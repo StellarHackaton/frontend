@@ -20,7 +20,7 @@ export function Orders() {
         <span className="font-display text-base font-semibold">Orders</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-[22px] pb-4 pt-2">
+      <div className="flex-1 overflow-y-auto px-[22px] pb-[100px] pt-2">
         {loading ? (
           <div className="flex flex-col gap-2.5">
             {Array.from({ length: 5 }).map((_, i) => (

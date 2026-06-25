@@ -74,7 +74,7 @@ export function Products() {
         )}
       </div>
 
-      <div className="flex-none px-[22px] pb-3 pt-3.5">
+      <div className="flex-none px-[22px] pb-[96px] pt-3.5">
         <Button onClick={() => router.push("/create")}>
           New product
         </Button>

@@ -74,10 +74,10 @@ export function WebShell({
               <button
                 key={n.key}
                 onClick={() => router.push(n.href)}
-                className={`flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] ${
+                className={`flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] transition-colors ${
                   active
-                    ? "bg-primary-soft font-semibold text-primary"
-                    : "text-muted"
+                    ? "liquid-nav font-semibold text-primary"
+                    : "text-muted hover:bg-ink/[.04]"
                 }`}
               >
                 <svg

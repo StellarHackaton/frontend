@@ -95,7 +95,7 @@ export default function Landing() {
             <MetalLink href="/login">Get started</MetalLink>
             <Link
               href="/pay/sunset-a3"
-              className="rounded-btn border-[1.5px] border-primary px-7 py-[14px] text-center font-display text-base font-semibold text-primary"
+              className="liquid-glass !border-primary/40 rounded-btn px-7 py-[14px] text-center font-display text-base font-semibold text-primary"
             >
               See how it works
             </Link>

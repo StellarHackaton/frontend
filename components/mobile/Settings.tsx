@@ -36,7 +36,7 @@ export function Settings() {
         </div>
       </div>
 
-      <div className="flex-none px-[22px] pb-3 pt-3.5">
+      <div className="flex-none px-[22px] pb-[96px] pt-3.5">
         <Button variant="glass" onClick={() => router.push("/login")}>
           Sign out
         </Button>
