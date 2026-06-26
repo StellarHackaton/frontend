@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { TabBar } from "./TabBar";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { RowSkeleton } from "@/components/ui/Skeleton";
@@ -10,9 +11,16 @@ import { orders, merchant } from "@/lib/mock";
 import { EASE, listContainer, listItem } from "@/lib/motion";
 import { useMockLoad } from "@/lib/useMockLoad";
 
+const NOTIFS = [
+  { id: "n1", title: "Sunset print A3 paid", meta: "$5.00 · 2m ago", paid: true },
+  { id: "n2", title: "Logo design paid", meta: "$40.00 · 3h ago", paid: true },
+  { id: "n3", title: "Coffee subscription awaiting", meta: "$12.00 · 18m ago", paid: false },
+];
+
 export function Dashboard() {
   const router = useRouter();
   const loading = useMockLoad();
+  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#0c0d12] text-white">
@@ -46,20 +54,97 @@ export function Dashboard() {
         </div>
 
         {/* top bar */}
-        <div className="relative mb-7 flex items-center justify-between">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 font-display text-base font-bold text-white ring-1 ring-white/15 backdrop-blur-md">
-            {merchant.initial}
-          </div>
+        <div className="relative z-20 mb-7 flex items-center justify-between">
           <button
+            onClick={() => router.push("/settings")}
+            aria-label="Account"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 font-display text-base font-bold text-white ring-1 ring-white/15 backdrop-blur-md active:scale-90"
+          >
+            {merchant.initial}
+          </button>
+          <button
+            onClick={() => setNotifOpen((v) => !v)}
             aria-label="Notifications"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/8 ring-1 ring-white/10 backdrop-blur-md"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur-md active:scale-90"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)">
               <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" strokeWidth="1.7" strokeLinejoin="round" />
               <path d="M10 19a2 2 0 0 0 4 0" strokeWidth="1.7" strokeLinecap="round" />
             </svg>
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#FF5A5A] ring-2 ring-[#0c0d12]" />
           </button>
         </div>
+
+        {/* notifications popover */}
+        <AnimatePresence>
+          {notifOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setNotifOpen(false)}
+                className="fixed inset-0 z-30"
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                className="absolute right-6 top-[58px] z-40 w-[280px] origin-top-right overflow-hidden rounded-[20px] bg-paper text-ink shadow-[0_24px_60px_rgba(0,0,0,.45)] ring-1 ring-black/5"
+              >
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="font-display text-[15px] font-bold">Notifications</span>
+                  <span className="rounded-full bg-success/[.14] px-2 py-0.5 text-[11px] font-semibold text-success">
+                    2 new
+                  </span>
+                </div>
+                <div className="max-h-[260px] overflow-y-auto">
+                  {NOTIFS.map((n) => (
+                    <button
+                      key={n.id}
+                      onClick={() => {
+                        setNotifOpen(false);
+                        router.push("/orders");
+                      }}
+                      className="flex w-full items-center gap-3 border-t border-ink/[.06] px-4 py-3 text-left active:bg-ink/[.03]"
+                    >
+                      <span
+                        className={`flex h-8 w-8 flex-none items-center justify-center rounded-full ${
+                          n.paid ? "bg-success/[.14] text-success" : "bg-ink/[.06] text-muted"
+                        }`}
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          {n.paid ? (
+                            <path d="M20 6 9 17l-5-5" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                          ) : (
+                            <>
+                              <circle cx="12" cy="12" r="8" strokeWidth="2" />
+                              <path d="M12 8v4l3 2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </>
+                          )}
+                        </svg>
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[14px] font-semibold">{n.title}</span>
+                        <span className="mt-0.5 block text-xs text-faint">{n.meta}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setNotifOpen(false);
+                    router.push("/orders");
+                  }}
+                  className="block w-full border-t border-ink/[.06] py-3 text-center font-display text-[14px] font-semibold text-primary active:bg-ink/[.03]"
+                >
+                  See all
+                </button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* balance */}
         <div className="relative text-[15px] text-white/55">Total balance</div>
@@ -92,15 +177,20 @@ export function Dashboard() {
             <div className="text-[13px] text-white/50">Paid this month</div>
             <div className="tnum mt-0.5 font-display text-[22px] font-bold">$48.00</div>
           </div>
-          <div className="flex -space-x-2">
-            {["#FFD23F", "#1F9D78", "#3B82F6"].map((c, i) => (
+          <div className="flex items-center -space-x-2.5">
+            {orders.slice(0, 3).map((o, i) => (
               <span
-                key={i}
-                className="h-7 w-7 rounded-full ring-2 ring-[#15161b]"
-                style={{ background: c }}
-              />
+                key={o.id}
+                className="flex h-8 w-8 items-center justify-center rounded-full font-display text-xs font-bold text-white ring-[2.5px] ring-[#13141a]"
+                style={{
+                  background: ["#FFB020", "#1F9D78", "#3B82F6"][i],
+                  zIndex: 3 - i,
+                }}
+              >
+                {o.item[0]}
+              </span>
             ))}
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-[11px] font-semibold text-white ring-2 ring-[#15161b]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-[11px] font-semibold text-white/90 ring-[2.5px] ring-[#13141a] backdrop-blur-sm">
               +2
             </span>
           </div>

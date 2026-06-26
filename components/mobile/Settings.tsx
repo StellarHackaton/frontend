@@ -4,17 +4,14 @@ import { useRouter } from "next/navigation";
 import { MobileShell } from "./MobileShell";
 import { TabBar } from "./TabBar";
 import { Button } from "@/components/ui/Button";
-import { Wordmark } from "@/components/ui/Wordmark";
+import { MobileHeader } from "@/components/ui/MobileHeader";
 import { merchant } from "@/lib/mock";
 
 export function Settings() {
   const router = useRouter();
   return (
     <MobileShell>
-      <div className="flex h-[54px] flex-none items-center justify-between px-6">
-        <Wordmark />
-        <span className="font-display text-base font-semibold">Settings</span>
-      </div>
+      <MobileHeader title="Settings" />
 
       <div className="flex-1 overflow-y-auto px-[22px] pb-4 pt-2">
         <div className="glass-strong relative mb-5 flex items-center gap-4 overflow-hidden rounded-[24px] p-5">

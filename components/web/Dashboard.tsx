@@ -14,6 +14,8 @@ import { useMockLoad } from "@/lib/useMockLoad";
 export function Dashboard() {
   const router = useRouter();
   const loading = useMockLoad();
+  const paidCount = orders.filter((o) => o.status === "paid").length;
+  const pendingCount = orders.length - paidCount;
   return (
     <WebShell
       title="Home"
@@ -23,20 +25,51 @@ export function Dashboard() {
         </MetalButton>
       }
     >
-      {/* balance card */}
+      {/* balance + stats */}
       <motion.div
-        className="liquid-glass mb-[30px] max-w-[520px] rounded-[28px] p-10"
+        className="mb-[30px] grid max-w-[920px] gap-5 lg:grid-cols-[1.5fr_1fr]"
         initial={{ opacity: 0, y: 12, scale: 0.99 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: EASE }}
       >
-        <div className="mb-3 text-[13px] uppercase tracking-[.1em] text-muted">
-          Balance
+        {/* balance */}
+        <div className="liquid-glass flex flex-col rounded-[28px] p-9">
+          <div className="flex items-center justify-between">
+            <div className="text-[13px] uppercase tracking-[.1em] text-muted">
+              Balance
+            </div>
+            <span className="rounded-full bg-success/[.14] px-3 py-1 text-[13px] font-semibold text-success">
+              ↑ +$48.00 this month
+            </span>
+          </div>
+          <div className="tnum mt-4 font-display text-[64px] font-extrabold leading-[.95] tracking-[-.04em]">
+            $240.00
+          </div>
+          <div className="mt-2.5 text-[15px] text-muted">≈ Rp3,768,000</div>
+          <div className="mt-auto flex items-center gap-2 pt-7 text-[13px] text-muted">
+            <span className="font-semibold text-ink">{orders.length} orders</span>
+            <span className="text-faint">·</span>
+            <span>{paidCount} paid</span>
+            <span className="text-faint">·</span>
+            <span>{pendingCount} pending</span>
+          </div>
         </div>
-        <div className="tnum font-display text-[64px] font-extrabold leading-[.95] tracking-[-.04em]">
-          $240.00
+
+        {/* stat tiles */}
+        <div className="grid gap-5">
+          <Stat
+            label="Paid this month"
+            value="$48.00"
+            tone="success"
+            icon={<path d="M20 6 9 17l-5-5" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />}
+          />
+          <Stat
+            label="Awaiting payment"
+            value="$20.00"
+            tone="muted"
+            icon={<><circle cx="12" cy="12" r="8" strokeWidth="1.8" /><path d="M12 8v4l3 2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></>}
+          />
         </div>
-        <div className="mt-2.5 text-[15px] text-muted">≈ Rp3,768,000</div>
       </motion.div>
 
       {/* orders table */}
@@ -92,5 +125,37 @@ export function Dashboard() {
         )}
       </div>
     </WebShell>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone,
+  icon,
+}: {
+  label: string;
+  value: string;
+  tone: "success" | "muted";
+  icon: React.ReactNode;
+}) {
+  const color = tone === "success" ? "#1F9D78" : "#6B6A73";
+  return (
+    <div className="liquid-glass flex items-center gap-4 rounded-[24px] p-6">
+      <div
+        className="flex h-12 w-12 flex-none items-center justify-center rounded-[14px]"
+        style={{ background: tone === "success" ? "rgba(31,157,120,.14)" : "rgba(21,22,27,.06)" }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color}>
+          {icon}
+        </svg>
+      </div>
+      <div>
+        <div className="text-[13px] text-muted">{label}</div>
+        <div className="tnum mt-0.5 font-display text-[26px] font-bold tracking-[-.02em]">
+          {value}
+        </div>
+      </div>
+    </div>
   );
 }

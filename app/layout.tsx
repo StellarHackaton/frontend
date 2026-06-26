@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   title: "Lunas — checkout that feels like cash",
   description:
     "Get paid in any balance. Receive exact dollars. One tap, no jargon.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Lunas", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
