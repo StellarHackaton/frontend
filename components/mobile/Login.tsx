@@ -3,15 +3,17 @@
 import { useRouter } from "next/navigation";
 import { MobileShell } from "./MobileShell";
 import { Button } from "@/components/ui/Button";
+import { LogoMark, Wordmark } from "@/components/ui/Wordmark";
 
 export function Login() {
   const router = useRouter();
   return (
     <MobileShell>
       <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-        <span className="font-display text-[46px] font-extrabold tracking-[-.035em] text-primary">
-          lunas
-        </span>
+        <div className="flex flex-col items-center gap-3">
+          <LogoMark size={60} />
+          <Wordmark size={36} />
+        </div>
         <div className="mt-[18px] max-w-[260px] font-display text-[19px] font-medium leading-[1.4]">
           Get paid in any balance. Receive exact dollars.
         </div>

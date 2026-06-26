@@ -9,6 +9,7 @@ import { EASE, listContainer, listItem, screenIn } from "@/lib/motion";
 import { EDGE } from "@/lib/checkoutStatus";
 import { MetalCta } from "@/components/ui/MetalCta";
 import { MetalButton } from "@/components/ui/MetalButton";
+import { useEscClose } from "@/lib/useEscClose";
 
 type Screen = "checkout" | "processing" | "success";
 
@@ -311,6 +312,7 @@ function WebPayModal({
   onClose: () => void;
   onSelect: (b: Balance) => void;
 }) {
+  useEscClose(true, onClose);
   return (
     <div className="fixed inset-0 z-30 flex items-center justify-center p-5">
       <motion.div

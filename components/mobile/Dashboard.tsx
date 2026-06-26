@@ -10,6 +10,7 @@ import { EmptyState, ReceiptIcon } from "@/components/ui/EmptyState";
 import { orders, merchant } from "@/lib/mock";
 import { EASE, listContainer, listItem } from "@/lib/motion";
 import { useMockLoad } from "@/lib/useMockLoad";
+import { useEscClose } from "@/lib/useEscClose";
 
 const NOTIFS = [
   { id: "n1", title: "Sunset print A3 paid", meta: "$5.00 · 2m ago", paid: true },
@@ -17,10 +18,16 @@ const NOTIFS = [
   { id: "n3", title: "Coffee subscription awaiting", meta: "$12.00 · 18m ago", paid: false },
 ];
 
+const GROUPS = [
+  { label: "Today", match: (o: { time: string }) => o.time !== "Yesterday" },
+  { label: "Yesterday", match: (o: { time: string }) => o.time === "Yesterday" },
+];
+
 export function Dashboard() {
   const router = useRouter();
   const loading = useMockLoad();
   const [notifOpen, setNotifOpen] = useState(false);
+  useEscClose(notifOpen, () => setNotifOpen(false));
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#0c0d12] text-white">
@@ -171,29 +178,20 @@ export function Dashboard() {
           </button>
         </div>
 
-        {/* stat strip */}
-        <div className="relative mt-6 flex items-center justify-between rounded-[20px] bg-white/[.08] px-5 py-4 ring-1 ring-white/10 backdrop-blur-md">
-          <div>
-            <div className="text-[13px] text-white/50">Paid this month</div>
-            <div className="tnum mt-0.5 font-display text-[22px] font-bold">$48.00</div>
-          </div>
-          <div className="flex items-center -space-x-2.5">
-            {orders.slice(0, 3).map((o, i) => (
-              <span
-                key={o.id}
-                className="flex h-8 w-8 items-center justify-center rounded-full font-display text-xs font-bold text-white ring-[2.5px] ring-[#13141a]"
-                style={{
-                  background: ["#FFB020", "#1F9D78", "#3B82F6"][i],
-                  zIndex: 3 - i,
-                }}
-              >
-                {o.item[0]}
-              </span>
-            ))}
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-[11px] font-semibold text-white/90 ring-[2.5px] ring-[#13141a] backdrop-blur-sm">
-              +2
-            </span>
-          </div>
+        {/* summary cards */}
+        <div className="relative mt-6 grid grid-cols-2 gap-3">
+          <SummaryCard
+            label="Awaiting"
+            value="$20.00"
+            sub="2 pending"
+            tone="muted"
+          />
+          <SummaryCard
+            label="Paid this month"
+            value="$48.00"
+            sub="3 paid"
+            tone="success"
+          />
         </div>
       </div>
 
@@ -206,19 +204,41 @@ export function Dashboard() {
       >
         {/* grabber */}
         <div className="mx-auto mt-2.5 h-1 w-10 flex-none rounded-full bg-ink/15" />
-        {/* sheet header */}
-        <div className="flex flex-none items-center justify-between px-6 py-3.5">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15161B">
-            <path d="M4 7h16M4 12h16M4 17h10" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-          <span className="font-display text-[17px] font-bold">Orders</span>
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#15161B">
-            <circle cx="11" cy="11" r="7" strokeWidth="1.8" />
-            <path d="m20 20-3.2-3.2" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        </div>
-
         <div className="flex-1 overflow-y-auto px-4 pb-[110px]">
+          {/* monthly target progress */}
+          <button
+            onClick={() => router.push("/settings")}
+            className="liquid-glass mt-1 block w-full rounded-[20px] p-5 text-left"
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-display text-[15px] font-bold">Monthly target</span>
+              <span className="flex items-center gap-1 text-[13px] font-semibold text-primary">
+                Set target
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F2A6B">
+                  <path d="M9 6l6 6-6 6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </div>
+            <div className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-ink/[.08]">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "24%" }}
+                transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}
+                className="h-full rounded-full bg-gradient-to-r from-primary to-success"
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between text-[13px]">
+              <span className="text-muted">This month</span>
+              <span className="tnum font-semibold text-ink">
+                $48.00 <span className="text-faint">/ $200.00</span>
+              </span>
+            </div>
+          </button>
+
+          {/* transactions */}
+          <div className="mb-1 mt-5 px-2 font-display text-[15px] font-bold">
+            Transactions
+          </div>
           {loading ? (
             <div className="flex flex-col gap-1 px-2">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -232,45 +252,78 @@ export function Dashboard() {
               body="Share a payment link and your first order lands here."
             />
           ) : (
-            <motion.div
-              variants={listContainer}
-              initial="initial"
-              animate="animate"
-            >
-              {orders.map((o) => (
-                <motion.div
-                  key={o.id}
-                  variants={listItem}
-                  className="flex items-center gap-3.5 rounded-[16px] px-3 py-3 active:bg-ink/[.03]"
-                >
-                  <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-ink font-display text-base font-bold text-white">
-                    {o.item[0]}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-display text-[15px] font-semibold">
-                      {o.item}
+            <motion.div variants={listContainer} initial="initial" animate="animate">
+              {GROUPS.map((g) => {
+                const rows = orders.filter(g.match);
+                if (rows.length === 0) return null;
+                return (
+                  <div key={g.label}>
+                    <div className="px-2 pb-1 pt-3 text-xs font-semibold uppercase tracking-[.06em] text-faint">
+                      {g.label}
                     </div>
-                    <div className="mt-0.5 text-xs text-faint">{o.time}</div>
+                    {rows.map((o) => (
+                      <motion.div
+                        key={o.id}
+                        variants={listItem}
+                        className="flex items-center gap-3.5 rounded-[16px] px-3 py-3 active:bg-ink/[.03]"
+                      >
+                        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-ink font-display text-base font-bold text-white">
+                          {o.item[0]}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate font-display text-[15px] font-semibold">
+                            {o.item}
+                          </div>
+                          <div className="mt-0.5 text-xs text-faint">{o.time}</div>
+                        </div>
+                        <div className="flex flex-none flex-col items-end gap-1">
+                          <span
+                            className={`tnum font-display text-[15px] font-bold ${
+                              o.status === "paid" ? "text-success" : "text-ink"
+                            }`}
+                          >
+                            {o.status === "paid" ? "+" : ""}
+                            {o.amount}
+                          </span>
+                          <StatusPill status={o.status} />
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
-                  <div className="flex flex-none flex-col items-end gap-1">
-                    <span
-                      className={`tnum font-display text-[15px] font-bold ${
-                        o.status === "paid" ? "text-success" : "text-ink"
-                      }`}
-                    >
-                      {o.status === "paid" ? "+" : ""}
-                      {o.amount}
-                    </span>
-                    <StatusPill status={o.status} />
-                  </div>
-                </motion.div>
-              ))}
+                );
+              })}
             </motion.div>
           )}
         </div>
       </motion.div>
 
       <TabBar />
+    </div>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  tone: "success" | "muted";
+}) {
+  return (
+    <div className="rounded-[20px] bg-white/[.08] p-4 ring-1 ring-white/10 backdrop-blur-md">
+      <div className="flex items-center gap-1.5 text-[13px] text-white/55">
+        <span
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ background: tone === "success" ? "#3DDc97" : "#FFB020" }}
+        />
+        {label}
+      </div>
+      <div className="tnum mt-1.5 font-display text-[22px] font-bold">{value}</div>
+      <div className="mt-0.5 text-xs text-white/40">{sub}</div>
     </div>
   );
 }

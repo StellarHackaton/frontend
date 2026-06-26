@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Balance } from "@/lib/mock";
+import { useEscClose } from "@/lib/useEscClose";
 
 interface Props {
   open: boolean;
@@ -19,6 +20,7 @@ export function PayWithSheet({
   onClose,
   onSelect,
 }: Props) {
+  useEscClose(open, onClose);
   return (
     <AnimatePresence>
       {open && (
