@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MetalCta } from "@/components/ui/MetalCta";
 import { useWalletContext } from "@/lib/wallet-context";
+import { LogoMark, Wordmark } from "@/components/ui/Wordmark";
 
 export function Login() {
   const router = useRouter();
@@ -63,10 +64,11 @@ export function Login() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-canvas px-5 py-12">
-      <div className="w-full max-w-[440px] rounded-[28px] border border-ink/[.08] bg-white p-12 text-center shadow-[0_20px_50px_rgba(21,22,27,.10)]">
-        <span className="font-display text-[46px] font-extrabold tracking-[-.035em] text-primary">
-          lunas
-        </span>
+      <div className="liquid-glass w-full max-w-[440px] rounded-[28px] p-12 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <LogoMark size={56} />
+          <Wordmark size={34} />
+        </div>
         <div className="mx-auto mt-4 max-w-[300px] font-display text-[19px] font-medium leading-[1.4]">
           Terima bayaran dalam bentuk apapun. Dapat dolar pas.
         </div>

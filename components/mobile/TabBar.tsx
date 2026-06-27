@@ -9,14 +9,14 @@ const TABS = [
     label: "Home",
     href: "/dashboard",
     icon: (
-      <path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z" strokeWidth="1.9" strokeLinejoin="round" />
     ),
   },
   {
     key: "orders",
     label: "Orders",
     href: "/orders",
-    icon: <path d="M4 6h16M4 12h16M4 18h10" strokeWidth="1.8" strokeLinecap="round" />,
+    icon: <path d="M4 6h16M4 12h16M4 18h10" strokeWidth="1.9" strokeLinecap="round" />,
   },
   {
     key: "products",
@@ -24,10 +24,10 @@ const TABS = [
     href: "/products",
     icon: (
       <>
-        <rect x="4" y="4" width="7" height="7" rx="2" strokeWidth="1.8" />
-        <rect x="13" y="4" width="7" height="7" rx="2" strokeWidth="1.8" />
-        <rect x="4" y="13" width="7" height="7" rx="2" strokeWidth="1.8" />
-        <rect x="13" y="13" width="7" height="7" rx="2" strokeWidth="1.8" />
+        <rect x="4" y="4" width="7" height="7" rx="2" strokeWidth="1.9" />
+        <rect x="13" y="4" width="7" height="7" rx="2" strokeWidth="1.9" />
+        <rect x="4" y="13" width="7" height="7" rx="2" strokeWidth="1.9" />
+        <rect x="13" y="13" width="7" height="7" rx="2" strokeWidth="1.9" />
       </>
     ),
   },
@@ -37,8 +37,8 @@ const TABS = [
     href: "/settings",
     icon: (
       <>
-        <circle cx="12" cy="12" r="3" strokeWidth="1.8" />
-        <path d="M12 3v3M12 18v3M3 12h3M18 12h3" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="3" strokeWidth="1.9" />
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3" strokeWidth="1.9" strokeLinecap="round" />
       </>
     ),
   },
@@ -49,32 +49,43 @@ export function TabBar() {
   const router = useRouter();
 
   return (
-    <nav className="glass-sheet flex h-16 flex-none items-center justify-around rounded-t-[24px] px-3">
-      {TABS.map((t) => {
-        const active =
-          t.href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(t.href);
-        const color = active ? "#2F2A6B" : "#9b9aa1";
-        return (
-          <motion.button
-            key={t.key}
-            onClick={() => router.push(t.href)}
-            whileTap={{ scale: 0.88 }}
-            animate={{ y: active ? -1 : 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 22 }}
-            className="flex flex-col items-center gap-[3px]"
-            style={{ color }}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color}>
-              {t.icon}
-            </svg>
-            <span className={`text-[11px] ${active ? "font-semibold" : ""}`}>
-              {t.label}
-            </span>
-          </motion.button>
-        );
-      })}
-    </nav>
+    // Floating capsule, centered, detached from edges — Apple-style.
+    <div className="pointer-events-none fixed inset-x-0 bottom-[max(18px,env(safe-area-inset-bottom))] z-50 flex justify-center">
+      <nav className="pointer-events-auto flex items-center gap-1 rounded-full bg-ink/80 p-1.5 shadow-[0_18px_40px_rgba(21,22,27,.4)] backdrop-blur-2xl ring-1 ring-white/10">
+        {TABS.map((t) => {
+          const active =
+            t.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname.startsWith(t.href);
+          return (
+            <motion.button
+              key={t.key}
+              onClick={() => router.push(t.href)}
+              whileTap={{ scale: 0.86 }}
+              aria-label={t.label}
+              className="relative flex h-12 w-12 items-center justify-center rounded-full"
+            >
+              {active && (
+                <motion.span
+                  layoutId="navpill"
+                  className="absolute inset-0 rounded-full bg-white shadow-[0_4px_14px_rgba(0,0,0,.25)]"
+                  transition={{ type: "spring", stiffness: 480, damping: 34 }}
+                />
+              )}
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={active ? "#15161B" : "rgba(255,255,255,.78)"}
+                className="relative z-[1]"
+              >
+                {t.icon}
+              </svg>
+            </motion.button>
+          );
+        })}
+      </nav>
+    </div>
   );
 }

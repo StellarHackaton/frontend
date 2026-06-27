@@ -1,24 +1,30 @@
+/* Brand wordmark + mark. Source art lives in /public/logo (indigo on light). */
+
 export function Wordmark({
-  size = 20,
+  size = 22,
   className = "",
 }: {
   size?: number;
   className?: string;
 }) {
   return (
-    <span
-      className={`font-display font-bold tracking-[-.02em] text-primary ${className}`}
-      style={{ fontSize: size }}
-    >
-      lunas
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo/wordmark.png"
+      alt="Lunas"
+      style={{ height: size, width: "auto" }}
+      className={className}
+    />
   );
 }
 
-export function LogoMark() {
+export function LogoMark({ size = 30 }: { size?: number }) {
   return (
-    <div className="flex h-[30px] w-[30px] items-center justify-center rounded-[10px] bg-primary font-display text-base font-extrabold text-white shadow-[0_4px_10px_rgba(47,42,107,.3)]">
-      L
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo/mark.png"
+      alt="Lunas"
+      style={{ height: size, width: "auto" }}
+    />
   );
 }

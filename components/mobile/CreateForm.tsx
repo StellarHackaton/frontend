@@ -2,6 +2,7 @@
 
 import { MobileShell } from "./MobileShell";
 import { Button } from "@/components/ui/Button";
+import { BackButton } from "@/components/ui/BackButton";
 import { useCreateForm } from "@/lib/useCreateForm";
 
 export function CreateForm() {
@@ -10,15 +11,7 @@ export function CreateForm() {
   return (
     <MobileShell>
       <div className="flex h-[54px] flex-none items-center gap-2.5 px-[18px]">
-        <button
-          onClick={f.back}
-          className="flex h-[34px] w-[34px] items-center justify-center"
-          aria-label="Back"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M15 6l-6 6 6 6" stroke="#15161B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <BackButton onClick={f.back} />
         <span className="font-display text-lg font-bold">New product</span>
       </div>
 
@@ -44,8 +37,8 @@ export function CreateForm() {
 
         <div>
           <div className="mb-3 text-[13px] font-medium text-muted">Price</div>
-          <div className="flex items-baseline justify-center gap-1 pb-2 pt-5">
-            <span className="font-display text-[42px] font-extrabold text-faint">
+          <div className="flex items-baseline justify-center gap-1.5 pb-2 pt-5">
+            <span className="font-display text-[38px] font-extrabold leading-none text-ink/35">
               $
             </span>
             <input
@@ -53,7 +46,8 @@ export function CreateForm() {
               onChange={(e) => f.onPrice(e.target.value)}
               inputMode="decimal"
               placeholder="0"
-              className="tnum w-[170px] border-none bg-transparent text-left font-display text-[68px] font-extrabold tracking-[-.04em] text-ink outline-none placeholder:text-faint"
+              style={{ width: `${Math.max(1, (f.price || "0").length)}ch` }}
+              className="tnum min-w-[1ch] max-w-full border-none bg-transparent text-left font-display text-[68px] font-extrabold leading-none tracking-[-.04em] text-ink outline-none placeholder:text-faint"
             />
           </div>
           <div

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MobileShell } from "./MobileShell";
 import { Button } from "@/components/ui/Button";
+import { BackButton } from "@/components/ui/BackButton";
 import { QrCode } from "@/components/ui/QrCode";
 import { useToast } from "@/components/ui/Toast";
 import { product } from "@/lib/mock";
@@ -35,15 +36,7 @@ export function ProductDetail({ slug }: { slug: string }) {
   return (
     <MobileShell>
       <div className="flex h-[54px] flex-none items-center gap-2.5 px-[18px]">
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="flex h-[34px] w-[34px] items-center justify-center"
-          aria-label="Back"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M15 6l-6 6 6 6" stroke="#15161B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <BackButton onClick={() => router.push("/dashboard")} />
         <span className="font-display text-lg font-bold">{name}</span>
       </div>
 

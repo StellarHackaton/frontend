@@ -29,8 +29,8 @@ export function CreateForm() {
       )}
 
       <div className="mb-2 mt-7 text-[13px] font-medium text-muted">Price</div>
-      <div className="flex items-baseline justify-center gap-1 pb-2 pt-4">
-        <span className="font-display text-[40px] font-extrabold text-faint">
+      <div className="flex items-baseline justify-center gap-1.5 pb-2 pt-4">
+        <span className="font-display text-[38px] font-extrabold leading-none text-ink/35">
           $
         </span>
         <input
@@ -38,7 +38,8 @@ export function CreateForm() {
           onChange={(e) => f.onPrice(e.target.value)}
           inputMode="decimal"
           placeholder="0"
-          className="tnum w-[180px] border-none bg-transparent text-left font-display text-[68px] font-extrabold tracking-[-.04em] text-ink outline-none placeholder:text-faint"
+          style={{ width: `${Math.max(1, (f.price || "0").length)}ch` }}
+          className="tnum min-w-[1ch] max-w-full border-none bg-transparent text-left font-display text-[68px] font-extrabold leading-none tracking-[-.04em] text-ink outline-none placeholder:text-faint"
         />
       </div>
       <div

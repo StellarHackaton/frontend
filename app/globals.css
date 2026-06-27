@@ -141,15 +141,40 @@ body {
     z-index: -1;
     background: conic-gradient(
       from 0deg,
-      rgba(168, 85, 247, 0.16),
-      rgba(0, 190, 255, 0.16),
-      rgba(31, 157, 120, 0.12),
-      rgba(255, 170, 80, 0.13),
-      rgba(168, 85, 247, 0.16)
+      rgba(168, 85, 247, 0.09),
+      rgba(0, 190, 255, 0.09),
+      rgba(31, 157, 120, 0.07),
+      rgba(255, 170, 80, 0.08),
+      rgba(168, 85, 247, 0.09)
     );
-    filter: blur(34px);
+    filter: blur(44px);
+    opacity: 0.55;
+    animation: liquidSpin 26s linear infinite;
+  }
+
+  /* Liquid nav pill — soft frosted active state for sidebar/tab items */
+  .liquid-nav {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: rgba(47, 42, 107, 0.07);
+  }
+  .liquid-nav::before {
+    content: "";
+    position: absolute;
+    inset: -60%;
+    z-index: -1;
+    background: conic-gradient(
+      from 0deg,
+      rgba(168, 85, 247, 0.14),
+      rgba(0, 190, 255, 0.13),
+      rgba(31, 157, 120, 0.1),
+      rgba(255, 170, 80, 0.11),
+      rgba(168, 85, 247, 0.14)
+    );
+    filter: blur(26px);
     opacity: 0.7;
-    animation: liquidSpin 22s linear infinite;
+    animation: liquidSpin 18s linear infinite;
   }
 
   .skeleton {
