@@ -1,8 +1,9 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Wordmark } from "@/components/ui/Wordmark";
+import { useWalletContext } from "@/lib/wallet-context";
 
 const NAV = [
   {
@@ -56,6 +57,38 @@ export function WebShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { address, authStatus, isConnected, disconnect, userInitial } = useWalletContext();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    await disconnect();
+    // redirect handled by auth guard in Dashboard (watches authStatus)
+  };
+
+  // auth guard — redirect to login when fully logged out
+  useEffect(() => {
+    if (
+      authStatus !== "initializing" &&
+      authStatus !== "in-progress" &&
+      authStatus !== "logged-in" &&
+      !isConnected
+    ) {
+      router.replace("/login");
+    }
+  }, [authStatus, isConnected, router]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
 
   return (
     <div className="flex min-h-screen bg-paper text-ink">
@@ -104,8 +137,34 @@ export function WebShell({
           </div>
           <div className="flex items-center gap-4">
             {action}
-            <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-primary-soft font-display font-bold text-primary">
-              A
+            <div ref={menuRef} className="relative">
+              <button
+                onClick={() => setMenuOpen((o) => !o)}
+                className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full bg-primary-soft font-display font-bold text-primary"
+              >
+                {userInitial}
+                {address && (
+                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
+                )}
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-11 z-50 min-w-[160px] overflow-hidden rounded-[14px] border border-ink/[.08] bg-white shadow-[0_8px_30px_rgba(21,22,27,.12)]">
+                  {address && (
+                    <div className="border-b border-ink/[.06] px-4 py-3">
+                      <p className="text-[11px] text-muted">Wallet</p>
+                      <p className="mt-0.5 truncate font-mono text-[12px] text-ink">
+                        {address.slice(0, 8)}…{address.slice(-6)}
+                      </p>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-3 text-left text-[14px] font-medium text-red-500 hover:bg-red-50"
+                  >
+                    Keluar
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>

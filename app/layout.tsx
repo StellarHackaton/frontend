@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Inter } from "next/font/google";
 import { ToastProvider } from "@/components/ui/Toast";
+import { Providers } from "./providers";
 import "./globals.css";
 
 const hanken = Hanken_Grotesk({
@@ -37,7 +38,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${hanken.variable} ${inter.variable}`}>
       <body className="font-sans antialiased">
-        <ToastProvider>{children}</ToastProvider>
+        <Providers>
+          <ToastProvider>{children}</ToastProvider>
+        </Providers>
       </body>
     </html>
   );
