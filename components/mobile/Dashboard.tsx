@@ -33,14 +33,9 @@ export function Dashboard() {
   const [notifOpen, setNotifOpen] = useState(false);
   useEscClose(notifOpen, () => setNotifOpen(false));
 
-  // Auth guard — bounce to login once auth has settled and we're not connected
+  // Auth guard — redirect once init is done and wallet not connected
   useEffect(() => {
-    if (
-      authStatus !== "initializing" &&
-      authStatus !== "in-progress" &&
-      authStatus !== "logged-in" &&
-      !isConnected
-    ) {
+    if (authStatus === "ready" && !isConnected) {
       router.replace("/login");
     }
   }, [authStatus, isConnected, router]);

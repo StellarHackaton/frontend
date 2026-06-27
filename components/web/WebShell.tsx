@@ -67,14 +67,9 @@ export function WebShell({
     // redirect handled by auth guard in Dashboard (watches authStatus)
   };
 
-  // auth guard — redirect to login when fully logged out
+  // auth guard — redirect to login once init is done and wallet not connected
   useEffect(() => {
-    if (
-      authStatus !== "initializing" &&
-      authStatus !== "in-progress" &&
-      authStatus !== "logged-in" &&
-      !isConnected
-    ) {
+    if (authStatus === "ready" && !isConnected) {
       router.replace("/login");
     }
   }, [authStatus, isConnected, router]);

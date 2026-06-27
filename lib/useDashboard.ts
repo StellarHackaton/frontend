@@ -23,6 +23,15 @@ interface DashboardData {
 }
 
 async function fetchUsdcBalance(address: string): Promise<number> {
+  // C... = Soroban smart wallet (PasskeyKit) — query the USDC SAC contract
+  if (address.startsWith("C")) {
+    const res = await fetch(`/api/passkey/balance?address=${encodeURIComponent(address)}`);
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return data.balance ?? 0;
+  }
+
+  // G... = classic Stellar account — query Horizon REST
   const res = await fetch(`${HORIZON_URL}/accounts/${address}`);
   if (!res.ok) return 0;
   const data = await res.json();
