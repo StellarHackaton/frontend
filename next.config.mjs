@@ -7,14 +7,21 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
 
-  // passkey-kit and its companion packages ship TypeScript source — must transpile
+  // passkey-kit ships TypeScript source — must transpile
   transpilePackages: ["passkey-kit", "passkey-kit-sdk", "sac-sdk"],
 
+  // Tree-shake large packages — only import what's actually used
+  experimental: {
+    optimizePackageImports: [
+      "@privy-io/react-auth",
+      "@stellar/stellar-sdk",
+      "@creit.tech/stellar-wallets-kit",
+      "framer-motion",
+    ],
+  },
+
   webpack: (config, { dev }) => {
-    // ── Fix: passkey-kit's nested @stellar/stellar-sdk has a wrong relative path ──
-    // lib/minimal/bindings/config.js does require('../../package.json')
-    // which resolves to lib/package.json (doesn't exist).
-    // Alias it to the actual root package.json (3 levels up from bindings/).
+    // ── Fix: passkey-kit's nested @stellar/stellar-sdk wrong relative path ────────
     const nestedStellarRoot = path.resolve(
       __dirname,
       "node_modules/passkey-kit/node_modules/@stellar/stellar-sdk"
@@ -25,14 +32,16 @@ const nextConfig = {
         path.join(nestedStellarRoot, "package.json"),
     };
 
-    // ── Windows dev polling (fixes slow hot-reload on WSL/NTFS) ──────────────────
-    if (dev) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-        ignored: ["**/node_modules/**", "**/.next/**"],
-      };
-    }
+    // ── Privy optional peer deps we don't use — stub them out ────────────────────
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@farcaster/mini-app-solana": false,
+      "@farcaster/frame-sdk": false,
+      "@solana/web3.js": false,
+      // WalletConnect / Reown — pulled in by Privy but we don't use it
+      "@reown/appkit": false,
+      "@walletconnect/core": false,
+    };
 
     // ── Node.js module shims for browser bundle ───────────────────────────────────
     config.resolve.fallback = {
@@ -40,6 +49,15 @@ const nextConfig = {
       "pino-pretty": false,
       "@react-native-async-storage/async-storage": false,
     };
+
+    if (dev) {
+      // Polling — diperlukan di Windows untuk deteksi perubahan file
+      config.watchOptions = {
+        poll: 800,
+        aggregateTimeout: 200,
+        ignored: ["**/node_modules/**", "**/.next/**"],
+      };
+    }
 
     return config;
   },

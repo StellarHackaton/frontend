@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { WebShell } from "./WebShell";
 import { StatusPill } from "@/components/ui/StatusPill";
@@ -21,10 +22,17 @@ function timeAgo(iso: string) {
 
 export function Dashboard() {
   const router = useRouter();
-  const { address } = useWalletContext();
-  const { balanceUsdc, orders, loading, error } = useDashboard(address);
+  const { address, authStatus, isConnected, storeName } = useWalletContext();
+  const { balanceUsdc, balanceCircleUsdc, orders, loading, error } = useDashboard(address);
 
-  const idr = (balanceUsdc * 15_700).toLocaleString("id-ID");
+  useEffect(() => {
+    if (authStatus !== "ready") return;
+    if (!isConnected) { router.replace("/login"); return; }
+    if (storeName === null) { router.replace("/onboarding"); return; }
+  }, [authStatus, isConnected, storeName, router]);
+
+  const totalUsdc = balanceUsdc + balanceCircleUsdc;
+  const idr = (totalUsdc * 15_700).toLocaleString("id-ID");
   const paidCount = orders.filter((o) => o.status === "paid").length;
   const pendingCount = orders.length - paidCount;
 
@@ -59,11 +67,23 @@ export function Dashboard() {
           ) : (
             <>
               <div className="tnum mt-4 font-display text-[64px] font-extrabold leading-[.95] tracking-[-.04em]">
-                ${balanceUsdc.toFixed(2)}
+                ${totalUsdc.toFixed(2)}
               </div>
               <div className="mt-2.5 text-[15px] text-muted">≈ Rp{idr}</div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {balanceUsdc > 0 && (
+                  <span className="rounded-full bg-ink/[.06] px-2.5 py-1 font-mono text-[11px] text-muted">
+                    ${balanceUsdc.toFixed(2)} Stellar USDC
+                  </span>
+                )}
+                {balanceCircleUsdc > 0 && (
+                  <span className="rounded-full bg-indigo-500/[.12] px-2.5 py-1 font-mono text-[11px] font-semibold text-indigo-500">
+                    ${balanceCircleUsdc.toFixed(2)} Circle USDC (cross-chain)
+                  </span>
+                )}
+              </div>
               {address && (
-                <div className="mt-3 flex items-center gap-1.5">
+                <div className="mt-2 flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   <span className="font-mono text-[12px] text-muted">
                     {address.slice(0, 8)}…{address.slice(-6)}

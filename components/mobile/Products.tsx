@@ -9,14 +9,16 @@ import { MobileHeader } from "@/components/ui/MobileHeader";
 import { RowSkeleton } from "@/components/ui/Skeleton";
 import { MetalButton } from "@/components/ui/MetalButton";
 import { EmptyState, BoxIcon } from "@/components/ui/EmptyState";
-import { products } from "@/lib/mock";
 import { formatUsd } from "@/lib/format";
 import { listContainer, listItem } from "@/lib/motion";
-import { useMockLoad } from "@/lib/useMockLoad";
+import { useWalletContext } from "@/lib/wallet-context";
+import { useDashboard } from "@/lib/useDashboard";
 
 export function Products() {
   const router = useRouter();
-  const loading = useMockLoad();
+  const { address } = useWalletContext();
+  const { products, loading } = useDashboard(address);
+
   return (
     <MobileShell>
       <MobileHeader title="Products" />
@@ -24,9 +26,7 @@ export function Products() {
       <div className="flex-1 overflow-y-auto px-[22px] pb-[120px] pt-2">
         {loading ? (
           <div className="flex flex-col gap-2.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <RowSkeleton key={i} />
-            ))}
+            {Array.from({ length: 5 }).map((_, i) => <RowSkeleton key={i} />)}
           </div>
         ) : products.length === 0 ? (
           <EmptyState
@@ -40,39 +40,26 @@ export function Products() {
             }
           />
         ) : (
-        <motion.div
-          className="liquid-glass overflow-hidden rounded-[20px]"
-          variants={listContainer}
-          initial="initial"
-          animate="animate"
-        >
-          {products.map((p, i) => (
-            <motion.button
-              key={p.slug}
-              variants={listItem}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => router.push(`/p/${p.slug}`)}
-              className={`flex w-full items-center gap-3.5 px-4 py-3 text-left ${
-                i > 0 ? "border-t border-ink/[.06]" : ""
-              }`}
-            >
-              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-ink font-display text-base font-bold text-white">
-                {p.name[0]}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-display text-[15px] font-semibold">
-                  {p.name}
+          <motion.div className="liquid-glass overflow-hidden rounded-[20px]" variants={listContainer} initial="initial" animate="animate">
+            {products.map((p, i) => (
+              <motion.button
+                key={p.id}
+                variants={listItem}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push(`/p/${p.orderId}`)}
+                className={`flex w-full items-center gap-3.5 px-4 py-3 text-left ${i > 0 ? "border-t border-ink/[.06]" : ""}`}
+              >
+                <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-ink font-display text-base font-bold text-white">
+                  {p.title[0]}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-display text-[15px] font-semibold">{p.title}</div>
+                  <div className="mt-0.5 text-xs text-faint">{p.paidCount} paid so far</div>
                 </div>
-                <div className="mt-0.5 text-xs text-faint">
-                  {p.paid} paid so far
-                </div>
-              </div>
-              <div className="tnum flex-none font-display text-[15px] font-bold">
-                {formatUsd(p.priceUSD)}
-              </div>
-            </motion.button>
-          ))}
-        </motion.div>
+                <div className="tnum flex-none font-display text-[15px] font-bold">{formatUsd(p.priceUSD)}</div>
+              </motion.button>
+            ))}
+          </motion.div>
         )}
       </div>
 

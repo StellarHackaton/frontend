@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { usePrivy } from "@privy-io/react-auth";
+import { useCreateWallet, useSignRawHash } from "@privy-io/react-auth/extended-chains";
 import {
   getPasskeyKit,
   loadPasskeySession,
@@ -8,7 +10,7 @@ import {
   clearPasskeySession,
 } from "./passkey-client";
 
-export type WalletType = "albedo" | "freighter" | "passkey" | "other" | null;
+export type WalletType = "albedo" | "freighter" | "passkey" | "privy" | "other" | null;
 
 interface WalletContextValue {
   address: string | null;
@@ -17,8 +19,11 @@ interface WalletContextValue {
   isPasskey: boolean;
   userInitial: string;
   authStatus: "initializing" | "ready" | "connecting";
+  storeName: string | null;
+  setStoreName: (name: string) => void;
   connect: () => Promise<string>;
   connectPasskey: (mode?: "register" | "login") => Promise<string>;
+  connectPrivy: () => Promise<void>;
   disconnect: () => Promise<void>;
   signXdr: (xdr: string) => Promise<string>;
 }
@@ -26,6 +31,7 @@ interface WalletContextValue {
 const WalletContext = createContext<WalletContextValue | null>(null);
 
 const STORAGE_KEY = "lunas_wallet";
+const PRIVY_STORAGE_KEY = "lunas_privy";
 const TESTNET_PASSPHRASE = "Test SDF Network ; September 2015";
 
 // ─── StellarWalletsKit (Albedo + Freighter) ───────────────────────────────────
@@ -54,39 +60,134 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [authStatus, setAuthStatus] = useState<"initializing" | "ready" | "connecting">(
     "initializing"
   );
+  const [storeName, setStoreName] = useState<string | null>(null);
+
+  // ─── Privy hooks ────────────────────────────────────────────────────────────
+  const { ready: privyReady, authenticated, user, login, logout } = usePrivy();
+  const { createWallet } = useCreateWallet();
+  const { signRawHash } = useSignRawHash();
+  const privyHandled = useRef(false);
 
   // Restore session from localStorage on mount
   useEffect(() => {
-    // Try passkey session first
+    // 1. Passkey session
     const pkSession = loadPasskeySession();
     if (pkSession) {
       setAddress(pkSession.contractId);
       setWalletType("passkey");
       setPasskeyKeyId(pkSession.keyIdBase64);
       setAuthStatus("ready");
+      fetchStoreName(pkSession.contractId);
       return;
     }
 
-    // Try classic wallet session
+    // 2. Classic wallet (Freighter/Albedo)
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      setAuthStatus("ready");
+    if (saved) {
+      const { walletId, addr } = JSON.parse(saved) as { walletId: string; addr: string };
+      buildKit(walletId)
+        .then(async (kit) => {
+          try {
+            const { address: live } = await kit.getAddress();
+            const finalAddr = live ?? addr;
+            setAddress(finalAddr);
+            setWalletType(walletId as WalletType);
+            fetchStoreName(finalAddr);
+          } catch {
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        })
+        .catch(() => localStorage.removeItem(STORAGE_KEY))
+        .finally(() => setAuthStatus("ready"));
       return;
     }
-    const { walletId, addr } = JSON.parse(saved) as { walletId: string; addr: string };
-    buildKit(walletId)
-      .then(async (kit) => {
-        try {
-          const { address: live } = await kit.getAddress();
-          setAddress(live ?? addr);
-          setWalletType(walletId as WalletType);
-        } catch {
-          localStorage.removeItem(STORAGE_KEY);
-        }
-      })
-      .catch(() => localStorage.removeItem(STORAGE_KEY))
-      .finally(() => setAuthStatus("ready"));
+
+    // 3. Privy session — wait for Privy to initialize (handled in effect below)
+    if (localStorage.getItem(PRIVY_STORAGE_KEY)) return;
+
+    setAuthStatus("ready");
   }, []);
+
+  // Fetch store name from backend after wallet connects
+  const fetchStoreName = useCallback(async (addr: string) => {
+    try {
+      const res = await fetch(`/api/merchant/profile?address=${encodeURIComponent(addr)}`);
+      const { merchant } = await res.json();
+      setStoreName(merchant?.store_name || null);
+    } catch { /* non-fatal */ }
+  }, []);
+
+  // Fund & add USDC trustline for a newly created Privy Stellar wallet
+  const setupPrivyAccount = useCallback(async (stellarAddress: string) => {
+    try {
+      const prepRes = await fetch("/api/onboard-privy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: stellarAddress }),
+      });
+      const prep = await prepRes.json();
+      if (prep.alreadySetup) return;
+      if (!prep.xdr || !prep.txHash) return;
+
+      // Sign the changeTrust transaction hash with Privy
+      const { signature } = await signRawHash({
+        address: stellarAddress,
+        chainType: "stellar" as any,
+        hash: `0x${prep.txHash}` as `0x${string}`,
+      });
+
+      // Submit the signed transaction via our server
+      await fetch("/api/onboard-privy/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ xdr: prep.xdr, address: stellarAddress, signature }),
+      });
+    } catch (e) {
+      console.warn("Privy account setup failed (non-fatal):", e);
+    }
+  }, [signRawHash]);
+
+  // Privy session restore — runs when Privy finishes initializing
+  useEffect(() => {
+    if (!privyReady) return;
+    const hasPrivyFlag = !!localStorage.getItem(PRIVY_STORAGE_KEY);
+
+    if (!authenticated || !user) {
+      // Was previously authenticated but session expired → clean up
+      if (hasPrivyFlag) {
+        localStorage.removeItem(PRIVY_STORAGE_KEY);
+        setAuthStatus("ready");
+      }
+      return;
+    }
+    if (!hasPrivyFlag) return; // Not a Privy session
+    if (privyHandled.current) return; // Already processed this session
+    privyHandled.current = true;
+
+    // Find existing Stellar wallet in linked accounts
+    const stellarWallet = (user.linkedAccounts ?? []).find(
+      (acc: any) => acc.type === "wallet" && acc.chainType === "stellar"
+    ) as any;
+
+    if (stellarWallet?.address) {
+      const addr = stellarWallet.address as string;
+      setAddress(addr);
+      setWalletType("privy");
+      setAuthStatus("ready");
+      setupPrivyAccount(addr); // fire-and-forget: fund + add USDC trustline
+    } else {
+      // Auto-create Stellar wallet for new Privy users
+      createWallet({ chainType: "stellar" } as any)
+        .then(async ({ wallet }: any) => {
+          const addr = wallet.address as string;
+          setAddress(addr);
+          setWalletType("privy");
+          await setupPrivyAccount(addr); // fund + add USDC trustline
+        })
+        .catch(() => {/* wallet might already exist; effect re-runs via user change */})
+        .finally(() => setAuthStatus("ready"));
+    }
+  }, [privyReady, authenticated, user?.id]);
 
   // ─── Albedo / Freighter connect ─────────────────────────────────────────────
 
@@ -101,6 +202,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setWalletType(wtype);
       setPasskeyKeyId(null);
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ walletId: mod?.productId, addr }));
+      fetchStoreName(addr);
       return addr;
     } finally {
       setAuthStatus("ready");
@@ -143,6 +245,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           setAddress(contractId);
           setWalletType("passkey");
           setPasskeyKeyId(keyIdBase64);
+          fetchStoreName(contractId);
           return contractId;
         }
 
@@ -162,6 +265,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         setAddress(contractId);
         setWalletType("passkey");
         setPasskeyKeyId(keyIdBase64);
+        fetchStoreName(contractId);
         return contractId;
       } finally {
         setAuthStatus("ready");
@@ -170,10 +274,36 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  // ─── Connect via Privy (email / Google) ──────────────────────────────────────
+
+  const connectPrivy = useCallback(async (): Promise<void> => {
+    setAuthStatus("connecting");
+    // Clear other sessions so Privy takes over
+    clearPasskeySession();
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(PRIVY_STORAGE_KEY, "1");
+    privyHandled.current = false; // allow the effect to run again
+
+    try {
+      await login(); // opens Privy auth modal; resolves after user authenticates
+      // The Privy session effect will pick up `authenticated=true` and create/fetch wallet
+    } catch {
+      localStorage.removeItem(PRIVY_STORAGE_KEY);
+      setAuthStatus("ready");
+      throw new Error("Login gagal atau dibatalkan");
+    }
+    // Safety timeout: if Privy effect didn't resolve in 10s, reset status
+    setTimeout(() => setAuthStatus((s) => (s === "connecting" ? "ready" : s)), 10_000);
+  }, [login]);
+
   // ─── Disconnect ──────────────────────────────────────────────────────────────
 
   const disconnect = useCallback(async () => {
-    if (walletType !== "passkey") {
+    if (walletType === "privy") {
+      try { await logout(); } catch { /* ignore */ }
+      localStorage.removeItem(PRIVY_STORAGE_KEY);
+      privyHandled.current = false;
+    } else if (walletType !== "passkey") {
       try {
         const kit = await buildKit();
         await kit.disconnect();
@@ -187,7 +317,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setAddress(null);
     setWalletType(null);
     setPasskeyKeyId(null);
-  }, [walletType]);
+    setStoreName(null);
+  }, [walletType, logout]);
 
   // ─── Sign XDR ────────────────────────────────────────────────────────────────
 
@@ -211,6 +342,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         if (!res.ok) throw new Error("Submission via Launchtube gagal");
         const data = await res.json();
         return data.hash ?? signedXdr;
+      }
+
+      if (walletType === "privy") {
+        // Privy merchants receive payments — they don't sign buyer transactions.
+        // If signing is ever needed, implement via Privy's signMessage API here.
+        throw new Error("Privy wallet tidak mendukung signing transaksi buyer");
       }
 
       // Classic wallet (Albedo / Freighter)
@@ -239,8 +376,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         isPasskey,
         userInitial,
         authStatus,
+        storeName,
+        setStoreName,
         connect,
         connectPasskey,
+        connectPrivy,
         disconnect,
         signXdr,
       }}

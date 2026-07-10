@@ -19,11 +19,21 @@ function getClient() {
 export async function initDb() {
   const db = getClient();
   await db.execute(`
+    CREATE TABLE IF NOT EXISTS merchants (
+      address    TEXT    PRIMARY KEY,
+      store_name TEXT    NOT NULL DEFAULT '',
+      verified   INTEGER NOT NULL DEFAULT 0,
+      stake_tx   TEXT,
+      created_at INTEGER NOT NULL
+    )
+  `);
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS products (
       id            TEXT    PRIMARY KEY,
       merchant_address TEXT NOT NULL,
       title         TEXT    NOT NULL,
       price_stroops INTEGER NOT NULL,
+      type          TEXT    NOT NULL DEFAULT 'one_time',
       created_at    INTEGER NOT NULL
     )
   `);
@@ -40,6 +50,53 @@ export async function initDb() {
       created_at       INTEGER NOT NULL
     )
   `);
+}
+
+// ─── Merchants ────────────────────────────────────────────────────────────────
+
+export interface Merchant {
+  address: string;
+  store_name: string;
+  verified: boolean;
+  stake_tx: string | null;
+  created_at: number;
+}
+
+export async function getMerchant(address: string): Promise<Merchant | null> {
+  await initDb();
+  const res = await getClient().execute({ sql: `SELECT * FROM merchants WHERE address = ?`, args: [address] });
+  if (!res.rows[0]) return null;
+  return rowToMerchant(res.rows[0]);
+}
+
+export async function upsertMerchant(address: string, storeName: string): Promise<Merchant> {
+  await initDb();
+  const now = Date.now();
+  await getClient().execute({
+    sql: `INSERT INTO merchants (address, store_name, verified, stake_tx, created_at)
+          VALUES (?, ?, 0, NULL, ?)
+          ON CONFLICT(address) DO UPDATE SET store_name = excluded.store_name`,
+    args: [address, storeName, now],
+  });
+  return (await getMerchant(address))!;
+}
+
+export async function setMerchantVerified(address: string, stakeTx: string): Promise<void> {
+  await initDb();
+  await getClient().execute({
+    sql: `UPDATE merchants SET verified = 1, stake_tx = ? WHERE address = ?`,
+    args: [stakeTx, address],
+  });
+}
+
+function rowToMerchant(r: any): Merchant {
+  return {
+    address: String(r.address),
+    store_name: String(r.store_name),
+    verified: Number(r.verified) === 1,
+    stake_tx: r.stake_tx ? String(r.stake_tx) : null,
+    created_at: Number(r.created_at),
+  };
 }
 
 // ─── Order ID helpers ─────────────────────────────────────────────────────────
@@ -66,6 +123,7 @@ export interface Product {
   merchant_address: string;
   title: string;
   price_stroops: number;
+  type: 'one_time' | 'permanent';
   created_at: number;
 }
 
@@ -73,17 +131,19 @@ export async function createProduct(data: {
   merchantAddress: string;
   title: string;
   priceUsdc: number;
+  type?: 'one_time' | 'permanent';
 }): Promise<Product> {
   await initDb();
   const id = generateOrderId();
   const price_stroops = Math.round(data.priceUsdc * 10_000_000);
+  const type = data.type ?? 'one_time';
   const now = Date.now();
   await getClient().execute({
-    sql: `INSERT INTO products (id, merchant_address, title, price_stroops, created_at)
-          VALUES (?, ?, ?, ?, ?)`,
-    args: [id, data.merchantAddress, data.title, price_stroops, now],
+    sql: `INSERT INTO products (id, merchant_address, title, price_stroops, type, created_at)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [id, data.merchantAddress, data.title, price_stroops, type, now],
   });
-  return { id, merchant_address: data.merchantAddress, title: data.title, price_stroops, created_at: now };
+  return { id, merchant_address: data.merchantAddress, title: data.title, price_stroops, type, created_at: now };
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
@@ -108,6 +168,7 @@ function rowToProduct(r: any): Product {
     merchant_address: String(r.merchant_address),
     title: String(r.title),
     price_stroops: Number(r.price_stroops),
+    type: (String(r.type ?? 'one_time')) as 'one_time' | 'permanent',
     created_at: Number(r.created_at),
   };
 }
@@ -152,11 +213,19 @@ export async function createOrder(data: {
   };
 }
 
+const ORDER_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 export async function getOrder(id: string): Promise<Order | null> {
   await initDb();
   const res = await getClient().execute({ sql: `SELECT * FROM orders WHERE id = ?`, args: [id] });
   if (!res.rows[0]) return null;
-  return rowToOrder(res.rows[0]);
+  const order = rowToOrder(res.rows[0]);
+  // Lazy expiry: pending orders older than 24h are auto-expired
+  if (order.status === 'pending' && Date.now() - order.created_at > ORDER_EXPIRY_MS) {
+    await markOrderExpired(id);
+    order.status = 'expired';
+  }
+  return order;
 }
 
 export async function listOrders(merchantAddress: string): Promise<Order[]> {

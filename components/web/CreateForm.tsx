@@ -50,14 +50,40 @@ export function CreateForm() {
         {f.touched && f.priceErr ? f.priceErr : f.local}
       </div>
 
+      {/* payment type toggle */}
+      <div className="mt-7">
+        <div className="mb-2 text-[13px] font-medium text-muted">Tipe pembayaran</div>
+        <div className="flex gap-2">
+          {(["one_time", "permanent"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => f.setType(t)}
+              className={`flex-1 rounded-[14px] border py-2.5 font-display text-[14px] font-semibold transition-colors ${
+                f.type === t
+                  ? "border-primary bg-primary/[.07] text-primary"
+                  : "border-ink/[.12] bg-paper text-muted"
+              }`}
+            >
+              {t === "one_time" ? "1× (custom)" : "Toko (berulang)"}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-[12px] text-muted">
+          {f.type === "one_time"
+            ? "Link sekali pakai untuk 1 buyer — cocok untuk freelancer."
+            : "Halaman produk permanen — buyer bisa bayar berkali-kali."}
+        </p>
+      </div>
+
       <MetalCta className="mt-8 block w-full">
         <button
           onClick={f.submit}
+          disabled={f.submitting}
           className={`liquid-surface w-full overflow-hidden rounded-btn py-4 font-display text-base font-semibold text-white transition-opacity ${
-            f.valid ? "" : "opacity-60"
+            f.valid && !f.submitting ? "" : "opacity-60"
           }`}
         >
-          Create payment link
+          {f.submitting ? "Creating…" : f.type === "permanent" ? "Buat halaman produk" : "Create payment link"}
         </button>
       </MetalCta>
     </WebCard>

@@ -8,9 +8,10 @@ import { LogoMark, Wordmark } from "@/components/ui/Wordmark";
 
 export function Login() {
   const router = useRouter();
-  const { connect, connectPasskey, isConnected, authStatus } = useWalletContext();
+  const { connect, connectPasskey, connectPrivy, isConnected, authStatus } = useWalletContext();
   const [error, setError] = useState<string | null>(null);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
+  const [privyLoading, setPrivyLoading] = useState(false);
 
   useEffect(() => {
     if (isConnected) router.push("/dashboard");
@@ -37,6 +38,18 @@ export function Login() {
     }
   };
 
+  const handlePrivy = async () => {
+    setError(null);
+    setPrivyLoading(true);
+    try {
+      await connectPrivy();
+    } catch (e: any) {
+      setError(e?.message ?? "Login email gagal. Coba lagi.");
+    } finally {
+      setPrivyLoading(false);
+    }
+  };
+
   const busy = authStatus === "connecting";
 
   return (
@@ -54,8 +67,33 @@ export function Login() {
           <p className="mt-4 text-[13px] text-red-500">{error}</p>
         )}
 
-        {/* ── Passkey / biometric (awam) ── */}
+        {/* ── Privy: email / Google (recommended for merchants) ── */}
         <div className="mt-8 flex flex-col gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
+            Cara termudah — tanpa wallet
+          </p>
+          <button
+            onClick={handlePrivy}
+            disabled={busy || privyLoading}
+            className="flex w-full items-center justify-center gap-2.5 rounded-btn bg-[#2F2A6B] py-4 font-display text-[16px] font-semibold text-white disabled:opacity-60"
+          >
+            {privyLoading ? <Spinner /> : <MailIcon />}
+            {privyLoading ? "Membuka…" : "Masuk dengan Email"}
+          </button>
+          <p className="text-[12px] leading-relaxed text-muted">
+            Masuk pakai email atau Google. Wallet Stellar dibuat otomatis.
+          </p>
+        </div>
+
+        {/* ── Divider ── */}
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-ink/[.08]" />
+          <span className="text-[12px] text-muted">atau pakai biometrik / wallet</span>
+          <div className="h-px flex-1 bg-ink/[.08]" />
+        </div>
+
+        {/* ── Passkey / biometric (awam) ── */}
+        <div className="flex flex-col gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
             Untuk pengguna baru
           </p>
@@ -78,13 +116,6 @@ export function Login() {
           <p className="text-[11px] leading-relaxed text-muted">
             Tidak perlu tahu crypto. Cukup sentuh sidik jari.
           </p>
-        </div>
-
-        {/* ── Divider ── */}
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-ink/[.08]" />
-          <span className="text-[12px] text-muted">atau pakai wallet</span>
-          <div className="h-px flex-1 bg-ink/[.08]" />
         </div>
 
         {/* ── Classic wallet (Albedo / Freighter) ── */}
@@ -113,6 +144,15 @@ export function Login() {
         </p>
       </div>
     </main>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" aria-hidden>
+      <rect x="2" y="4" width="20" height="16" rx="2" strokeWidth="1.8" />
+      <path d="M2 7l10 7 10-7" strokeWidth="1.8" strokeLinejoin="round" />
+    </svg>
   );
 }
 

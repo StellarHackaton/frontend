@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { Reveal } from "@/components/ui/Reveal";
-import { MetalLink } from "@/components/ui/MetalButton";
 import { formatRp } from "@/lib/format";
 
 const PAY_METHODS = [
@@ -72,9 +71,12 @@ export default function Landing() {
           <Link href="/login" className="hidden text-[15px] text-muted sm:inline">
             Sign in
           </Link>
-          <MetalLink href="/login" className="px-5 py-2.5 text-[15px]">
+          <Link
+            href="/login"
+            className="liquid-surface rounded-btn px-5 py-2.5 text-center font-display text-[15px] font-semibold text-white"
+          >
             Get started
-          </MetalLink>
+          </Link>
         </div>
       </header>
 
@@ -92,7 +94,12 @@ export default function Landing() {
             asked for. One tap. No jargon.
           </p>
           <div className="mt-9 flex flex-col gap-3.5 sm:flex-row">
-            <MetalLink href="/login">Get started</MetalLink>
+            <Link
+              href="/login"
+              className="liquid-surface rounded-btn px-7 py-[14px] text-center font-display text-base font-semibold text-white"
+            >
+              Get started
+            </Link>
             <Link
               href="/pay/sunset-a3"
               className="liquid-glass !border-primary/40 rounded-btn px-7 py-[14px] text-center font-display text-base font-semibold text-primary"
@@ -256,9 +263,12 @@ export default function Landing() {
               </div>
             ))}
           </div>
-          <MetalLink href="/login" full className="py-4 text-base">
+          <Link
+            href="/login"
+            className="liquid-surface block w-full rounded-btn py-4 text-center font-display text-base font-semibold text-white"
+          >
             Get started
-          </MetalLink>
+          </Link>
         </Reveal>
       </section>
 
@@ -271,11 +281,12 @@ export default function Landing() {
           <p className="mt-3.5 text-[17px] text-white/70">
             Create a product, share the link, watch it land.
           </p>
-          <span className="mt-7 inline-block">
-            <MetalLink href="/login" className="px-8 py-4 text-base">
-              Get started
-            </MetalLink>
-          </span>
+          <Link
+            href="/login"
+            className="liquid-glass !border-white/30 mt-7 inline-block rounded-btn px-8 py-4 text-center font-display text-base font-semibold text-white"
+          >
+            Get started
+          </Link>
         </Reveal>
       </section>
 

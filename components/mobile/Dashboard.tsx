@@ -28,20 +28,20 @@ const NOTIFS = [
 
 export function Dashboard() {
   const router = useRouter();
-  const { address, userInitial, authStatus, isConnected } = useWalletContext();
-  const { balanceUsdc, orders, loading } = useDashboard(address);
+  const { address, userInitial, authStatus, isConnected, storeName } = useWalletContext();
+  const { balanceUsdc, balanceCircleUsdc, orders, loading } = useDashboard(address);
   const [notifOpen, setNotifOpen] = useState(false);
   useEscClose(notifOpen, () => setNotifOpen(false));
 
-  // Auth guard — redirect once init is done and wallet not connected
   useEffect(() => {
-    if (authStatus === "ready" && !isConnected) {
-      router.replace("/login");
-    }
-  }, [authStatus, isConnected, router]);
+    if (authStatus !== "ready") return;
+    if (!isConnected) { router.replace("/login"); return; }
+    if (storeName === null) { router.replace("/onboarding"); return; }
+  }, [authStatus, isConnected, storeName, router]);
 
-  const idr = (balanceUsdc * 15_700).toLocaleString("id-ID");
-  const [whole, cents] = balanceUsdc.toFixed(2).split(".");
+  const totalUsdc = balanceUsdc + balanceCircleUsdc;
+  const idr = (totalUsdc * 15_700).toLocaleString("id-ID");
+  const [whole, cents] = totalUsdc.toFixed(2).split(".");
 
   const paid = orders.filter((o) => o.status === "paid");
   const pending = orders.filter((o) => o.status === "pending");
@@ -186,6 +186,13 @@ export function Dashboard() {
               <span className="text-white/45">.{cents}</span>
             </div>
             <div className="relative mt-1.5 text-[13px] text-white/45">≈ Rp{idr}</div>
+            {balanceCircleUsdc > 0 && (
+              <div className="relative mt-2">
+                <span className="rounded-full bg-indigo-500/20 px-3 py-1 text-[11px] font-semibold text-indigo-300">
+                  ${balanceCircleUsdc.toFixed(2)} Circle USDC (cross-chain)
+                </span>
+              </div>
+            )}
           </>
         )}
 

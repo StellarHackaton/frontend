@@ -7,10 +7,11 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { merchantAddress, title, priceUsdc } = body as {
+    const { merchantAddress, title, priceUsdc, type } = body as {
       merchantAddress: string;
       title: string;
       priceUsdc: number;
+      type?: 'one_time' | 'permanent';
     };
 
     if (!merchantAddress || !title || !priceUsdc) {
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
     const amountStroops = Math.round(priceUsdc * 10_000_000);
     const orderId = generateOrderId();
 
-    const product = await createProduct({ merchantAddress, title, priceUsdc });
+    const product = await createProduct({ merchantAddress, title, priceUsdc, type });
     await createOrder({ id: orderId, productId: product.id, merchantAddress, amountStroops });
 
     // Register on-chain (best-effort — don't fail the whole request)
@@ -50,5 +51,11 @@ export async function GET(req: NextRequest) {
     listOrders(merchantAddress),
     listProducts(merchantAddress),
   ]);
-  return NextResponse.json({ orders, products });
+  // Enrich orders with product title for UI display
+  const productMap = new Map(products.map((p) => [p.id, p.title]));
+  const enriched = orders.map((o) => ({
+    ...o,
+    product_title: o.product_id ? (productMap.get(o.product_id) ?? 'Product') : 'Product',
+  }));
+  return NextResponse.json({ orders: enriched, products });
 }
