@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Build changeTrust for whichever trustlines are missing
-    const ops: StellarSdk.Operation.Operation[] = [];
+    const ops: Parameters<typeof StellarSdk.TransactionBuilder.prototype.addOperation>[0][] = [];
     if (!hasCustomUsdc) ops.push(StellarSdk.Operation.changeTrust({ asset: USDC_ASSET }));
     if (!hasCircleUsdc) ops.push(StellarSdk.Operation.changeTrust({ asset: CIRCLE_USDC }));
 

@@ -10,10 +10,8 @@ const nextConfig = {
   // passkey-kit ships TypeScript source — must transpile
   transpilePackages: ["passkey-kit", "passkey-kit-sdk", "sac-sdk"],
 
-  // Tree-shake large packages — only import what's actually used
   experimental: {
     optimizePackageImports: [
-      "@privy-io/react-auth",
       "@stellar/stellar-sdk",
       "@creit.tech/stellar-wallets-kit",
       "framer-motion",
@@ -38,9 +36,9 @@ const nextConfig = {
       "@farcaster/mini-app-solana": false,
       "@farcaster/frame-sdk": false,
       "@solana/web3.js": false,
-      // WalletConnect / Reown — pulled in by Privy but we don't use it
-      "@reown/appkit": false,
-      "@walletconnect/core": false,
+      // x402 = Privy's AI payment protocol, kita tidak pakai
+      // Ini yang menyebabkan warning "Critical dependency" dari viem/tempo
+      "x402": false,
     };
 
     // ── Node.js module shims for browser bundle ───────────────────────────────────

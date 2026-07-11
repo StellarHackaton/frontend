@@ -50,6 +50,13 @@ export async function initDb() {
       created_at       INTEGER NOT NULL
     )
   `);
+
+  // Migration: add 'type' column to existing products tables that predate it
+  try {
+    await db.execute(`ALTER TABLE products ADD COLUMN type TEXT NOT NULL DEFAULT 'one_time'`);
+  } catch {
+    // Column already exists — safe to ignore
+  }
 }
 
 // ─── Merchants ────────────────────────────────────────────────────────────────
@@ -160,6 +167,34 @@ export async function listProducts(merchantAddress: string): Promise<Product[]> 
     args: [merchantAddress],
   });
   return res.rows.map(rowToProduct);
+}
+
+export async function updateProduct(
+  id: string,
+  merchantAddress: string,
+  data: { title?: string; priceUsdc?: number }
+): Promise<void> {
+  await initDb();
+  if (data.title !== undefined) {
+    await getClient().execute({
+      sql: `UPDATE products SET title = ? WHERE id = ? AND merchant_address = ?`,
+      args: [data.title, id, merchantAddress],
+    });
+  }
+  if (data.priceUsdc !== undefined) {
+    await getClient().execute({
+      sql: `UPDATE products SET price_stroops = ? WHERE id = ? AND merchant_address = ?`,
+      args: [Math.round(data.priceUsdc * 10_000_000), id, merchantAddress],
+    });
+  }
+}
+
+export async function deleteProduct(id: string, merchantAddress: string): Promise<void> {
+  await initDb();
+  await getClient().execute({
+    sql: `DELETE FROM products WHERE id = ? AND merchant_address = ?`,
+    args: [id, merchantAddress],
+  });
 }
 
 function rowToProduct(r: any): Product {

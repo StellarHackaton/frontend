@@ -159,7 +159,7 @@ export function encodeHookData(merchantStellarAddress: string): `0x${string}` {
 export function usdcToEvmUnits(amountUsd: string): bigint {
   const [whole, frac = ""] = amountUsd.split(".");
   const fracPadded = (frac + "000000").slice(0, 6);
-  return BigInt(whole) * 1_000_000n + BigInt(fracPadded);
+  return BigInt(whole) * BigInt(1_000_000) + BigInt(fracPadded);
 }
 
 /** Fast transfer: minFinalityThreshold=0 + maxFee>0 → Circle attests in ~30s */

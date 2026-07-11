@@ -28,6 +28,7 @@ export function Dashboard() {
   useEffect(() => {
     if (authStatus !== "ready") return;
     if (!isConnected) { router.replace("/login"); return; }
+    if (storeName === undefined) return; // masih fetching, tunggu dulu
     if (storeName === null) { router.replace("/onboarding"); return; }
   }, [authStatus, isConnected, storeName, router]);
 

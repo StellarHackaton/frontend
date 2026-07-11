@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckoutOption } from "@/lib/useCheckout";
 import { useEscClose } from "@/lib/useEscClose";
+import { PaymentIcon } from "@/components/ui/PaymentIcon";
 
 interface Props {
   open: boolean;
@@ -51,8 +52,8 @@ export function PayWithSheet({ open, options, selectedKey, onClose, onSelect }: 
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-[13px] bg-[#F1EFEA] text-xl shadow-[inset_0_1px_0_rgba(255,255,255,.8)]">
-                        {o.emoji}
+                      <div className="flex-none overflow-hidden rounded-[13px] shadow-[0_2px_8px_rgba(0,0,0,.15)]">
+                        <PaymentIcon code={o.assetCode} size={42} radius={13} />
                       </div>
                       <div>
                         <div className="font-display text-base font-semibold">{o.label}</div>

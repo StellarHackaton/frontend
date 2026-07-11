@@ -8,7 +8,9 @@ import { EDGE } from "@/lib/checkoutStatus";
 import { MetalButton } from "@/components/ui/MetalButton";
 import { useEscClose } from "@/lib/useEscClose";
 import { useCheckout, CheckoutOption } from "@/lib/useCheckout";
+import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { useWalletContext } from "@/lib/wallet-context";
+import { useEffect, useState } from "react";
 import { CctpCheckout } from "@/components/cctp/CctpCheckout";
 
 export function WebCheckoutFlow({ orderId }: { orderId: string }) {
@@ -59,54 +61,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
   }
 
   if (co.screen === "success") {
-    return (
-      <WebCard>
-        <div className="flex flex-col items-center">
-          <div className="mb-6 text-[13px] text-muted">
-            Paid with {co.selected?.label ?? "wallet"} → received ${co.priceUSD.toFixed(2)}
-          </div>
-          <div className="relative flex h-[84px] w-[84px] items-center justify-center">
-            <div className="absolute h-[84px] w-[84px] rounded-full"
-              style={{ background: "radial-gradient(closest-side,rgba(31,157,120,.4),rgba(31,157,120,0))", animation: "halo .9s .2s ease-out both" }} />
-            <div className="relative flex h-[84px] w-[84px] items-center justify-center rounded-full bg-success shadow-[0_16px_34px_rgba(31,157,120,.32)]"
-              style={{ animation: "pop .5s .15s ease both" }}>
-              <svg width="44" height="44" viewBox="0 0 52 52" fill="none">
-                <path d="M15 27l7 7 15-17" stroke="#fff" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"
-                  style={{ strokeDasharray: 48, strokeDashoffset: 48, animation: "lunasDraw .45s .42s ease forwards" }} />
-              </svg>
-            </div>
-          </div>
-          <div className="my-6 font-display text-[46px] font-extrabold tracking-[-.025em] text-success"
-            style={{ animation: "rise .5s .55s ease both" }}>
-            Lunas ✓
-          </div>
-          <div className="w-full rounded-[18px] border border-ink/[.06] bg-paper px-[18px] py-1"
-            style={{ animation: "slide .5s .7s ease both" }}>
-            <Row label="Item" value={co.order?.product_title ?? "Product"} />
-            <Row label="Total" value={formatRp(co.priceUSD)} top display />
-            {co.txHash && (
-              <div className="border-t border-ink/[.06] py-3">
-                <a
-                  href={`https://stellar.expert/explorer/testnet/tx/${co.txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cursor-pointer text-sm font-semibold text-primary"
-                >
-                  View proof ↗
-                </a>
-              </div>
-            )}
-          </div>
-          <div className="mt-5 flex w-full gap-2.5">
-            <div className="flex-1">
-              <MetalButton onClick={() => window.location.href = "/"} preset="gold" className="!py-3 text-[15px]">
-                Done
-              </MetalButton>
-            </div>
-          </div>
-        </div>
-      </WebCard>
-    );
+    return <WebSuccess co={co} />;
   }
 
   // Checkout screen
@@ -253,7 +208,9 @@ function WebPayPicker({
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white text-xl">{o.emoji}</div>
+              <div className="flex-none overflow-hidden rounded-[12px] shadow-[0_2px_8px_rgba(0,0,0,.12)]">
+                <PaymentIcon code={o.assetCode} size={40} radius={12} />
+              </div>
               <div>
                 <div className="font-display text-base font-semibold">{o.label}</div>
                 {o.helper && <div className="text-xs text-danger">{o.helper}</div>}
@@ -284,6 +241,130 @@ function Row({
     <div className={`flex justify-between py-3 text-[15px] ${top ? "border-t border-ink/[.06]" : ""}`}>
       <span className="text-muted">{label}</span>
       <span className={display ? "tnum font-display font-bold text-ink" : "text-ink"}>{value}</span>
+    </div>
+  );
+}
+
+type SuccessStage = "loading" | "check" | "title" | "receipt";
+
+function WebSuccess({ co }: { co: ReturnType<typeof useCheckout> }) {
+  const [stage, setStage] = useState<SuccessStage>("loading");
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setStage("check"),   900);
+    const t2 = setTimeout(() => setStage("title"),   1400);
+    const t3 = setTimeout(() => setStage("receipt"), 1900);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  return (
+    <div className="relative overflow-hidden rounded-[28px] bg-[#0c0d12] text-white shadow-[0_24px_60px_rgba(0,0,0,.22)]"
+      style={{ minHeight: 480 }}>
+
+      {/* ambient glow */}
+      <AnimatePresence>
+        {stage !== "loading" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "radial-gradient(ellipse 70% 50% at 50% 42%, rgba(31,157,120,.25), transparent)" }} />
+        )}
+      </AnimatePresence>
+
+      {/* top area */}
+      <div className="flex flex-col items-center px-8 pt-12 pb-6">
+        {/* icon */}
+        <div className="relative flex h-32 w-32 items-center justify-center">
+          <AnimatePresence>
+            {stage === "loading" && (
+              <motion.div key="spin" exit={{ opacity: 0, scale: 0.7, transition: { duration: 0.2 } }}
+                className="absolute h-28 w-28">
+                <svg className="animate-spin" viewBox="0 0 56 56" fill="none">
+                  <circle cx="28" cy="28" r="24" stroke="rgba(255,255,255,.1)" strokeWidth="3" />
+                  <path d="M28 4 a24 24 0 0 1 24 24" stroke="#1F9D78" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {stage !== "loading" && (
+              <motion.div key="check"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 440, damping: 22 }}
+                className="relative flex h-24 w-24 items-center justify-center">
+                {[0, 1].map((i) => (
+                  <motion.div key={i}
+                    initial={{ scale: 1, opacity: 0.4 }}
+                    animate={{ scale: 2.2 + i * 0.6, opacity: 0 }}
+                    transition={{ duration: 1 + i * 0.2, ease: "easeOut", delay: i * 0.12 }}
+                    className="absolute h-24 w-24 rounded-full bg-success" />
+                ))}
+                <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-success shadow-[0_0_48px_rgba(31,157,120,.6),inset_0_2px_8px_rgba(255,255,255,.3)]">
+                  <div className="absolute left-4 top-3 h-4 w-7 rounded-full bg-white/35 blur-[4px]" />
+                  <svg width="46" height="46" viewBox="0 0 52 52" fill="none">
+                    <path d="M14 26l8 8 16-18" stroke="#fff" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ strokeDasharray: 52, strokeDashoffset: 52, animation: "lunasDraw .4s .08s ease forwards" }} />
+                  </svg>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* title */}
+        <AnimatePresence>
+          {(stage === "title" || stage === "receipt") && (
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 280, damping: 22 }}
+              className="mt-6 text-center">
+              <div className="font-display text-[48px] font-extrabold leading-none tracking-[-.03em]">
+                Lunas <span className="text-success">✓</span>
+              </div>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+                className="mt-2 text-[14px] text-white/45">
+                Paid with {co.selected?.label ?? "wallet"} · received ${co.priceUSD.toFixed(2)}
+              </motion.div>
+            </motion.div>
+          )}
+          {stage === "loading" && (
+            <motion.div exit={{ opacity: 0 }}
+              className="mt-6 text-[13px] font-medium uppercase tracking-[.05em] text-white/30">
+              Memverifikasi…
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* receipt */}
+      <AnimatePresence>
+        {stage === "receipt" && (
+          <motion.div initial={{ y: "100%" }} animate={{ y: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 30 }}
+            className="rounded-t-[24px] bg-paper px-6 pb-6 pt-5 text-ink shadow-[0_-8px_32px_rgba(0,0,0,.3)]">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/15" />
+            <div className="mb-4 overflow-hidden rounded-[16px] border border-ink/[.07]">
+              <Row label="Item" value={co.order?.product_title ?? "Product"} />
+              <Row label="Total" value={formatRp(co.priceUSD)} top display />
+              {co.txHash && (
+                <div className="border-t border-ink/[.06] py-3 px-1">
+                  <a href={`https://stellar.expert/explorer/testnet/tx/${co.txHash}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-sm font-semibold text-primary">
+                    View proof ↗
+                  </a>
+                </div>
+              )}
+            </div>
+            <MetalButton onClick={() => window.location.href = "/"} preset="gold" className="!py-3 text-[15px]">
+              Done
+            </MetalButton>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style jsx global>{`
+        @keyframes lunasDraw { to { stroke-dashoffset: 0; } }
+      `}</style>
     </div>
   );
 }

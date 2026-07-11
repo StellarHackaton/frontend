@@ -14,7 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           accentColor: "#2F2A6B",
           logo: "/icon-192.png",
         },
-        embeddedWallets: { createOnLogin: "off" },
+        embeddedWallets: { createOnLogin: "off" } as any,
       }}
     >
       <WalletProvider>{children}</WalletProvider>

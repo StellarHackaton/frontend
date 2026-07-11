@@ -20,22 +20,31 @@ function timeAgo(iso: string) {
   return `${Math.floor(diff / 86400)} hari lalu`;
 }
 
-const NOTIFS = [
-  { id: "n1", title: "Sunset print A3 paid", meta: "$5.00 · 2m ago", paid: true },
-  { id: "n2", title: "Logo design paid", meta: "$40.00 · 3h ago", paid: true },
-  { id: "n3", title: "Coffee subscription awaiting", meta: "$12.00 · 18m ago", paid: false },
-];
-
 export function Dashboard() {
   const router = useRouter();
   const { address, userInitial, authStatus, isConnected, storeName } = useWalletContext();
   const { balanceUsdc, balanceCircleUsdc, orders, loading } = useDashboard(address);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [lastSeen, setLastSeen] = useState<number>(0);
+  const [monthlyTarget, setMonthlyTarget] = useState(200);
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [targetInput, setTargetInput] = useState("");
   useEscClose(notifOpen, () => setNotifOpen(false));
+
+  useEffect(() => {
+    setLastSeen(parseInt(localStorage.getItem("lunas_notif_seen") ?? "0", 10));
+  }, []);
+
+  useEffect(() => {
+    if (!address) return;
+    const saved = localStorage.getItem(`lunas_target_${address}`);
+    if (saved) setMonthlyTarget(parseFloat(saved));
+  }, [address]);
 
   useEffect(() => {
     if (authStatus !== "ready") return;
     if (!isConnected) { router.replace("/login"); return; }
+    if (storeName === undefined) return; // masih fetching, tunggu dulu
     if (storeName === null) { router.replace("/onboarding"); return; }
   }, [authStatus, isConnected, storeName, router]);
 
@@ -47,6 +56,42 @@ export function Dashboard() {
   const pending = orders.filter((o) => o.status === "pending");
   const paidSum = paid.reduce((s, o) => s + o.amountUsdc, 0);
   const pendingSum = pending.reduce((s, o) => s + o.amountUsdc, 0);
+
+  // Real notifications from orders (newest first, max 10)
+  const notifs = [...orders]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10)
+    .map((o) => ({
+      id: o.id,
+      title: o.title,
+      meta: `$${o.amountUsdc.toFixed(2)} · ${timeAgo(o.createdAt)}`,
+      paid: o.status === "paid",
+    }));
+  const newCount = orders.filter((o) => new Date(o.createdAt).getTime() > lastSeen).length;
+
+  // Monthly target (current month only)
+  const nowDate = new Date();
+  const thisMonthPaid = paid.filter((o) => {
+    const d = new Date(o.createdAt);
+    return d.getMonth() === nowDate.getMonth() && d.getFullYear() === nowDate.getFullYear();
+  });
+  const thisMonthSum = thisMonthPaid.reduce((s, o) => s + o.amountUsdc, 0);
+  const targetPct = monthlyTarget > 0 ? Math.min(100, (thisMonthSum / monthlyTarget) * 100) : 0;
+
+  function openNotif() {
+    setNotifOpen((v) => !v);
+    const now = Date.now();
+    setLastSeen(now);
+    localStorage.setItem("lunas_notif_seen", String(now));
+  }
+
+  function saveTarget() {
+    const v = parseFloat(targetInput);
+    if (!v || v <= 0 || !address) return;
+    setMonthlyTarget(v);
+    localStorage.setItem(`lunas_target_${address}`, String(v));
+    setEditingTarget(false);
+  }
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#0c0d12] text-white">
@@ -92,7 +137,7 @@ export function Dashboard() {
             )}
           </button>
           <button
-            onClick={() => setNotifOpen((v) => !v)}
+            onClick={openNotif}
             aria-label="Notifications"
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur-md active:scale-90"
           >
@@ -100,7 +145,7 @@ export function Dashboard() {
               <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" strokeWidth="1.7" strokeLinejoin="round" />
               <path d="M10 19a2 2 0 0 0 4 0" strokeWidth="1.7" strokeLinecap="round" />
             </svg>
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#FF5A5A] ring-2 ring-[#0c0d12]" />
+            {newCount > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#FF5A5A] ring-2 ring-[#0c0d12]" />}
           </button>
         </div>
 
@@ -124,12 +169,17 @@ export function Dashboard() {
               >
                 <div className="flex items-center justify-between px-4 py-3">
                   <span className="font-display text-[15px] font-bold">Notifications</span>
-                  <span className="rounded-full bg-success/[.14] px-2 py-0.5 text-[11px] font-semibold text-success">
-                    2 new
-                  </span>
+                  {newCount > 0 && (
+                    <span className="rounded-full bg-success/[.14] px-2 py-0.5 text-[11px] font-semibold text-success">
+                      {newCount} new
+                    </span>
+                  )}
                 </div>
                 <div className="max-h-[260px] overflow-y-auto">
-                  {NOTIFS.map((n) => (
+                  {notifs.length === 0 && (
+                    <p className="px-4 py-4 text-[13px] text-faint">Belum ada transaksi.</p>
+                  )}
+                  {notifs.map((n) => (
                     <button
                       key={n.id}
                       onClick={() => {
@@ -243,23 +293,39 @@ export function Dashboard() {
         <div className="mx-auto mt-2.5 h-1 w-10 flex-none rounded-full bg-ink/15" />
         <div className="flex-1 overflow-y-auto px-4 pb-[110px]">
           {/* monthly target progress */}
-          <button
-            onClick={() => router.push("/settings")}
-            className="liquid-glass mt-1 block w-full rounded-[20px] p-5 text-left"
-          >
+          <div className="liquid-glass mt-1 rounded-[20px] p-5">
             <div className="flex items-center justify-between">
               <span className="font-display text-[15px] font-bold">Monthly target</span>
-              <span className="flex items-center gap-1 text-[13px] font-semibold text-primary">
-                Set target
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F2A6B">
-                  <path d="M9 6l6 6-6 6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
+              {editingTarget ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] text-muted">$</span>
+                  <input
+                    autoFocus
+                    value={targetInput}
+                    onChange={(e) => setTargetInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") saveTarget(); if (e.key === "Escape") setEditingTarget(false); }}
+                    className="w-20 rounded-[8px] border border-ink/20 bg-white px-2 py-1 font-mono text-[13px] text-ink outline-none focus:border-primary"
+                    type="number" min="1" step="1"
+                    placeholder={String(monthlyTarget)}
+                  />
+                  <button onClick={saveTarget} className="text-[12px] font-bold text-primary">OK</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setTargetInput(String(monthlyTarget)); setEditingTarget(true); }}
+                  className="flex items-center gap-1 text-[13px] font-semibold text-primary"
+                >
+                  Set target
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F2A6B">
+                    <path d="M9 6l6 6-6 6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              )}
             </div>
             <div className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-ink/[.08]">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: "24%" }}
+                animate={{ width: `${targetPct}%` }}
                 transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}
                 className="h-full rounded-full bg-gradient-to-r from-primary to-success"
               />
@@ -267,10 +333,10 @@ export function Dashboard() {
             <div className="mt-2 flex items-center justify-between text-[13px]">
               <span className="text-muted">This month</span>
               <span className="tnum font-semibold text-ink">
-                ${paidSum.toFixed(2)} <span className="text-faint">/ $200.00</span>
+                ${thisMonthSum.toFixed(2)} <span className="text-faint">/ ${monthlyTarget.toFixed(0)}</span>
               </span>
             </div>
-          </button>
+          </div>
 
           {/* transactions */}
           <div className="mb-1 mt-5 px-2 font-display text-[15px] font-bold">

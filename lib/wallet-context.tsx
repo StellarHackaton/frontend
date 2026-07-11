@@ -19,7 +19,7 @@ interface WalletContextValue {
   isPasskey: boolean;
   userInitial: string;
   authStatus: "initializing" | "ready" | "connecting";
-  storeName: string | null;
+  storeName: string | null | undefined; // undefined = masih loading, null = sudah fetch & tidak ada
   setStoreName: (name: string) => void;
   connect: () => Promise<string>;
   connectPasskey: (mode?: "register" | "login") => Promise<string>;
@@ -60,7 +60,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [authStatus, setAuthStatus] = useState<"initializing" | "ready" | "connecting">(
     "initializing"
   );
-  const [storeName, setStoreName] = useState<string | null>(null);
+  const [storeName, setStoreName] = useState<string | null | undefined>(undefined);
 
   // ─── Privy hooks ────────────────────────────────────────────────────────────
   const { ready: privyReady, authenticated, user, login, logout } = usePrivy();
@@ -113,8 +113,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await fetch(`/api/merchant/profile?address=${encodeURIComponent(addr)}`);
       const { merchant } = await res.json();
-      setStoreName(merchant?.store_name || null);
-    } catch { /* non-fatal */ }
+      // null = sudah fetch, tidak ada store name → redirect ke onboarding
+      setStoreName(merchant?.store_name ?? null);
+    } catch {
+      setStoreName(null);
+    }
   }, []);
 
   // Fund & add USDC trustline for a newly created Privy Stellar wallet
@@ -174,7 +177,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setAddress(addr);
       setWalletType("privy");
       setAuthStatus("ready");
-      setupPrivyAccount(addr); // fire-and-forget: fund + add USDC trustline
+      setupPrivyAccount(addr);
+      fetchStoreName(addr);
     } else {
       // Auto-create Stellar wallet for new Privy users
       createWallet({ chainType: "stellar" } as any)
@@ -182,7 +186,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           const addr = wallet.address as string;
           setAddress(addr);
           setWalletType("privy");
-          await setupPrivyAccount(addr); // fund + add USDC trustline
+          await setupPrivyAccount(addr);
+          fetchStoreName(addr);
         })
         .catch(() => {/* wallet might already exist; effect re-runs via user change */})
         .finally(() => setAuthStatus("ready"));
@@ -317,7 +322,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setAddress(null);
     setWalletType(null);
     setPasskeyKeyId(null);
-    setStoreName(null);
+    setStoreName(undefined);
   }, [walletType, logout]);
 
   // ─── Sign XDR ────────────────────────────────────────────────────────────────
@@ -345,9 +350,24 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (walletType === "privy") {
-        // Privy merchants receive payments — they don't sign buyer transactions.
-        // If signing is ever needed, implement via Privy's signMessage API here.
-        throw new Error("Privy wallet tidak mendukung signing transaksi buyer");
+        // Parse XDR → hash → sign dengan Privy signRawHash → rekonstruksi signed XDR
+        const { TransactionBuilder } = await import("@stellar/stellar-sdk");
+        const tx = TransactionBuilder.fromXDR(xdr, TESTNET_PASSPHRASE) as any;
+        const hashHex = (tx.hash() as Buffer).toString("hex");
+
+        const { signature } = await signRawHash({
+          address,
+          chainType: "stellar" as any,
+          hash: `0x${hashHex}` as `0x${string}`,
+        });
+
+        const sigHex = (signature as string).startsWith("0x")
+          ? (signature as string).slice(2)
+          : (signature as string);
+        const sigBase64 = Buffer.from(sigHex, "hex").toString("base64");
+
+        tx.addSignature(address, sigBase64);
+        return tx.toEnvelope().toXDR("base64");
       }
 
       // Classic wallet (Albedo / Freighter)
@@ -358,14 +378,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       });
       return signedTxXdr;
     },
-    [address, walletType, passkeyKeyId]
+    [address, walletType, passkeyKeyId, signRawHash]
   );
 
   // ─── Derived values ───────────────────────────────────────────────────────────
 
   const isConnected = !!address;
   const isPasskey = walletType === "passkey";
-  const userInitial = address ? address.slice(0, 2).toUpperCase() : "?";
+
+  const privyEmailRaw = walletType === "privy"
+    ? (user?.email?.address ?? (user as any)?.google?.email
+        ?? ((user?.linkedAccounts ?? []).find((a: any) => a.type === "google_oauth") as any)?.email
+        ?? null)
+    : null;
+  const userInitial = privyEmailRaw
+    ? privyEmailRaw.split("@")[0].split(/[.\-_]/).filter(Boolean).map((s: string) => s[0].toUpperCase()).join("").slice(0, 2)
+    : (address ? address.slice(0, 2).toUpperCase() : "?");
 
   return (
     <WalletContext.Provider

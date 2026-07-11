@@ -36,7 +36,10 @@ export function OnboardingFlow() {
     }
   }
 
-  // Already has store name — redirect
+  // Masih loading storeName — jangan render dulu
+  if (storeName === undefined) return null;
+
+  // Sudah punya store name — redirect ke dashboard
   if (storeName) {
     router.replace("/dashboard");
     return null;

@@ -2,12 +2,14 @@ import Link from "next/link";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { Reveal } from "@/components/ui/Reveal";
 import { formatRp } from "@/lib/format";
+import { PaymentIcon } from "@/components/ui/PaymentIcon";
+import { PhoneHero } from "@/components/ui/PhoneHero";
 
 const PAY_METHODS = [
-  { emoji: "💶", name: "Euro" },
-  { emoji: "💵", name: "Dollar" },
-  { emoji: "💳", name: "PayPal Dollar" },
-  { emoji: "🪙", name: "Stellar Balance" },
+  { code: "EURC",  name: "Euro"           },
+  { code: "USDC",  name: "Dollar"         },
+  { code: "PYUSD", name: "PayPal Dollar"  },
+  { code: "XLM",   name: "Stellar Balance"},
 ];
 
 const STEPS = [
@@ -111,37 +113,7 @@ export default function Landing() {
 
         {/* hero phone */}
         <Reveal delay={0.1} className="flex justify-center">
-          <div className="relative flex w-[300px] flex-col items-center overflow-hidden rounded-[42px] bg-white p-6 shadow-[0_30px_70px_rgba(21,22,27,.18)]">
-            <div
-              className="pointer-events-none absolute -left-10 -top-[70px] h-[220px] w-[220px] rounded-full"
-              style={{
-                background:
-                  "radial-gradient(closest-side,rgba(31,157,120,.14),rgba(31,157,120,0))",
-              }}
-            />
-            <div className="relative my-7 text-center text-xs text-muted">
-              Paid with Euro → received $5
-            </div>
-            <div className="relative flex h-[84px] w-[84px] items-center justify-center rounded-full bg-success shadow-[0_16px_34px_rgba(31,157,120,.34)]">
-              <svg width="44" height="44" viewBox="0 0 52 52" fill="none">
-                <path
-                  d="M15 27l7 7 15-17"
-                  stroke="#fff"
-                  strokeWidth="4.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <div className="relative my-5 font-display text-[42px] font-extrabold tracking-[-.02em] text-success">
-              Lunas ✓
-            </div>
-            <div className="relative w-full rounded-[18px] border border-ink/[.06] bg-paper px-4 py-1">
-              <ReceiptRow label="Item" value="Sunset print A3" />
-              <ReceiptRow label="Seller" value="Studio Mawar" top />
-              <ReceiptRow label="Total" value={formatRp(5)} top display />
-            </div>
-          </div>
+          <PhoneHero />
         </Reveal>
       </section>
 
@@ -154,9 +126,11 @@ export default function Landing() {
           {PAY_METHODS.map((m) => (
             <div
               key={m.name}
-              className="flex items-center gap-2.5 rounded-btn border border-ink/[.08] bg-white px-[18px] py-2.5"
+              className="flex items-center gap-2.5 rounded-btn border border-ink/[.08] bg-white px-[18px] py-2.5 shadow-[0_2px_8px_rgba(0,0,0,.04)]"
             >
-              <span className="text-lg">{m.emoji}</span>
+              <div className="overflow-hidden rounded-[8px] shadow-[0_1px_4px_rgba(0,0,0,.12)]">
+                <PaymentIcon code={m.code} size={26} radius={8} />
+              </div>
               <span className="font-display text-[15px] font-semibold">
                 {m.name}
               </span>
@@ -206,9 +180,9 @@ export default function Landing() {
           body="They keep their balance, you keep it simple. No top ups, no detours, no new accounts to open."
         >
           <div className="flex w-full flex-col gap-2.5">
-            <PickRow emoji="💶" name="Euro" selected />
-            <PickRow emoji="💵" name="Dollar" approx="≈ $5.00" />
-            <PickRow emoji="💳" name="PayPal Dollar" approx="≈ $5.02" />
+            <PickRow code="EURC"  name="Euro" selected />
+            <PickRow code="USDC"  name="Dollar" approx="≈ $5.00" />
+            <PickRow code="PYUSD" name="PayPal Dollar" approx="≈ $5.02" />
           </div>
         </ValueBlock>
         </Reveal>
@@ -306,30 +280,6 @@ export default function Landing() {
   );
 }
 
-function ReceiptRow({
-  label,
-  value,
-  top,
-  display,
-}: {
-  label: string;
-  value: string;
-  top?: boolean;
-  display?: boolean;
-}) {
-  return (
-    <div
-      className={`flex justify-between py-[11px] text-[13px] ${
-        top ? "border-t border-ink/[.06]" : ""
-      }`}
-    >
-      <span className="text-muted">{label}</span>
-      <span className={display ? "font-display font-bold text-ink" : "text-ink"}>
-        {value}
-      </span>
-    </div>
-  );
-}
 
 function ValueBlock({
   title,
@@ -375,12 +325,12 @@ function ValueBlock({
 }
 
 function PickRow({
-  emoji,
+  code,
   name,
   approx,
   selected,
 }: {
-  emoji: string;
+  code: string;
   name: string;
   approx?: string;
   selected?: boolean;
@@ -394,7 +344,9 @@ function PickRow({
       }`}
     >
       <div className="flex items-center gap-2.5">
-        <span className="text-lg">{emoji}</span>
+        <div className="overflow-hidden rounded-[9px] shadow-[0_1px_4px_rgba(0,0,0,.12)]">
+          <PaymentIcon code={code} size={30} radius={9} />
+        </div>
         <span className="font-display text-[15px] font-semibold">{name}</span>
       </div>
       {selected ? (
