@@ -196,8 +196,13 @@ export function useCheckout(orderId: string) {
       // Sign (passkey: signs+submits via /api/passkey/send; classic: signs only)
       const result = await signXdr(xdr);
 
-      // For classic wallets: submit signed XDR to Horizon
-      if (walletType !== "passkey") {
+      let txHash: string | null = null;
+
+      if (walletType === "passkey") {
+        // result is the tx hash returned by /api/passkey/send
+        txHash = result;
+      } else {
+        // For classic wallets: submit signed XDR to Horizon
         const submitRes = await fetch("https://horizon-testnet.stellar.org/transactions", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -211,9 +216,20 @@ export function useCheckout(orderId: string) {
             "submission_failed";
           throw new Error(code);
         }
+        const submitJson = await submitRes.json().catch(() => ({}));
+        txHash = submitJson.hash ?? null;
       }
 
-      // Open SSE to receive confirmation from server
+      // Confirm payment in DB directly — don't rely solely on SSE (Vercel timeout)
+      if (txHash) {
+        fetch(`/api/orders/${orderId}/confirm`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ txHash, assetCode: option.assetCode }),
+        }).catch(() => {});
+      }
+
+      // Open SSE + polling as backup
       openSSE();
     } catch (err: any) {
       setPayError(err?.message ?? "Payment failed");
