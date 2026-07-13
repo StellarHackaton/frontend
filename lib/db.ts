@@ -51,12 +51,13 @@ export async function initDb() {
     )
   `);
 
-  // Migration: add 'type' column to existing products tables that predate it
+  // Migrations for columns added after initial schema
   try {
     await db.execute(`ALTER TABLE products ADD COLUMN type TEXT NOT NULL DEFAULT 'one_time'`);
-  } catch {
-    // Column already exists — safe to ignore
-  }
+  } catch { /* already exists */ }
+  try {
+    await db.execute(`ALTER TABLE products ADD COLUMN description TEXT NOT NULL DEFAULT ''`);
+  } catch { /* already exists */ }
 }
 
 // ─── Merchants ────────────────────────────────────────────────────────────────
@@ -129,6 +130,7 @@ export interface Product {
   id: string;
   merchant_address: string;
   title: string;
+  description: string;
   price_stroops: number;
   type: 'one_time' | 'permanent';
   created_at: number;
@@ -137,6 +139,7 @@ export interface Product {
 export async function createProduct(data: {
   merchantAddress: string;
   title: string;
+  description?: string;
   priceUsdc: number;
   type?: 'one_time' | 'permanent';
 }): Promise<Product> {
@@ -144,13 +147,14 @@ export async function createProduct(data: {
   const id = generateOrderId();
   const price_stroops = Math.round(data.priceUsdc * 10_000_000);
   const type = data.type ?? 'one_time';
+  const description = data.description ?? '';
   const now = Date.now();
   await getClient().execute({
-    sql: `INSERT INTO products (id, merchant_address, title, price_stroops, type, created_at)
-          VALUES (?, ?, ?, ?, ?, ?)`,
-    args: [id, data.merchantAddress, data.title, price_stroops, type, now],
+    sql: `INSERT INTO products (id, merchant_address, title, description, price_stroops, type, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    args: [id, data.merchantAddress, data.title, description, price_stroops, type, now],
   });
-  return { id, merchant_address: data.merchantAddress, title: data.title, price_stroops, type, created_at: now };
+  return { id, merchant_address: data.merchantAddress, title: data.title, description, price_stroops, type, created_at: now };
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
@@ -172,13 +176,19 @@ export async function listProducts(merchantAddress: string): Promise<Product[]> 
 export async function updateProduct(
   id: string,
   merchantAddress: string,
-  data: { title?: string; priceUsdc?: number }
+  data: { title?: string; description?: string; priceUsdc?: number }
 ): Promise<void> {
   await initDb();
   if (data.title !== undefined) {
     await getClient().execute({
       sql: `UPDATE products SET title = ? WHERE id = ? AND merchant_address = ?`,
       args: [data.title, id, merchantAddress],
+    });
+  }
+  if (data.description !== undefined) {
+    await getClient().execute({
+      sql: `UPDATE products SET description = ? WHERE id = ? AND merchant_address = ?`,
+      args: [data.description, id, merchantAddress],
     });
   }
   if (data.priceUsdc !== undefined) {
@@ -202,6 +212,7 @@ function rowToProduct(r: any): Product {
     id: String(r.id),
     merchant_address: String(r.merchant_address),
     title: String(r.title),
+    description: String(r.description ?? ''),
     price_stroops: Number(r.price_stroops),
     type: (String(r.type ?? 'one_time')) as 'one_time' | 'permanent',
     created_at: Number(r.created_at),

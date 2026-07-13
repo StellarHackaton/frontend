@@ -11,6 +11,7 @@ export function useCreateForm() {
   const toast = useToast();
   const { address } = useWalletContext();
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [type, setType] = useState<"one_time" | "permanent">("one_time");
   const [touched, setTouched] = useState(false);
@@ -43,24 +44,21 @@ export function useCreateForm() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           merchantAddress: address,
           title: name.trim(),
+          description: description.trim(),
           priceUsdc: priceNum,
           type,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to create product");
-      toast("Payment link created", "success");
-      // Permanent products use productId in URL; one_time use orderId
-      const dest = type === "permanent"
-        ? `/p/${data.product.id}`
-        : `/p/${data.orderId}`;
-      router.push(dest);
+      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan produk");
+      toast("Produk berhasil ditambahkan", "success");
+      router.push("/products");
     } catch (err: any) {
       toast(err.message ?? "Something went wrong", "error");
     } finally {
@@ -71,6 +69,8 @@ export function useCreateForm() {
   return {
     name,
     setName,
+    description,
+    setDescription,
     price,
     onPrice,
     type,

@@ -36,6 +36,20 @@ export function CreateForm() {
         </div>
 
         <div>
+          <div className="mb-2 text-[13px] font-medium text-muted">
+            Description <span className="text-faint">(optional)</span>
+          </div>
+          <textarea
+            value={f.description}
+            onChange={(e) => f.setDescription(e.target.value)}
+            placeholder="Tell buyers what they're getting…"
+            rows={3}
+            maxLength={300}
+            className="w-full resize-none rounded-[18px] border border-white/70 bg-white/55 px-4 py-3 text-base text-ink shadow-[0_6px_18px_rgba(21,22,27,.05),inset_0_1px_0_rgba(255,255,255,.85)] outline-none backdrop-blur-[16px] placeholder:text-faint focus:border-primary focus:shadow-[0_0_0_3px_rgba(47,42,107,.14)]"
+          />
+        </div>
+
+        <div>
           <div className="mb-3 text-[13px] font-medium text-muted">Price</div>
           <div className="flex items-baseline justify-center gap-1.5 pb-2 pt-5">
             <span className="font-display text-[38px] font-extrabold leading-none text-ink/35">
@@ -87,7 +101,7 @@ export function CreateForm() {
 
       <div className="flex-none px-[22px] pb-8 pt-3.5">
         <Button onClick={f.submit} className={f.valid && !f.submitting ? "" : "opacity-60"}>
-          {f.submitting ? "Creating…" : "Create payment link"}
+          {f.submitting ? "Menyimpan…" : "Simpan ke katalog"}
         </Button>
       </div>
     </MobileShell>

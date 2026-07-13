@@ -8,9 +8,32 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const order = await getOrder(params.id);
+  let order = await getOrder(params.id);
+
+  // Fallback: treat the id as a product id (permanent products use product id as orderId in dashboard)
   if (!order) {
-    return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    const product = await getProduct(params.id);
+    if (!product) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+    const merchant = await getMerchant(product.merchant_address);
+    return NextResponse.json({
+      order: {
+        id: product.id,
+        product_id: product.id,
+        merchant_address: product.merchant_address,
+        amount_stroops: product.price_stroops,
+        status: 'pending',
+        asset_paid: null,
+        tx_hash: null,
+        paid_at: null,
+        created_at: product.created_at,
+        product_title: product.title,
+        product_type: product.type,
+        merchant_name: merchant?.store_name ?? null,
+        merchant_verified: merchant?.verified ?? false,
+      },
+    });
   }
 
   // Reconcile with chain if DB says pending

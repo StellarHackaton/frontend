@@ -68,6 +68,7 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
             seller=""
             priceUSD={co.priceUSD}
             payingWith={co.selected?.label ?? ""}
+            txHash={co.txHash}
             onDone={() => window.location.href = "/"}
           />
         </motion.div>

@@ -45,7 +45,7 @@ export function PayWithSheet({ open, options, selectedKey, onClose, onSelect }: 
                     key={o.key}
                     onClick={() => onSelect(o)}
                     disabled={!o.enabled}
-                    className={`flex items-center justify-between rounded-[18px] border bg-white/60 p-3 text-left transition-transform duration-300 [transition-timing-function:cubic-bezier(.34,1.56,.64,1)] active:scale-[.98] ${
+                    className={`flex items-center justify-between rounded-[18px] border bg-white/60 p-3 text-left shadow-[0_2px_0_rgba(0,0,0,.06),0_4px_16px_rgba(0,0,0,.07)] transition-transform duration-300 [transition-timing-function:cubic-bezier(.34,1.56,.64,1)] active:scale-[.98] active:shadow-[0_1px_0_rgba(0,0,0,.06),0_2px_8px_rgba(0,0,0,.06)] ${
                       o.enabled
                         ? selected ? "border-primary" : "border-white/65"
                         : "cursor-not-allowed border-danger/40 opacity-90"

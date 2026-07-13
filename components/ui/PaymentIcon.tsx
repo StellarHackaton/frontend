@@ -4,60 +4,71 @@ interface Props {
   radius?: number;
 }
 
-const CONFIGS: Record<string, { bg: string; fg: string; content: "dollar" | "euro" | "p" | "xlm" | "letter" }> = {
-  USDC:  { bg: "#2775CA", fg: "#fff", content: "dollar" },
-  EURC:  { bg: "#0052B4", fg: "#fff", content: "euro"   },
-  PYUSD: { bg: "#003087", fg: "#fff", content: "p"      },
-  XLM:   { bg: "#1B1B3A", fg: "#fff", content: "xlm"    },
-};
+function EURCIcon({ s, r }: { s: number; r: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <rect width="24" height="24" rx={r * 24 / s} fill="#0B53BF" />
+      <path fill="#0B53BF" d="M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18" />
+      <path fill="#fff" strokeMiterlimit="10" strokeWidth=".03" stroke="#0B53BF" d="M13.913 14.143a3.4 3.4 0 0 1-1.232.248c-.814 0-1.58-.347-1.947-1.181h1.79l.348-.844h-2.346a4 4 0 0 1 0-.732h2.644l.349-.843h-2.785c.367-.835 1.133-1.182 1.947-1.182c.41 0 .838.09 1.232.248l.36-.855a3.4 3.4 0 0 0-1.575-.377c-1.317 0-2.649.736-3.13 2.166h-.864v.843h.69a4 4 0 0 0 0 .732h-.69v.844h.863c.482 1.429 1.814 2.165 3.13 2.165a3.4 3.4 0 0 0 1.576-.377z" />
+      <path fill="#fff" strokeMiterlimit="10" strokeWidth=".03" stroke="#0B53BF" d="M6.375 12a5.64 5.64 0 0 1 4.005-5.394v-1.16A6.74 6.74 0 0 0 5.25 12a6.74 6.74 0 0 0 5.13 6.553v-1.159A5.63 5.63 0 0 1 6.375 12Zm7.245-6.553v1.159A5.64 5.64 0 0 1 17.625 12a5.64 5.64 0 0 1-4.005 5.394v1.16A6.74 6.74 0 0 0 18.75 12a6.74 6.74 0 0 0-5.13-6.553Z" />
+    </svg>
+  );
+}
+
+function USDCIcon({ s, r }: { s: number; r: number }) {
+  const rx = r * 2000 / s;
+  return (
+    <svg width={s} height={s} viewBox="547.6 135.1 2000 2000" fill="none">
+      <rect x="547.6" y="135.1" width="2000" height="2000" rx={rx} fill="#2775CA" />
+      <path fill="#2775CA" d="M1547.6,2135.1c554.2,0,1000-445.8,1000-1000s-445.8-1000-1000-1000s-1000,445.8-1000,1000S993.4,2135.1,1547.6,2135.1z" />
+      <path fill="#fff" d="M1822.6,1293.4c0-145.8-87.5-195.8-262.5-216.7c-125-16.7-150-50-150-108.3s41.7-95.8,125-95.8c75,0,116.7,25,137.5,87.5c4.2,12.5,16.7,20.8,29.2,20.8h66.7c16.7,0,29.2-12.5,29.2-29.2v-4.2c-16.7-91.7-91.7-162.5-187.5-170.8v-100c0-16.7-12.5-29.2-33.3-33.3h-62.5c-16.7,0-29.2,12.5-33.3,33.3v95.8c-125,16.7-204.2,100-204.2,204.2c0,137.5,83.3,191.7,258.3,212.5c116.7,20.8,154.2,45.8,154.2,112.5s-58.3,112.5-137.5,112.5c-108.3,0-145.8-45.8-158.3-108.3c-4.2-16.7-16.7-25-29.2-25h-70.8c-16.7,0-29.2,12.5-29.2,29.2v4.2c16.7,104.2,83.3,179.2,220.8,200v100c0,16.7,12.5,29.2,33.3,33.3h62.5c16.7,0,29.2-12.5,33.3-33.3v-100C1739.2,1493.4,1822.6,1405.9,1822.6,1293.4z" />
+      <path fill="#fff" d="M1335.1,1730.9c-325-116.7-491.7-479.2-370.8-800c62.5-175,200-308.3,370.8-370.8c16.7-8.3,25-20.8,25-41.7v-58.3c0-16.7-8.3-29.2-25-33.3c-4.2,0-12.5,0-16.7,4.2c-395.8,125-612.5,545.8-487.5,941.7c75,233.3,254.2,412.5,487.5,487.5c16.7,8.3,33.3,0,37.5-16.7c4.2-4.2,4.2-8.3,4.2-16.7v-58.3C1360.1,1755.9,1347.6,1739.3,1335.1,1730.9zM1776.7,430.9c-16.7-8.3-33.3,0-37.5,16.7c-4.2,4.2-4.2,8.3-4.2,16.7v58.3c0,16.7,12.5,33.3,25,41.7c325,116.7,491.7,479.2,370.8,800c-62.5,175-200,308.3-370.8,370.8c-16.7,8.3-25,20.8-25,41.7v58.3c0,16.7,8.3,29.2,25,33.3c4.2,0,12.5,0,16.7-4.2c395.8-125,612.5-545.8,487.5-941.7C2189.2,685.1,2005.9,505.9,1776.7,430.9z" />
+    </svg>
+  );
+}
+
+function PYUSDIcon({ s, r }: { s: number; r: number }) {
+  const rx = r * 84.3 / s;
+  return (
+    <svg width={s} height={s} viewBox="0 0 84.3 84.9" fill="none">
+      <rect width="84.3" height="84.9" rx={rx} fill="#0071F3" />
+      <path fill="#0071F3" d="M42.1,84.9c23.3,0,42.1-19,42.1-42.4C84.3,19,65.4,0,42.1,0C18.9,0,0,19,0,42.4C0,65.9,18.9,84.9,42.1,84.9z" />
+      <path fill="#fff" d="M48.8,17h-4.6H34c-1.6,0-3.1,1.2-3.3,2.9l-1,6.8v0.1h-5c-1.3,0-2.4,1.1-2.4,2.4c0,1.4,1.1,2.4,2.4,2.5h4.2l-0.7,4.7l0,0.4h-5c-1.3,0-2.4,1.1-2.4,2.4c0,1.3,1.1,2.4,2.4,2.4h4.2l-2.3,14.6l-0.7,4.9l-0.4,2.6c-0.3,2.1,1.2,3.9,3.3,3.9h3.2h4.4h3.6c1.6,0,3-1.2,3.3-2.9l2.1-13.4h1.2h4c9.4,0,17.1-7.8,16.9-17.3C65.9,24.3,58.1,17,48.8,17zM33.8,31.5l15,0.1c1.3,0,2.5,1.1,2.5,2.5c0,1.4-1.1,2.5-2.5,2.5H33L33.8,31.5zM48.9,46.1h-2.5h-1.2h-2.5c-1.6,0-3,1.2-3.3,2.9l-2.1,13.4H29l3.2-21h16.6c4,0,7.3-3.3,7.3-7.3c0-4-3.3-7.3-7.3-7.3l-14.2-0.1l0.7-4.8h13.8c6.8,0,12.2,5.6,12.1,12.4C61,40.9,55.5,46.1,48.9,46.1z" />
+    </svg>
+  );
+}
+
+function XLMIcon({ s, r }: { s: number; r: number }) {
+  const rx = r * 236.36 / s;
+  return (
+    <svg width={s} height={s} viewBox="0 -18.18 236.36 236.36" fill="none">
+      <rect x="0" y="-18.18" width="236.36" height="236.36" rx={rx} fill="#0D0F1A" />
+      <path fill="#fff" d="M203,26.16l-28.46,14.5-137.43,70a82.49,82.49,0,0,1-.7-10.69A81.87,81.87,0,0,1,158.2,28.6l16.29-8.3,2.43-1.24A100,100,0,0,0,18.18,100q0,3.82.29,7.61a18.19,18.19,0,0,1-9.88,17.58L0,129.57V150l25.29-12.89,0,0,8.19-4.18,8.07-4.11v0L186.43,55l16.28-8.29,33.65-17.15V9.14Z" />
+      <path fill="#fff" d="M236.36,50,49.78,145,33.5,153.31,0,170.38v20.41l33.27-16.95,28.46-14.5L199.3,89.24A83.45,83.45,0,0,1,200,100,81.87,81.87,0,0,1,78.09,171.36l-1,.53-17.66,9A100,100,0,0,0,218.18,100c0-2.57-.1-5.14-.29-7.68a18.2,18.2,0,0,1,9.87-17.58l8.6-4.38Z" />
+    </svg>
+  );
+}
 
 export function PaymentIcon({ code, size = 42, radius }: Props) {
-  const r = radius ?? Math.round(size * 0.28);
-  const cfg = CONFIGS[code] ?? { bg: "#6B7280", fg: "#fff", content: "letter" as const };
   const s = size;
-  const ic = s * 0.46;
+  const r = radius ?? Math.round(s * 0.28);
+
+  if (code === "EURC")  return <EURCIcon s={s} r={r} />;
+  if (code === "USDC")  return <USDCIcon s={s} r={r} />;
+  if (code === "PYUSD") return <PYUSDIcon s={s} r={r} />;
+  if (code === "XLM")   return <XLMIcon s={s} r={r} />;
 
   return (
     <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} fill="none">
-      <rect width={s} height={s} rx={r} fill={cfg.bg} />
-
-      {cfg.content === "dollar" && (
-        <text x={s / 2} y={s * 0.685} textAnchor="middle" fill={cfg.fg}
-          fontFamily="system-ui,sans-serif" fontWeight="700" fontSize={ic}>$</text>
-      )}
-
-      {cfg.content === "euro" && (
-        <text x={s / 2} y={s * 0.685} textAnchor="middle" fill={cfg.fg}
-          fontFamily="system-ui,sans-serif" fontWeight="700" fontSize={ic}>€</text>
-      )}
-
-      {cfg.content === "p" && (
-        <text x={s / 2} y={s * 0.685} textAnchor="middle" fill={cfg.fg}
-          fontFamily="system-ui,sans-serif" fontWeight="800" fontSize={ic}>P</text>
-      )}
-
-      {cfg.content === "xlm" && (() => {
-        const cx = s / 2, cy = s / 2, arm = s * 0.28;
-        const angles = [0, 60, 120];
-        const sw = s * 0.075;
-        return angles.map((a) => {
-          const rad = (a * Math.PI) / 180;
-          const cos = Math.cos(rad), sin = Math.sin(rad);
-          return (
-            <line key={a}
-              x1={cx - arm * cos} y1={cy - arm * sin}
-              x2={cx + arm * cos} y2={cy + arm * sin}
-              stroke={cfg.fg} strokeWidth={sw} strokeLinecap="round" />
-          );
-        });
-      })()}
-
-      {cfg.content === "letter" && (
-        <text x={s / 2} y={s * 0.685} textAnchor="middle" fill={cfg.fg}
-          fontFamily="system-ui,sans-serif" fontWeight="700" fontSize={ic}>
-          {code[0]}
-        </text>
-      )}
+      <rect width={s} height={s} rx={r} fill="#6B7280" />
+      <text
+        x={s / 2} y={s / 2}
+        dominantBaseline="middle" textAnchor="middle"
+        fill="white" fontFamily="system-ui,sans-serif"
+        fontWeight="700" fontSize={s * 0.44}
+      >
+        {code[0]}
+      </text>
     </svg>
   );
 }

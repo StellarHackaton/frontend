@@ -7,7 +7,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const { merchantAddress, title, priceUsdc } = await req.json();
+  const { merchantAddress, title, description, priceUsdc } = await req.json();
   if (!merchantAddress) return NextResponse.json({ error: 'Missing merchantAddress' }, { status: 400 });
 
   const product = await getProduct(params.id);
@@ -15,7 +15,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  await updateProduct(params.id, merchantAddress, { title, priceUsdc });
+  await updateProduct(params.id, merchantAddress, { title, description, priceUsdc });
   return NextResponse.json({ ok: true });
 }
 

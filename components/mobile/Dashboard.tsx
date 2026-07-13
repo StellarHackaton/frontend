@@ -357,10 +357,15 @@ export function Dashboard() {
           ) : (
             <motion.div variants={listContainer} initial="initial" animate="animate">
               {orders.map((o) => (
-                <motion.div
+                <motion.button
                   key={o.id}
                   variants={listItem}
-                  className="flex items-center gap-3.5 rounded-[16px] px-3 py-3 active:bg-ink/[.03]"
+                  onClick={() =>
+                    o.status === "pending"
+                      ? router.push(`/p/${o.id}`)
+                      : router.push("/orders")
+                  }
+                  className="flex w-full items-center gap-3.5 rounded-[16px] px-3 py-3 text-left active:bg-ink/[.05]"
                 >
                   <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-ink font-display text-base font-bold text-white">
                     {o.title[0]}
@@ -369,7 +374,9 @@ export function Dashboard() {
                     <div className="truncate font-display text-[15px] font-semibold">
                       {o.title}
                     </div>
-                    <div className="mt-0.5 text-xs text-faint">{timeAgo(o.createdAt)}</div>
+                    <div className="mt-0.5 text-xs text-faint">
+                      {o.status === "pending" ? "Tap to see QR · " : ""}{timeAgo(o.createdAt)}
+                    </div>
                   </div>
                   <div className="flex flex-none flex-col items-end gap-1">
                     <span
@@ -381,7 +388,7 @@ export function Dashboard() {
                     </span>
                     <StatusPill status={o.status} />
                   </div>
-                </motion.div>
+                </motion.button>
               ))}
             </motion.div>
           )}

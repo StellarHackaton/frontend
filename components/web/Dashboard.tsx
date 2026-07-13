@@ -34,8 +34,20 @@ export function Dashboard() {
 
   const totalUsdc = balanceUsdc + balanceCircleUsdc;
   const idr = (totalUsdc * 15_700).toLocaleString("id-ID");
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
   const paidCount = orders.filter((o) => o.status === "paid").length;
-  const pendingCount = orders.length - paidCount;
+  const pendingCount = orders.filter((o) => o.status === "pending").length;
+
+  const paidThisMonth = orders
+    .filter((o) => o.status === "paid" && o.paidAt && new Date(o.paidAt).getTime() >= startOfMonth)
+    .reduce((sum, o) => sum + o.amountUsdc, 0);
+
+  const awaitingAmount = orders
+    .filter((o) => o.status === "pending")
+    .reduce((sum, o) => sum + o.amountUsdc, 0);
 
   return (
     <WebShell
@@ -59,9 +71,11 @@ export function Dashboard() {
             <div className="text-[13px] uppercase tracking-[.1em] text-muted">
               Balance
             </div>
-            <span className="rounded-full bg-success/[.14] px-3 py-1 text-[13px] font-semibold text-success">
-              ↑ +$48.00 this month
-            </span>
+            {paidThisMonth > 0 && (
+              <span className="rounded-full bg-success/[.14] px-3 py-1 text-[13px] font-semibold text-success">
+                ↑ +${paidThisMonth.toFixed(2)} this month
+              </span>
+            )}
           </div>
           {loading ? (
             <Skeleton className="mt-4 h-16 w-48" />
@@ -106,13 +120,13 @@ export function Dashboard() {
         <div className="grid gap-5">
           <Stat
             label="Paid this month"
-            value="$48.00"
+            value={`$${paidThisMonth.toFixed(2)}`}
             tone="success"
             icon={<path d="M20 6 9 17l-5-5" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />}
           />
           <Stat
             label="Awaiting payment"
-            value="$20.00"
+            value={`$${awaitingAmount.toFixed(2)}`}
             tone="muted"
             icon={<><circle cx="12" cy="12" r="8" strokeWidth="1.8" /><path d="M12 8v4l3 2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></>}
           />
@@ -158,9 +172,19 @@ export function Dashboard() {
               <motion.div
                 key={o.id}
                 variants={listItem}
-                className="grid grid-cols-[2fr_1fr_1fr_1fr] items-center border-b border-ink/[.05] px-6 py-[18px] last:border-b-0"
+                onClick={() =>
+                  o.status === "pending"
+                    ? router.push(`/p/${o.id}`)
+                    : router.push("/orders")
+                }
+                className="grid cursor-pointer grid-cols-[2fr_1fr_1fr_1fr] items-center border-b border-ink/[.05] px-6 py-[18px] last:border-b-0 transition-colors hover:bg-ink/[.02] active:bg-ink/[.04]"
               >
-                <span className="font-display text-[15px] font-semibold">{o.title}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-[15px] font-semibold">{o.title}</span>
+                  {o.status === "pending" && (
+                    <span className="text-[11px] font-semibold text-primary opacity-60">Click to see QR</span>
+                  )}
+                </div>
                 <span className="text-sm text-muted">{timeAgo(o.createdAt)}</span>
                 <span className="tnum text-right font-display text-[15px] font-semibold">
                   ${o.amountUsdc.toFixed(2)}

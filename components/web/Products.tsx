@@ -21,10 +21,12 @@ export function Products() {
 
   const [modal, setModal] = useState<Modal>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [creatingQR, setCreatingQR] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export function Products() {
 
   function openEdit(p: DashboardProduct) {
     setEditTitle(p.title);
+    setEditDescription(p.description);
     setEditPrice(p.priceUSD.toFixed(2));
     setModalError("");
     setModal({ type: "edit", product: p });
@@ -51,6 +54,27 @@ export function Products() {
     setOpenMenuId(null);
   }
 
+  async function handleGetQR(p: DashboardProduct) {
+    if (!address) return;
+    if (p.type === "permanent") {
+      router.push(`/p/${p.id}`);
+      return;
+    }
+    setCreatingQR(p.id);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ merchantAddress: address, productId: p.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal membuat QR");
+      router.push(`/p/${data.orderId}`);
+    } catch {
+      setCreatingQR(null);
+    }
+  }
+
   async function saveEdit() {
     if (modal?.type !== "edit" || !address) return;
     const price = parseFloat(editPrice);
@@ -61,7 +85,7 @@ export function Products() {
       const res = await fetch(`/api/products/${modal.product.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ merchantAddress: address, title: editTitle.trim(), priceUsdc: price }),
+        body: JSON.stringify({ merchantAddress: address, title: editTitle.trim(), description: editDescription.trim(), priceUsdc: price }),
       });
       if (!res.ok) throw new Error("Gagal menyimpan");
       refresh();
@@ -104,19 +128,21 @@ export function Products() {
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-[20px] border border-ink/[.08] bg-white p-6">
-              <div className="flex items-start justify-between">
-                <Skeleton className="h-5 w-1/2" />
-                <Skeleton className="h-5 w-12" />
+              <Skeleton className="mb-2 h-5 w-1/2" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="mt-1 h-3 w-3/4" />
+              <div className="mt-6 flex items-center justify-between border-t border-ink/[.06] pt-4">
+                <Skeleton className="h-5 w-14" />
+                <Skeleton className="h-8 w-24 rounded-[10px]" />
               </div>
-              <Skeleton className="mt-6 h-3 w-1/3" />
             </div>
           ))}
         </div>
       ) : products.length === 0 ? (
         <EmptyState
           icon={BoxIcon}
-          title="No products yet"
-          body="Create your first product to get a payment link."
+          title="Belum ada produk"
+          body="Tambah produk ke katalog kamu. QR pembayaran bisa dibuat kapan saja dari produk yang sudah ada."
           action={
             <MetalButton onClick={() => router.push("/create")} full={false} size="sm">
               New product
@@ -134,7 +160,6 @@ export function Products() {
             <motion.div
               key={p.id}
               variants={listItem}
-              whileHover={{ y: -3 }}
               className="liquid-glass relative rounded-[20px] p-6"
             >
               {/* ⋯ menu */}
@@ -173,8 +198,7 @@ export function Products() {
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="3 6 5 6 21 6" />
                           <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                          <path d="M10 11v6M14 11v6" />
-                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                          <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                         </svg>
                         Hapus
                       </button>
@@ -183,19 +207,53 @@ export function Products() {
                 </AnimatePresence>
               </div>
 
-              <button
-                onClick={() => router.push(`/p/${p.orderId}`)}
-                className="w-full text-left"
-              >
-                <div className="flex items-start justify-between pr-8">
-                  <div className="font-display text-[17px] font-semibold">{p.title}</div>
+              {/* Card content */}
+              <div className="pr-8">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <div className="font-display text-[17px] font-semibold leading-tight">{p.title}</div>
+                  {p.type === "permanent" && (
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                      Permanent
+                    </span>
+                  )}
+                </div>
+                {p.description ? (
+                  <p className="line-clamp-2 text-[13px] leading-[1.5] text-muted">{p.description}</p>
+                ) : (
+                  <p className="text-[13px] italic text-faint">Belum ada deskripsi</p>
+                )}
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-ink/[.06] pt-4">
+                <div>
                   <div className="tnum font-display text-[17px] font-bold">{formatUsd(p.priceUSD)}</div>
+                  {p.paidCount > 0 && (
+                    <div className="text-[12px] text-faint">{p.paidCount}x terjual</div>
+                  )}
                 </div>
-                <div className="mt-6 flex items-center justify-between">
-                  <span className="text-[13px] text-muted">{p.paidCount} paid so far</span>
-                  <span className="text-[13px] font-semibold text-primary">View link →</span>
-                </div>
-              </button>
+                <button
+                  onClick={() => handleGetQR(p)}
+                  disabled={creatingQR === p.id}
+                  className="flex items-center gap-1.5 rounded-[11px] bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(47,42,107,.2)] hover:bg-primary/90 disabled:opacity-60"
+                >
+                  {creatingQR === p.id ? (
+                    <>
+                      <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
+                      </svg>
+                      Membuat…
+                    </>
+                  ) : (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                        <path d="M14 14h.01M14 17h.01M17 14h.01M17 17h.01M20 14h.01M20 17h.01M20 20h.01M17 20h.01M14 20h.01"/>
+                      </svg>
+                      Buat QR
+                    </>
+                  )}
+                </button>
+              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -226,9 +284,19 @@ export function Products() {
                   <input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="mb-4 w-full rounded-[12px] border border-ink/[.12] bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    className="mb-3 w-full rounded-[12px] border border-ink/[.12] bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                     maxLength={60}
                     autoFocus
+                  />
+                  <label className="mb-1.5 block text-[13px] font-semibold text-muted">
+                    Deskripsi <span className="font-normal text-faint">(opsional)</span>
+                  </label>
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={3}
+                    maxLength={300}
+                    className="mb-3 w-full resize-none rounded-[12px] border border-ink/[.12] bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
                   <label className="mb-1.5 block text-[13px] font-semibold text-muted">Harga (USD)</label>
                   <input
@@ -241,17 +309,10 @@ export function Products() {
                   />
                   {modalError && <p className="mb-3 text-[13px] text-red-500">{modalError}</p>}
                   <div className="flex gap-3">
-                    <button
-                      onClick={() => setModal(null)}
-                      className="flex-1 rounded-[12px] border border-ink/15 py-3 font-semibold text-muted hover:bg-ink/[.04]"
-                    >
+                    <button onClick={() => setModal(null)} className="flex-1 rounded-[12px] border border-ink/15 py-3 font-semibold text-muted hover:bg-ink/[.04]">
                       Batal
                     </button>
-                    <button
-                      onClick={saveEdit}
-                      disabled={saving || !editTitle.trim() || !parseFloat(editPrice)}
-                      className="flex-1 rounded-[12px] bg-primary py-3 font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
-                    >
+                    <button onClick={saveEdit} disabled={saving || !editTitle.trim() || !parseFloat(editPrice)} className="flex-1 rounded-[12px] bg-primary py-3 font-semibold text-white hover:bg-primary/90 disabled:opacity-50">
                       {saving ? "Menyimpan…" : "Simpan"}
                     </button>
                   </div>
@@ -262,21 +323,14 @@ export function Products() {
                 <>
                   <h2 className="mb-2 font-display text-[20px] font-bold">Hapus produk?</h2>
                   <p className="mb-6 text-[15px] text-muted">
-                    <span className="font-semibold text-ink">{modal.product.title}</span> akan dihapus permanen. Pesanan yang sudah ada tidak terpengaruh.
+                    <span className="font-semibold text-ink">{modal.product.title}</span> akan dihapus dari katalog. Pesanan yang sudah ada tidak terpengaruh.
                   </p>
                   {modalError && <p className="mb-3 text-[13px] text-red-500">{modalError}</p>}
                   <div className="flex gap-3">
-                    <button
-                      onClick={() => setModal(null)}
-                      className="flex-1 rounded-[12px] border border-ink/15 py-3 font-semibold text-muted hover:bg-ink/[.04]"
-                    >
+                    <button onClick={() => setModal(null)} className="flex-1 rounded-[12px] border border-ink/15 py-3 font-semibold text-muted hover:bg-ink/[.04]">
                       Batal
                     </button>
-                    <button
-                      onClick={confirmDelete}
-                      disabled={saving}
-                      className="flex-1 rounded-[12px] bg-red-500 py-3 font-semibold text-white hover:bg-red-600 disabled:opacity-50"
-                    >
+                    <button onClick={confirmDelete} disabled={saving} className="flex-1 rounded-[12px] bg-red-500 py-3 font-semibold text-white hover:bg-red-600 disabled:opacity-50">
                       {saving ? "Menghapus…" : "Hapus"}
                     </button>
                   </div>

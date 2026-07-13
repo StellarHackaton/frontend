@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOrder, createProduct, generateOrderId, listOrders, listProducts } from '@/lib/db';
+import { createOrder, getProduct, generateOrderId, listOrders, listProducts } from '@/lib/db';
 import { contractCreateOrder } from '@/lib/contract';
 
 export const runtime = 'nodejs';
@@ -7,27 +7,25 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { merchantAddress, title, priceUsdc, type } = body as {
+    const { merchantAddress, productId } = body as {
       merchantAddress: string;
-      title: string;
-      priceUsdc: number;
-      type?: 'one_time' | 'permanent';
+      productId: string;
     };
 
-    if (!merchantAddress || !title || !priceUsdc) {
+    if (!merchantAddress || !productId) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
-    if (priceUsdc <= 0) {
-      return NextResponse.json({ error: 'Price must be positive' }, { status: 400 });
+
+    const product = await getProduct(productId);
+    if (!product || product.merchant_address !== merchantAddress) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const amountStroops = Math.round(priceUsdc * 10_000_000);
     const orderId = generateOrderId();
+    const amountStroops = product.price_stroops;
 
-    const product = await createProduct({ merchantAddress, title, priceUsdc, type });
     await createOrder({ id: orderId, productId: product.id, merchantAddress, amountStroops });
 
-    // Register on-chain (best-effort — don't fail the whole request)
     try {
       await contractCreateOrder(orderId, merchantAddress, amountStroops);
     } catch (err) {
@@ -51,7 +49,6 @@ export async function GET(req: NextRequest) {
     listOrders(merchantAddress),
     listProducts(merchantAddress),
   ]);
-  // Enrich orders with product title for UI display
   const productMap = new Map(products.map((p) => [p.id, p.title]));
   const enriched = orders.map((o) => ({
     ...o,

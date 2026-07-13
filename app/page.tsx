@@ -65,9 +65,9 @@ export default function Landing() {
       <header className="flex h-[72px] items-center justify-between border-b border-ink/[.06] px-5 sm:px-14">
         <Wordmark size={22} />
         <nav className="hidden items-center gap-9 text-[15px] md:flex">
-          <span>Product</span>
-          <span>How it works</span>
-          <span>Pricing</span>
+          <a href="#product" className="text-muted transition-colors hover:text-ink">Product</a>
+          <a href="#how-it-works" className="text-muted transition-colors hover:text-ink">How it works</a>
+          <a href="#pricing" className="text-muted transition-colors hover:text-ink">Pricing</a>
         </nav>
         <div className="flex items-center gap-3.5">
           <Link href="/login" className="hidden text-[15px] text-muted sm:inline">
@@ -83,7 +83,7 @@ export default function Landing() {
       </header>
 
       {/* hero */}
-      <section className="mx-auto grid max-w-[1240px] items-center gap-12 px-5 py-14 sm:px-14 lg:grid-cols-[1.05fr_.95fr] lg:py-[88px]">
+      <section id="product" className="mx-auto grid max-w-[1240px] items-center gap-12 px-5 py-14 sm:px-14 lg:grid-cols-[1.05fr_.95fr] lg:py-[88px]">
         <Reveal>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/[.07] px-3.5 py-[7px] text-[13px] font-semibold text-primary">
             Checkout that feels like cash
@@ -140,7 +140,7 @@ export default function Landing() {
       </section>
 
       {/* how it works */}
-      <section className="px-5 py-16 sm:px-14 sm:py-20">
+      <section id="how-it-works" className="px-5 py-16 sm:px-14 sm:py-20">
         <Reveal className="mb-12 text-center">
           <h2 className="font-display text-[30px] font-bold tracking-[-.025em] sm:text-[38px]">
             How it works
@@ -209,6 +209,7 @@ export default function Landing() {
       </section>
 
       {/* pricing */}
+      <span id="pricing" />
       <section className="border-t border-ink/[.06] bg-white px-5 py-16 sm:px-14 sm:py-20">
         <div className="mb-10 text-center">
           <h2 className="font-display text-[30px] font-bold tracking-[-.025em] sm:text-[38px]">

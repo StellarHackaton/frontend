@@ -201,7 +201,7 @@ function WebPayPicker({
             whileTap={o.enabled ? { scale: 0.98 } : undefined}
             onClick={() => o.enabled && onSelect(o.key)}
             disabled={!o.enabled}
-            className={`flex items-center justify-between rounded-[16px] border bg-paper p-3 text-left ${
+            className={`flex items-center justify-between rounded-[16px] border bg-paper p-3 text-left shadow-[0_2px_0_rgba(0,0,0,.05),0_4px_16px_rgba(0,0,0,.06)] ${
               o.enabled
                 ? selected ? "border-primary" : "border-ink/[.08]"
                 : "cursor-not-allowed border-danger/40 opacity-90"

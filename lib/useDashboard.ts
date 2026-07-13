@@ -13,14 +13,18 @@ export interface DashboardOrder {
   amountUsdc: number;
   status: "pending" | "paid" | "expired";
   createdAt: string;
+  txHash: string | null;
+  assetPaid: string | null;
+  paidAt: string | null;
 }
 
 export interface DashboardProduct {
   id: string;
-  orderId: string;
   title: string;
+  description: string;
   priceUSD: number;
   paidCount: number;
+  type: "one_time" | "permanent";
 }
 
 interface DashboardData {
@@ -91,21 +95,25 @@ export function useDashboard(merchantAddress: string | null): DashboardData {
           title: o.product_title ?? o.title ?? "Produk",
           amountUsdc: o.amount_stroops / 10_000_000,
           status: o.status,
-          createdAt: o.created_at,
+          createdAt: new Date(o.created_at).toISOString(),
+          txHash: o.tx_hash ?? null,
+          assetPaid: o.asset_paid ?? null,
+          paidAt: o.paid_at ? new Date(o.paid_at).toISOString() : null,
         }));
         setOrders(ords);
 
         const prods: DashboardProduct[] = rawProducts.map((p) => {
-          const relatedOrder = rawOrders.find((o) => o.product_id === p.id);
+          const productType: "one_time" | "permanent" = p.type ?? "one_time";
           const paid = rawOrders.filter(
             (o) => o.product_id === p.id && o.status === "paid"
           ).length;
           return {
             id: p.id,
-            orderId: relatedOrder?.id ?? p.id,
             title: p.title,
+            description: p.description ?? '',
             priceUSD: p.price_stroops / 10_000_000,
             paidCount: paid,
+            type: productType,
           };
         });
         setProducts(prods);
