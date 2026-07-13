@@ -24,8 +24,8 @@ export default function ProductCheckoutPage({ params }: { params: { id: string }
       <div className="flex min-h-[100dvh] items-center justify-center text-center">
         <div>
           <div className="text-4xl mb-3">❌</div>
-          <div className="font-display text-lg font-bold">Produk tidak ditemukan</div>
-          <div className="mt-1 text-sm text-muted">Link ini tidak valid atau sudah dihapus.</div>
+          <div className="font-display text-lg font-bold">Product not found</div>
+          <div className="mt-1 text-sm text-muted">This link is invalid or has been removed.</div>
         </div>
       </div>
     );

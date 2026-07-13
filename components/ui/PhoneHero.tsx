@@ -129,7 +129,7 @@ export function PhoneHero() {
 
                   {/* payment method */}
                   <div className="mb-3 rounded-[14px] border border-ink/[.08] bg-white/80 p-3">
-                    <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[.06em] text-muted">Bayar dengan</div>
+                    <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[.06em] text-muted">Pay with</div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="overflow-hidden rounded-[8px]"><PaymentIcon code="EURC" size={28} radius={8} /></div>

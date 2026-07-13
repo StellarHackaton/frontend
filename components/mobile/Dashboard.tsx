@@ -11,19 +11,14 @@ import { EASE, listContainer, listItem } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard } from "@/lib/useDashboard";
 import { useEscClose } from "@/lib/useEscClose";
-
-function timeAgo(iso: string) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "Baru saja";
-  if (diff < 3600) return `${Math.floor(diff / 60)} mnt lalu`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
-  return `${Math.floor(diff / 86400)} hari lalu`;
-}
+import { useLang } from "@/lib/i18n";
+import { timeAgo } from "@/lib/time";
 
 export function Dashboard() {
   const router = useRouter();
   const { address, userInitial, authStatus, isConnected, storeName } = useWalletContext();
   const { balanceUsdc, balanceCircleUsdc, orders, loading } = useDashboard(address);
+  const { t, lang } = useLang();
   const [notifOpen, setNotifOpen] = useState(false);
   const [lastSeen, setLastSeen] = useState<number>(0);
   const [monthlyTarget, setMonthlyTarget] = useState(200);
@@ -64,7 +59,7 @@ export function Dashboard() {
     .map((o) => ({
       id: o.id,
       title: o.title,
-      meta: `$${o.amountUsdc.toFixed(2)} · ${timeAgo(o.createdAt)}`,
+      meta: `$${o.amountUsdc.toFixed(2)} · ${timeAgo(o.createdAt, lang)}`,
       paid: o.status === "paid",
     }));
   const newCount = orders.filter((o) => new Date(o.createdAt).getTime() > lastSeen).length;
@@ -177,7 +172,7 @@ export function Dashboard() {
                 </div>
                 <div className="max-h-[260px] overflow-y-auto">
                   {notifs.length === 0 && (
-                    <p className="px-4 py-4 text-[13px] text-faint">Belum ada transaksi.</p>
+                    <p className="px-4 py-4 text-[13px] text-faint">{t("orders.noTransactions")}</p>
                   )}
                   {notifs.map((n) => (
                     <button
@@ -375,7 +370,7 @@ export function Dashboard() {
                       {o.title}
                     </div>
                     <div className="mt-0.5 text-xs text-faint">
-                      {o.status === "pending" ? "Tap to see QR · " : ""}{timeAgo(o.createdAt)}
+                      {o.status === "pending" ? "Tap to see QR · " : ""}{timeAgo(o.createdAt, lang)}
                     </div>
                   </div>
                   <div className="flex flex-none flex-col items-end gap-1">

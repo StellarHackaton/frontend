@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { WebCard } from "./WebCard";
 import { QrCode } from "@/components/ui/QrCode";
+import { BackButton } from "@/components/ui/BackButton";
 import { useToast } from "@/components/ui/Toast";
 import { formatRp, formatUsd } from "@/lib/format";
 import { useLang } from "@/lib/i18n";
@@ -89,16 +90,9 @@ export function ProductDetail({ slug }: { slug: string }) {
 
   return (
     <WebCard>
-      {/* Back button */}
-      <button
-        onClick={() => router.back()}
-        className="mb-5 flex items-center gap-1.5 text-[13px] font-semibold text-muted transition-colors hover:text-ink"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 5l-7 7 7 7" />
-        </svg>
-        Back
-      </button>
+      <div className="mb-5">
+        <BackButton onClick={() => router.back()} />
+      </div>
 
       <div className="flex flex-col items-center">
         <div className="mb-1 self-start font-display text-[18px] font-bold">{name}</div>

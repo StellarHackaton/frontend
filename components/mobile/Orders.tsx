@@ -13,32 +13,17 @@ import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { listContainer, listItem } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardOrder } from "@/lib/useDashboard";
+import { useLang } from "@/lib/i18n";
+import { timeAgo, formatDT } from "@/lib/time";
 
 const HORIZON_EXPLORER = "https://stellar.expert/explorer/testnet/tx/";
-
-function timeAgo(iso: string) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "Baru saja";
-  if (diff < 3600) return `${Math.floor(diff / 60)} mnt lalu`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
-  return `${Math.floor(diff / 86400)} hari lalu`;
-}
-
-function formatDT(iso: string) {
-  return new Date(iso).toLocaleString("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export function Orders() {
   const router = useRouter();
   const { address } = useWalletContext();
   const { orders, loading } = useDashboard(address);
   const [detail, setDetail] = useState<DashboardOrder | null>(null);
+  const { t, lang } = useLang();
 
   return (
     <MobileShell>
@@ -52,8 +37,8 @@ export function Orders() {
         ) : orders.length === 0 ? (
           <EmptyState
             icon={ReceiptIcon}
-            title="No orders yet"
-            body="Share a payment link and your first order lands here."
+            title={t("orders.emptyTitle")}
+            body={t("orders.emptyBody")}
           />
         ) : (
           <motion.div className="liquid-glass overflow-hidden rounded-[20px]" variants={listContainer} initial="initial" animate="animate">
@@ -80,8 +65,8 @@ export function Orders() {
                   <div className="truncate font-display text-[15px] font-semibold">{o.title}</div>
                   <div className="mt-0.5 text-xs text-faint">
                     {o.status === "paid" && o.paidAt
-                      ? `Paid · ${timeAgo(o.paidAt)}`
-                      : `Created · ${timeAgo(o.createdAt)}`}
+                      ? `${t("orders.paidPrefix")} · ${timeAgo(o.paidAt, lang)}`
+                      : `${t("orders.createdPrefix")} · ${timeAgo(o.createdAt, lang)}`}
                   </div>
                 </div>
                 <div className="flex flex-none flex-col items-end gap-1">
@@ -129,20 +114,20 @@ export function Orders() {
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-display text-[18px] font-bold">{detail.title}</div>
-                  <div className="mt-0.5 text-[13px] text-muted">{formatDT(detail.createdAt)}</div>
+                  <div className="mt-0.5 text-[13px] text-muted">{formatDT(detail.createdAt, lang)}</div>
                 </div>
                 <StatusPill status={detail.status} />
               </div>
 
               {/* Detail rows */}
               <div className="mb-4 space-y-0 overflow-hidden rounded-[16px] bg-ink/[.04]">
-                <DetailRow label="Jumlah">
+                <DetailRow label={t("orders.amount")}>
                   <span className={`tnum font-display text-[15px] font-bold ${detail.status === "paid" ? "text-success" : "text-ink"}`}>
                     {detail.status === "paid" ? "+" : ""}${detail.amountUsdc.toFixed(2)}
                   </span>
                 </DetailRow>
                 {detail.assetPaid && (
-                  <DetailRow label="Dibayar dengan">
+                  <DetailRow label={t("orders.paidWith")}>
                     <div className="flex items-center gap-1.5">
                       <div className="overflow-hidden rounded-[5px]">
                         <PaymentIcon code={detail.assetPaid} size={18} radius={5} />
@@ -152,8 +137,8 @@ export function Orders() {
                   </DetailRow>
                 )}
                 {detail.paidAt && (
-                  <DetailRow label="Waktu bayar">
-                    <span className="text-[13px]">{formatDT(detail.paidAt)}</span>
+                  <DetailRow label={t("orders.paidAt")}>
+                    <span className="text-[13px]">{formatDT(detail.paidAt, lang)}</span>
                   </DetailRow>
                 )}
               </div>

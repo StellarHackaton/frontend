@@ -12,48 +12,33 @@ import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { listContainer, listItem } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardOrder } from "@/lib/useDashboard";
+import { useLang } from "@/lib/i18n";
+import { timeAgo, formatDT } from "@/lib/time";
 
 const HORIZON_EXPLORER = "https://stellar.expert/explorer/testnet/tx/";
-
-function timeAgo(iso: string) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "Just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
-function formatDT(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export function Orders() {
   const router = useRouter();
   const { address } = useWalletContext();
   const { orders, loading } = useDashboard(address);
   const [detail, setDetail] = useState<DashboardOrder | null>(null);
+  const { t, lang } = useLang();
 
   return (
     <WebShell
       title="Orders"
       action={
         <MetalButton onClick={() => router.push("/create")} full={false} size="sm">
-          New product
+          {t("nav.newProduct")}
         </MetalButton>
       }
     >
       <div className="liquid-glass overflow-hidden rounded-[20px]">
         <div className="grid grid-cols-[2fr_1fr_1fr_1fr] border-b border-ink/[.06] px-6 py-4 text-xs font-semibold uppercase tracking-[.06em] text-faint">
-          <span>Item</span>
-          <span>Time</span>
-          <span className="text-right">Amount</span>
-          <span className="text-right">Status</span>
+          <span>{t("orders.item")}</span>
+          <span>{t("orders.time")}</span>
+          <span className="text-right">{t("orders.amount")}</span>
+          <span className="text-right">{t("orders.status")}</span>
         </div>
         {loading ? (
           <div className="flex flex-col">
@@ -67,7 +52,7 @@ export function Orders() {
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <EmptyState icon={ReceiptIcon} title="No orders yet" body="Share a payment link and your first order lands here." />
+          <EmptyState icon={ReceiptIcon} title={t("orders.emptyTitle")} body={t("orders.emptyBody")} />
         ) : (
           <motion.div variants={listContainer} initial="initial" animate="animate">
             {orders.map((o) => (
@@ -92,7 +77,7 @@ export function Orders() {
                   <span className="font-display text-[15px] font-semibold">{o.title}</span>
                 </div>
                 <span className="text-sm text-muted">
-                  {o.status === "paid" && o.paidAt ? timeAgo(o.paidAt) : timeAgo(o.createdAt)}
+                  {o.status === "paid" && o.paidAt ? timeAgo(o.paidAt, lang) : timeAgo(o.createdAt, lang)}
                 </span>
                 <span className={`tnum text-right font-display text-[15px] font-semibold ${o.status === "paid" ? "text-success" : ""}`}>
                   {o.status === "paid" ? "+" : ""}${o.amountUsdc.toFixed(2)}
@@ -135,20 +120,20 @@ export function Orders() {
 
               <div className="mb-5 pr-8">
                 <div className="font-display text-[20px] font-bold">{detail.title}</div>
-                <div className="mt-1 text-sm text-muted">{formatDT(detail.createdAt)}</div>
+                <div className="mt-1 text-sm text-muted">{formatDT(detail.createdAt, lang)}</div>
               </div>
 
               <div className="mb-4 overflow-hidden rounded-[14px] border border-ink/[.08] bg-white">
-                <ModalRow label="Amount">
+                <ModalRow label={t("orders.amount")}>
                   <span className={`tnum font-display text-[15px] font-bold ${detail.status === "paid" ? "text-success" : "text-ink"}`}>
                     {detail.status === "paid" ? "+" : ""}${detail.amountUsdc.toFixed(2)}
                   </span>
                 </ModalRow>
-                <ModalRow label="Status">
+                <ModalRow label={t("orders.status")}>
                   <StatusPill status={detail.status} />
                 </ModalRow>
                 {detail.assetPaid && (
-                  <ModalRow label="Paid with">
+                  <ModalRow label={t("orders.paidWith")}>
                     <div className="flex items-center gap-1.5">
                       <div className="overflow-hidden rounded-[5px]">
                         <PaymentIcon code={detail.assetPaid} size={18} radius={5} />
@@ -158,8 +143,8 @@ export function Orders() {
                   </ModalRow>
                 )}
                 {detail.paidAt && (
-                  <ModalRow label="Paid at">
-                    <span className="text-sm">{formatDT(detail.paidAt)}</span>
+                  <ModalRow label={t("orders.paidAt")}>
+                    <span className="text-sm">{formatDT(detail.paidAt, lang)}</span>
                   </ModalRow>
                 )}
               </div>

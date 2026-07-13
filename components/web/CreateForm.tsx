@@ -15,7 +15,7 @@ export function CreateForm() {
       <div className="mb-7 flex items-center gap-3">
         <BackButton onClick={f.back} />
         <div className="font-display text-[24px] font-bold tracking-[-.02em]">
-          New product
+          {t("nav.newProduct")}
         </div>
       </div>
 

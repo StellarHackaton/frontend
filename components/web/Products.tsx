@@ -122,7 +122,7 @@ export function Products() {
       title="Products"
       action={
         <MetalButton onClick={() => router.push("/create")} full={false} size="sm">
-          New product
+          {t("nav.newProduct")}
         </MetalButton>
       }
     >
@@ -147,7 +147,7 @@ export function Products() {
           body={t("products.emptyBody")}
           action={
             <MetalButton onClick={() => router.push("/create")} full={false} size="sm">
-              New product
+              {t("nav.newProduct")}
             </MetalButton>
           }
         />

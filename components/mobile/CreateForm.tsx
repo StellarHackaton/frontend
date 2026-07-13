@@ -14,7 +14,7 @@ export function CreateForm() {
     <MobileShell>
       <div className="flex h-[54px] flex-none items-center gap-2.5 px-[18px]">
         <BackButton onClick={f.back} />
-        <span className="font-display text-lg font-bold">New product</span>
+        <span className="font-display text-lg font-bold">{t("nav.newProduct")}</span>
       </div>
 
       <div className="flex flex-1 flex-col gap-[26px] px-[22px] py-4">

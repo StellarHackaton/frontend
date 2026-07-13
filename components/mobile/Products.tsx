@@ -371,7 +371,7 @@ export function Products() {
         )}
       </AnimatePresence>
 
-      <Fab onClick={() => router.push("/create")} label="New product" />
+      <Fab onClick={() => router.push("/create")} label={t("nav.newProduct")} />
       <TabBar />
     </MobileShell>
   );

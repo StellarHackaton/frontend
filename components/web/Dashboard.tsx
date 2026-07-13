@@ -11,18 +11,13 @@ import { EmptyState, ReceiptIcon } from "@/components/ui/EmptyState";
 import { EASE, listContainer, listItem } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard } from "@/lib/useDashboard";
-
-function timeAgo(iso: string) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "Just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
+import { useLang } from "@/lib/i18n";
+import { timeAgo } from "@/lib/time";
 
 export function Dashboard() {
   const router = useRouter();
   const { address, authStatus, isConnected, storeName } = useWalletContext();
+  const { t, lang } = useLang();
   const { balanceUsdc, balanceCircleUsdc, orders, loading, error } = useDashboard(address);
 
   useEffect(() => {
@@ -54,7 +49,7 @@ export function Dashboard() {
       title="Home"
       action={
         <MetalButton onClick={() => router.push("/create")} full={false} size="sm">
-          New product
+          {t("nav.newProduct")}
         </MetalButton>
       }
     >
@@ -185,7 +180,7 @@ export function Dashboard() {
                     <span className="text-[11px] font-semibold text-primary opacity-60">Click to see QR</span>
                   )}
                 </div>
-                <span className="text-sm text-muted">{timeAgo(o.createdAt)}</span>
+                <span className="text-sm text-muted">{timeAgo(o.createdAt, lang)}</span>
                 <span className="tnum text-right font-display text-[15px] font-semibold">
                   ${o.amountUsdc.toFixed(2)}
                 </span>
