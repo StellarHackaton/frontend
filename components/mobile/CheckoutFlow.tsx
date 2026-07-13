@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/ui/Wordmark";
+import { DotLoader } from "@/components/ui/DotLoader";
 import { MobileShell } from "./MobileShell";
 import { PayWithSheet } from "./PayWithSheet";
 import { Processing } from "./Processing";
@@ -22,7 +23,7 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
     return (
       <MobileShell>
         <div className="flex flex-1 items-center justify-center">
-          <div className="h-5 w-5 animate-wobble rounded-full bg-primary" />
+          <DotLoader />
         </div>
       </MobileShell>
     );

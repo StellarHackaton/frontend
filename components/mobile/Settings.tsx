@@ -12,6 +12,7 @@ import { buildUsdcPaymentXdr, submitToHorizon, SEND_DESTINATIONS } from "@/lib/s
 import { ExchangeIcon } from "@/components/ui/ExchangeIcon";
 import { useLang } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS ?? "";
 
@@ -19,6 +20,7 @@ export function Settings() {
   const { address, userInitial, disconnect, storeName, setStoreName, walletType, signXdr } = useWalletContext();
   const { balanceUsdc } = useDashboard(address);
   const { t, lang } = useLang();
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState(storeName ?? "");
@@ -379,11 +381,20 @@ export function Settings() {
         </div>
 
         <div className="flex-none px-[22px] pb-[96px] pt-3.5">
-          <Button variant="glass" onClick={disconnect}>{t("settings.signOut")}</Button>
+          <Button variant="glass" onClick={() => setConfirmSignOut(true)}>{t("settings.signOut")}</Button>
         </div>
         <TabBar />
       </MobileShell>
 
+      <ConfirmDialog
+        open={confirmSignOut}
+        title={t("settings.signOutConfirmTitle")}
+        body={t("settings.signOutConfirmBody")}
+        confirmLabel={t("settings.signOut")}
+        danger
+        onConfirm={disconnect}
+        onClose={() => setConfirmSignOut(false)}
+      />
     </>
   );
 }

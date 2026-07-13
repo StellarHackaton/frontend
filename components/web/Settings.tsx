@@ -9,6 +9,7 @@ import { buildUsdcPaymentXdr, submitToHorizon, SEND_DESTINATIONS } from "@/lib/s
 import { ExchangeIcon } from "@/components/ui/ExchangeIcon";
 import { useLang } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS ?? "";
 
@@ -18,6 +19,7 @@ export function Settings() {
   const { user: privyUser } = usePrivy();
   const { balanceUsdc } = useDashboard(address);
   const { t, lang } = useLang();
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const privyEmail = privyUser?.email?.address
     ?? (privyUser as any)?.google?.email
@@ -393,11 +395,21 @@ export function Settings() {
           </div>
 
           <button
-            onClick={disconnect}
+            onClick={() => setConfirmSignOut(true)}
             className="liquid-glass !border-red-400/40 mt-6 w-full rounded-btn py-3.5 font-display text-[15px] font-semibold text-red-500"
           >
             {t("settings.signOut")}
           </button>
+
+          <ConfirmDialog
+            open={confirmSignOut}
+            title={t("settings.signOutConfirmTitle")}
+            body={t("settings.signOutConfirmBody")}
+            confirmLabel={t("settings.signOut")}
+            danger
+            onConfirm={disconnect}
+            onClose={() => setConfirmSignOut(false)}
+          />
         </div>
       </WebShell>
 

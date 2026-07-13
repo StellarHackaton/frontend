@@ -7,6 +7,7 @@ import { BackButton } from "@/components/ui/BackButton";
 import { QrCode } from "@/components/ui/QrCode";
 import { useToast } from "@/components/ui/Toast";
 import { formatRp, formatUsd } from "@/lib/format";
+import { useLang } from "@/lib/i18n";
 
 interface OrderInfo {
   product_title: string;
@@ -18,6 +19,7 @@ interface OrderInfo {
 export function ProductDetail({ slug }: { slug: string }) {
   const router = useRouter();
   const toast = useToast();
+  const { t } = useLang();
   const [copied, setCopied] = useState(false);
   const [order, setOrder] = useState<OrderInfo | null>(null);
 
@@ -70,7 +72,7 @@ export function ProductDetail({ slug }: { slug: string }) {
   function copy() {
     navigator.clipboard?.writeText(payUrl).catch(() => {});
     setCopied(true);
-    toast("Link copied", "success");
+    toast(t("common.linkCopied"), "success");
     setTimeout(() => setCopied(false), 1600);
   }
 

@@ -75,12 +75,15 @@ const dict = {
     "settings.errVerify": "Verification failed.",
     "settings.errGeneric": "Something went wrong. Try again.",
     "settings.signOut": "Sign out",
+    "settings.signOutConfirmTitle": "Sign out?",
+    "settings.signOutConfirmBody": "You'll need to sign in again to access your dashboard.",
 
     "common.saving": "Saving…",
     "common.save": "Save",
     "common.cancel": "Cancel",
     "common.errSave": "Failed to save",
     "common.errDelete": "Failed to delete",
+    "common.linkCopied": "Link copied",
 
     "products.editTitle": "Edit product",
     "products.name": "Product name",
@@ -189,12 +192,15 @@ const dict = {
     "settings.errVerify": "Verifikasi gagal.",
     "settings.errGeneric": "Terjadi kesalahan. Coba lagi.",
     "settings.signOut": "Keluar",
+    "settings.signOutConfirmTitle": "Keluar dari akun?",
+    "settings.signOutConfirmBody": "Kamu perlu masuk lagi untuk mengakses dashboard.",
 
     "common.saving": "Menyimpan…",
     "common.save": "Simpan",
     "common.cancel": "Batal",
     "common.errSave": "Gagal menyimpan",
     "common.errDelete": "Gagal menghapus",
+    "common.linkCopied": "Link disalin",
 
     "products.editTitle": "Edit produk",
     "products.name": "Nama produk",

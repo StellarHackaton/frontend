@@ -6,6 +6,7 @@ import { formatRp, formatUsd } from "@/lib/format";
 import { EASE, listContainer, listItem, screenIn } from "@/lib/motion";
 import { EDGE } from "@/lib/checkoutStatus";
 import { MetalButton } from "@/components/ui/MetalButton";
+import { DotLoader } from "@/components/ui/DotLoader";
 import { useEscClose } from "@/lib/useEscClose";
 import { useCheckout, CheckoutOption } from "@/lib/useCheckout";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
@@ -21,7 +22,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
     return (
       <WebCard>
         <div className="flex items-center justify-center py-16">
-          <div className="h-5 w-5 animate-wobble rounded-full bg-primary" />
+          <DotLoader />
         </div>
       </WebCard>
     );

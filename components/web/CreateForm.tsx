@@ -2,6 +2,7 @@
 
 import { WebCard } from "./WebCard";
 import { MetalCta } from "@/components/ui/MetalCta";
+import { BackButton } from "@/components/ui/BackButton";
 import { useCreateForm } from "@/lib/useCreateForm";
 import { useLang } from "@/lib/i18n";
 
@@ -11,8 +12,11 @@ export function CreateForm() {
 
   return (
     <WebCard>
-      <div className="mb-7 font-display text-[24px] font-bold tracking-[-.02em]">
-        New product
+      <div className="mb-7 flex items-center gap-3">
+        <BackButton onClick={f.back} />
+        <div className="font-display text-[24px] font-bold tracking-[-.02em]">
+          New product
+        </div>
       </div>
 
       <div className="mb-2 text-[13px] font-medium text-muted">Product name</div>
