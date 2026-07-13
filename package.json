@@ -11,7 +11,9 @@
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^2.4.0",
     "@crossmint/client-sdk-react-ui": "^4.2.13",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@libsql/client": "^0.17.4",
+    "@neondatabase/serverless": "^1.1.0",
     "@privy-io/react-auth": "^3.33.1",
     "@stellar/stellar-sdk": "^16.0.1",
     "@stripe/crypto": "^1.1.1",

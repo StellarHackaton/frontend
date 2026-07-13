@@ -1,7 +1,20 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import withPWAInit from "@ducanh2912/next-pwa";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
+const withPWA = withPWAInit({
+  dest: "public",
+  // Service worker only matters for production installs — skip in dev so it
+  // never fights the polling file watcher or the fragile local dev server.
+  disable: process.env.NODE_ENV !== "production",
+  register: true,
+  cacheOnFrontEndNav: true,
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -61,4 +74,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

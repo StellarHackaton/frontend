@@ -34,7 +34,6 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json();
-    console.log("[cctp/attest] Circle raw response:", JSON.stringify(data).slice(0, 500));
     const msg = data?.messages?.[0];
 
     if (!msg) {
@@ -42,7 +41,6 @@ export async function GET(req: NextRequest) {
     }
 
     const { status, message, attestation } = msg;
-    console.log("[cctp/attest] msg status:", status, "| attestation:", String(attestation).slice(0, 20));
 
     if (status !== "complete" || !attestation || attestation === "PENDING") {
       return NextResponse.json({ status: "pending" });

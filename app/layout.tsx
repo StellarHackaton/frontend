@@ -19,6 +19,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+  ),
   title: "Lunas — checkout that feels like cash",
   description:
     "Get paid in any balance. Receive exact dollars. One tap, no jargon.",

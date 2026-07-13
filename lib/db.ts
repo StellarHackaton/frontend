@@ -1,63 +1,67 @@
 /**
- * SQLite database via @libsql/client (pure JS, no native build needed).
+ * Neon Postgres via @neondatabase/serverless (HTTP driver, no TCP pool needed).
  * Off-chain metadata only — payment truth lives on-chain.
  */
-import { createClient } from '@libsql/client';
-import path from 'path';
+import { neon } from '@neondatabase/serverless';
 
-const DB_PATH = `file:${path.join(process.cwd(), 'lunas.db')}`;
+let _client: ReturnType<typeof neon> | null = null;
 
-let _client: ReturnType<typeof createClient> | null = null;
-
-function getClient() {
+function client() {
   if (!_client) {
-    _client = createClient({ url: DB_PATH });
+    if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
+    _client = neon(process.env.DATABASE_URL);
   }
   return _client;
 }
 
-export async function initDb() {
-  const db = getClient();
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS merchants (
-      address    TEXT    PRIMARY KEY,
-      store_name TEXT    NOT NULL DEFAULT '',
-      verified   INTEGER NOT NULL DEFAULT 0,
-      stake_tx   TEXT,
-      created_at INTEGER NOT NULL
-    )
-  `);
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS products (
-      id            TEXT    PRIMARY KEY,
-      merchant_address TEXT NOT NULL,
-      title         TEXT    NOT NULL,
-      price_stroops INTEGER NOT NULL,
-      type          TEXT    NOT NULL DEFAULT 'one_time',
-      created_at    INTEGER NOT NULL
-    )
-  `);
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS orders (
-      id               TEXT    PRIMARY KEY,
-      product_id       TEXT,
-      merchant_address TEXT    NOT NULL,
-      amount_stroops   INTEGER NOT NULL,
-      status           TEXT    NOT NULL DEFAULT 'pending',
-      asset_paid       TEXT,
-      tx_hash          TEXT,
-      paid_at          INTEGER,
-      created_at       INTEGER NOT NULL
-    )
-  `);
+/** Tagged-template query helper — rows typed as any[] since neon's return
+ *  type is a TS union that can't be indexed without a cast at every call site. */
+function db(strings: TemplateStringsArray, ...values: unknown[]): Promise<any[]> {
+  return client()(strings, ...values) as unknown as Promise<any[]>;
+}
 
-  // Migrations for columns added after initial schema
-  try {
-    await db.execute(`ALTER TABLE products ADD COLUMN type TEXT NOT NULL DEFAULT 'one_time'`);
-  } catch { /* already exists */ }
-  try {
-    await db.execute(`ALTER TABLE products ADD COLUMN description TEXT NOT NULL DEFAULT ''`);
-  } catch { /* already exists */ }
+let _initPromise: Promise<void> | null = null;
+
+export async function initDb() {
+  if (_initPromise) return _initPromise;
+  _initPromise = (async () => {
+    await db`
+      CREATE TABLE IF NOT EXISTS merchants (
+        address    TEXT    PRIMARY KEY,
+        store_name TEXT    NOT NULL DEFAULT '',
+        verified   BOOLEAN NOT NULL DEFAULT FALSE,
+        stake_tx   TEXT,
+        created_at BIGINT  NOT NULL
+      )
+    `;
+    await db`
+      CREATE TABLE IF NOT EXISTS products (
+        id               TEXT    PRIMARY KEY,
+        merchant_address TEXT    NOT NULL,
+        title            TEXT    NOT NULL,
+        description      TEXT    NOT NULL DEFAULT '',
+        price_stroops    BIGINT  NOT NULL,
+        type             TEXT    NOT NULL DEFAULT 'one_time',
+        created_at       BIGINT  NOT NULL
+      )
+    `;
+    await db`
+      CREATE TABLE IF NOT EXISTS orders (
+        id               TEXT    PRIMARY KEY,
+        product_id       TEXT,
+        merchant_address TEXT    NOT NULL,
+        amount_stroops   BIGINT  NOT NULL,
+        status           TEXT    NOT NULL DEFAULT 'pending',
+        asset_paid       TEXT,
+        tx_hash          TEXT,
+        paid_at          BIGINT,
+        created_at       BIGINT  NOT NULL
+      )
+    `;
+    await db`ALTER TABLE products ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT 'one_time'`;
+    await db`ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT ''`;
+  })();
+  return _initPromise;
 }
 
 // ─── Merchants ────────────────────────────────────────────────────────────────
@@ -72,36 +76,32 @@ export interface Merchant {
 
 export async function getMerchant(address: string): Promise<Merchant | null> {
   await initDb();
-  const res = await getClient().execute({ sql: `SELECT * FROM merchants WHERE address = ?`, args: [address] });
-  if (!res.rows[0]) return null;
-  return rowToMerchant(res.rows[0]);
+  const rows = await db`SELECT * FROM merchants WHERE address = ${address}`;
+  if (!rows[0]) return null;
+  return rowToMerchant(rows[0]);
 }
 
 export async function upsertMerchant(address: string, storeName: string): Promise<Merchant> {
   await initDb();
   const now = Date.now();
-  await getClient().execute({
-    sql: `INSERT INTO merchants (address, store_name, verified, stake_tx, created_at)
-          VALUES (?, ?, 0, NULL, ?)
-          ON CONFLICT(address) DO UPDATE SET store_name = excluded.store_name`,
-    args: [address, storeName, now],
-  });
+  await db`
+    INSERT INTO merchants (address, store_name, verified, stake_tx, created_at)
+    VALUES (${address}, ${storeName}, FALSE, NULL, ${now})
+    ON CONFLICT (address) DO UPDATE SET store_name = excluded.store_name
+  `;
   return (await getMerchant(address))!;
 }
 
 export async function setMerchantVerified(address: string, stakeTx: string): Promise<void> {
   await initDb();
-  await getClient().execute({
-    sql: `UPDATE merchants SET verified = 1, stake_tx = ? WHERE address = ?`,
-    args: [stakeTx, address],
-  });
+  await db`UPDATE merchants SET verified = TRUE, stake_tx = ${stakeTx} WHERE address = ${address}`;
 }
 
 function rowToMerchant(r: any): Merchant {
   return {
     address: String(r.address),
     store_name: String(r.store_name),
-    verified: Number(r.verified) === 1,
+    verified: Boolean(r.verified),
     stake_tx: r.stake_tx ? String(r.stake_tx) : null,
     created_at: Number(r.created_at),
   };
@@ -149,28 +149,24 @@ export async function createProduct(data: {
   const type = data.type ?? 'one_time';
   const description = data.description ?? '';
   const now = Date.now();
-  await getClient().execute({
-    sql: `INSERT INTO products (id, merchant_address, title, description, price_stroops, type, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    args: [id, data.merchantAddress, data.title, description, price_stroops, type, now],
-  });
+  await db`
+    INSERT INTO products (id, merchant_address, title, description, price_stroops, type, created_at)
+    VALUES (${id}, ${data.merchantAddress}, ${data.title}, ${description}, ${price_stroops}, ${type}, ${now})
+  `;
   return { id, merchant_address: data.merchantAddress, title: data.title, description, price_stroops, type, created_at: now };
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
   await initDb();
-  const res = await getClient().execute({ sql: `SELECT * FROM products WHERE id = ?`, args: [id] });
-  if (!res.rows[0]) return null;
-  return rowToProduct(res.rows[0]);
+  const rows = await db`SELECT * FROM products WHERE id = ${id}`;
+  if (!rows[0]) return null;
+  return rowToProduct(rows[0]);
 }
 
 export async function listProducts(merchantAddress: string): Promise<Product[]> {
   await initDb();
-  const res = await getClient().execute({
-    sql: `SELECT * FROM products WHERE merchant_address = ? ORDER BY created_at DESC`,
-    args: [merchantAddress],
-  });
-  return res.rows.map(rowToProduct);
+  const rows = await db`SELECT * FROM products WHERE merchant_address = ${merchantAddress} ORDER BY created_at DESC`;
+  return rows.map(rowToProduct);
 }
 
 export async function updateProduct(
@@ -180,31 +176,20 @@ export async function updateProduct(
 ): Promise<void> {
   await initDb();
   if (data.title !== undefined) {
-    await getClient().execute({
-      sql: `UPDATE products SET title = ? WHERE id = ? AND merchant_address = ?`,
-      args: [data.title, id, merchantAddress],
-    });
+    await db`UPDATE products SET title = ${data.title} WHERE id = ${id} AND merchant_address = ${merchantAddress}`;
   }
   if (data.description !== undefined) {
-    await getClient().execute({
-      sql: `UPDATE products SET description = ? WHERE id = ? AND merchant_address = ?`,
-      args: [data.description, id, merchantAddress],
-    });
+    await db`UPDATE products SET description = ${data.description} WHERE id = ${id} AND merchant_address = ${merchantAddress}`;
   }
   if (data.priceUsdc !== undefined) {
-    await getClient().execute({
-      sql: `UPDATE products SET price_stroops = ? WHERE id = ? AND merchant_address = ?`,
-      args: [Math.round(data.priceUsdc * 10_000_000), id, merchantAddress],
-    });
+    const price_stroops = Math.round(data.priceUsdc * 10_000_000);
+    await db`UPDATE products SET price_stroops = ${price_stroops} WHERE id = ${id} AND merchant_address = ${merchantAddress}`;
   }
 }
 
 export async function deleteProduct(id: string, merchantAddress: string): Promise<void> {
   await initDb();
-  await getClient().execute({
-    sql: `DELETE FROM products WHERE id = ? AND merchant_address = ?`,
-    args: [id, merchantAddress],
-  });
+  await db`DELETE FROM products WHERE id = ${id} AND merchant_address = ${merchantAddress}`;
 }
 
 function rowToProduct(r: any): Product {
@@ -241,11 +226,10 @@ export async function createOrder(data: {
 }): Promise<Order> {
   await initDb();
   const now = Date.now();
-  await getClient().execute({
-    sql: `INSERT INTO orders (id, product_id, merchant_address, amount_stroops, status, created_at)
-          VALUES (?, ?, ?, ?, 'pending', ?)`,
-    args: [data.id, data.productId ?? null, data.merchantAddress, data.amountStroops, now],
-  });
+  await db`
+    INSERT INTO orders (id, product_id, merchant_address, amount_stroops, status, created_at)
+    VALUES (${data.id}, ${data.productId ?? null}, ${data.merchantAddress}, ${data.amountStroops}, 'pending', ${now})
+  `;
   return {
     id: data.id,
     product_id: data.productId ?? null,
@@ -263,9 +247,9 @@ const ORDER_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function getOrder(id: string): Promise<Order | null> {
   await initDb();
-  const res = await getClient().execute({ sql: `SELECT * FROM orders WHERE id = ?`, args: [id] });
-  if (!res.rows[0]) return null;
-  const order = rowToOrder(res.rows[0]);
+  const rows = await db`SELECT * FROM orders WHERE id = ${id}`;
+  if (!rows[0]) return null;
+  const order = rowToOrder(rows[0]);
   // Lazy expiry: pending orders older than 24h are auto-expired
   if (order.status === 'pending' && Date.now() - order.created_at > ORDER_EXPIRY_MS) {
     await markOrderExpired(id);
@@ -276,27 +260,18 @@ export async function getOrder(id: string): Promise<Order | null> {
 
 export async function listOrders(merchantAddress: string): Promise<Order[]> {
   await initDb();
-  const res = await getClient().execute({
-    sql: `SELECT * FROM orders WHERE merchant_address = ? ORDER BY created_at DESC LIMIT 50`,
-    args: [merchantAddress],
-  });
-  return res.rows.map(rowToOrder);
+  const rows = await db`SELECT * FROM orders WHERE merchant_address = ${merchantAddress} ORDER BY created_at DESC LIMIT 50`;
+  return rows.map(rowToOrder);
 }
 
 export async function markOrderPaid(id: string, assetPaid: string, txHash: string): Promise<void> {
   await initDb();
-  await getClient().execute({
-    sql: `UPDATE orders SET status='paid', asset_paid=?, tx_hash=?, paid_at=? WHERE id=?`,
-    args: [assetPaid, txHash, Date.now(), id],
-  });
+  await db`UPDATE orders SET status='paid', asset_paid=${assetPaid}, tx_hash=${txHash}, paid_at=${Date.now()} WHERE id=${id}`;
 }
 
 export async function markOrderExpired(id: string): Promise<void> {
   await initDb();
-  await getClient().execute({
-    sql: `UPDATE orders SET status='expired' WHERE id=? AND status='pending'`,
-    args: [id],
-  });
+  await db`UPDATE orders SET status='expired' WHERE id=${id} AND status='pending'`;
 }
 
 function rowToOrder(r: any): Order {
