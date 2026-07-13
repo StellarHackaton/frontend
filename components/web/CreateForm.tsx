@@ -85,7 +85,7 @@ export function CreateForm() {
         <button
           onClick={f.submit}
           disabled={f.submitting}
-          className={`liquid-surface w-full overflow-hidden rounded-btn py-4 font-display text-base font-semibold text-white transition-opacity ${
+          className={`liquid-surface w-full overflow-hidden rounded-btn py-4 font-display text-base font-semibold text-white transition-[opacity,transform] duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] ${
             f.valid && !f.submitting ? "" : "opacity-60"
           }`}
         >

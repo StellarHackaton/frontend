@@ -7,7 +7,7 @@ import { MetalCta } from "./MetalCta";
 type Variant = "primary" | "glass" | "disabled";
 
 const base =
-  "relative flex h-14 w-full items-center justify-center overflow-hidden rounded-[22px] font-display text-[17px] font-semibold transition-transform duration-300 [transition-timing-function:cubic-bezier(.34,1.56,.64,1)] active:scale-[.96]";
+  "relative flex h-14 w-full items-center justify-center overflow-hidden rounded-[22px] font-display text-[17px] font-semibold transition-[transform,opacity] duration-300 [transition-timing-function:cubic-bezier(.34,1.56,.64,1)] active:scale-[.96] disabled:cursor-not-allowed disabled:pointer-events-none disabled:active:scale-100";
 
 const variants: Record<Variant, string> = {
   primary: "bg-primary text-white shadow-btnPrimary",
@@ -31,14 +31,15 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   // Every primary button is the liquid-glass pill + metal ring, so the look is
   // identical on every screen. `plain` falls back to the flat indigo fill.
   const liquid = variant === "primary" && !plain;
+  const isDisabled = variant === "disabled" || props.disabled;
   const fill = liquid
     ? "liquid-surface text-white shadow-btnPrimary"
     : variants[variant];
   const btn = (
     <button
       ref={ref}
-      disabled={variant === "disabled" || props.disabled}
-      className={`${base} ${fill} ${className}`}
+      disabled={isDisabled}
+      className={`${base} ${fill} ${className} ${!liquid && isDisabled ? "opacity-50" : ""}`}
       {...props}
     >
       <span className="relative">{children}</span>
@@ -47,7 +48,10 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
 
   if (liquid) {
     return (
-      <MetalCta preset={metalPreset} className="w-full">
+      <MetalCta
+        preset={metalPreset}
+        className={`w-full ${isDisabled ? "pointer-events-none opacity-50" : ""}`}
+      >
         {btn}
       </MetalCta>
     );

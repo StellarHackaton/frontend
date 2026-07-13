@@ -107,7 +107,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
                 <div className="text-[15px] font-semibold">Connect your wallet to pay</div>
                 <button
                   onClick={connect}
-                  className="liquid-surface rounded-btn px-6 py-3 font-display text-[15px] font-semibold text-white"
+                  className="liquid-surface rounded-btn px-6 py-3 font-display text-[15px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98]"
                 >
                   {authStatus === "connecting" ? "Connecting…" : "Connect wallet"}
                 </button>
@@ -137,7 +137,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
                   <motion.button
                     onClick={co.pay}
                     whileTap={{ scale: 0.97 }}
-                    className="liquid-surface w-full overflow-hidden rounded-btn py-4 font-display text-[17px] font-semibold text-white"
+                    className="liquid-surface w-full overflow-hidden rounded-btn py-4 font-display text-[17px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98]"
                   >
                     Pay
                   </motion.button>

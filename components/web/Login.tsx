@@ -78,7 +78,7 @@ export function Login() {
             <button
               onClick={handlePrivy}
               disabled={busy || privyLoading}
-              className="liquid-surface flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-btn py-4 font-display text-[16px] font-semibold text-white disabled:opacity-60"
+              className="liquid-surface flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-btn py-4 font-display text-[16px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
             >
               {privyLoading ? <Spinner /> : <MailIcon />}
               {privyLoading ? t("login.opening") : t("login.emailCta")}
@@ -104,7 +104,7 @@ export function Login() {
           <button
             onClick={() => handlePasskey("register")}
             disabled={busy || passkeyLoading}
-            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary disabled:opacity-60"
+            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
           >
             {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
             {passkeyLoading ? t("login.preparing") : t("login.registerPasskey")}
@@ -112,7 +112,7 @@ export function Login() {
           <button
             onClick={() => handlePasskey("login")}
             disabled={busy || passkeyLoading}
-            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary disabled:opacity-60"
+            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
           >
             {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
             {passkeyLoading ? t("login.verifying") : t("login.loginPasskey")}
@@ -130,7 +130,7 @@ export function Login() {
           <button
             onClick={handleConnect}
             disabled={busy}
-            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary disabled:opacity-60"
+            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
           >
             {busy ? <Spinner dark /> : <WalletIcon />}
             {busy ? t("login.connecting") : t("login.connectWallet")}
