@@ -74,15 +74,15 @@ export function Login() {
           <p className="text-center text-[13px] text-red-500">{error}</p>
         )}
 
-        {/* ── Privy: email / Google ── */}
-        <button
+        {/* ── Privy: email / Google — the recommended, easiest path ── */}
+        <Button
           onClick={handlePrivy}
           disabled={busy || privyLoading}
-          className="flex h-[54px] w-full items-center justify-center gap-2.5 rounded-[20px] bg-[#2F2A6B] font-display text-[16px] font-semibold text-white disabled:opacity-60 active:scale-[.97]"
+          className="flex items-center justify-center gap-2.5"
         >
           {privyLoading ? <Spinner /> : <MailIcon />}
           {privyLoading ? t("login.opening") : t("login.emailCta")}
-        </button>
+        </Button>
         <p className="text-center text-[11px] leading-relaxed text-muted">
           {t("login.emailHelper")}
         </p>
@@ -94,24 +94,26 @@ export function Login() {
           <div className="h-px flex-1 bg-ink/[.08]" />
         </div>
 
-        {/* Passkey / biometrik */}
+        {/* Passkey / biometrik — secondary paths */}
         <Button
+          variant="glass"
           onClick={() => handlePasskey("register")}
           disabled={busy || passkeyLoading}
           className="flex items-center justify-center gap-2"
         >
-          {passkeyLoading ? <Spinner /> : <FingerprintIcon />}
+          {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
           {passkeyLoading ? t("login.preparing") : t("login.registerPasskey")}
         </Button>
 
-        <button
+        <Button
+          variant="glass"
           onClick={() => handlePasskey("login")}
           disabled={busy || passkeyLoading}
-          className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[20px] border border-ink/15 bg-white font-display text-[16px] font-semibold text-ink disabled:opacity-60 active:scale-[.97]"
+          className="flex items-center justify-center gap-2"
         >
           {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
           {passkeyLoading ? t("login.verifying") : t("login.loginPasskey")}
-        </button>
+        </Button>
 
         <p className="text-center text-[11px] leading-relaxed text-muted">
           {t("login.passkeyHelper")}

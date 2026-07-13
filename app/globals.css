@@ -106,16 +106,16 @@ a:focus-visible,
     z-index: -1;
     background: conic-gradient(
       from 0deg,
-      rgba(255, 0, 128, 0.55),
-      rgba(0, 190, 255, 0.55),
-      rgba(120, 255, 180, 0.5),
-      rgba(255, 210, 80, 0.5),
-      rgba(168, 85, 247, 0.55),
-      rgba(255, 0, 128, 0.55)
+      rgba(255, 0, 128, 0.32),
+      rgba(0, 190, 255, 0.32),
+      rgba(120, 255, 180, 0.28),
+      rgba(255, 210, 80, 0.28),
+      rgba(168, 85, 247, 0.32),
+      rgba(255, 0, 128, 0.32)
     );
-    filter: blur(16px);
-    opacity: 0.55;
-    animation: liquidSpin 9s linear infinite;
+    filter: blur(26px);
+    opacity: 0.7;
+    animation: liquidSpin 11s linear infinite;
   }
   .liquid-surface::after {
     content: "";

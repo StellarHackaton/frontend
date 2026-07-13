@@ -148,7 +148,7 @@ export function Products() {
             action={
               <button
                 onClick={() => router.push("/create")}
-                className="liquid-surface rounded-btn px-5 py-2.5 text-[14px] font-semibold text-white"
+                className="liquid-surface rounded-btn px-5 py-2.5 text-[14px] font-semibold text-white transition-transform active:scale-95"
               >
                 {t("products.addProduct")}
               </button>
@@ -334,7 +334,7 @@ export function Products() {
                     <button
                       onClick={saveEdit}
                       disabled={saving || !editTitle.trim() || !parseFloat(editPrice)}
-                      className="flex-1 rounded-[14px] bg-primary py-3.5 font-semibold text-white disabled:opacity-50"
+                      className="flex-1 rounded-[14px] bg-primary py-3.5 font-semibold text-white transition-transform active:scale-[.98] disabled:opacity-50"
                     >
                       {saving ? t("common.saving") : t("common.save")}
                     </button>
@@ -359,7 +359,7 @@ export function Products() {
                     <button
                       onClick={confirmDelete}
                       disabled={saving}
-                      className="flex-1 rounded-[14px] bg-red-500 py-3.5 font-semibold text-white disabled:opacity-50"
+                      className="flex-1 rounded-[14px] bg-red-500 py-3.5 font-semibold text-white transition-transform active:scale-[.98] disabled:opacity-50"
                     >
                       {saving ? t("products.deleting") : t("products.delete")}
                     </button>

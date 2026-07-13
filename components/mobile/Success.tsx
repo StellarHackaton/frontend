@@ -435,7 +435,7 @@ export function Success({
                         <button
                           key={opt.id}
                           onClick={() => handleShare(opt.id)}
-                          className="flex flex-col items-center gap-2"
+                          className="flex flex-col items-center gap-2 transition-transform active:scale-90"
                         >
                           <div className={`flex h-[54px] w-[54px] items-center justify-center rounded-[16px] ${opt.bg} ${opt.color}`}>
                             {opt.id === "copy" && copied

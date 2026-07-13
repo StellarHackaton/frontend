@@ -128,7 +128,7 @@ export function Settings() {
                       setEditing(false);
                       setSaving(false);
                     }}
-                    className="text-[13px] font-semibold text-primary"
+                    className="text-[13px] font-semibold text-primary transition-opacity active:opacity-50"
                   >
                     {saving ? "…" : t("settings.save")}
                   </button>
@@ -136,7 +136,7 @@ export function Settings() {
               ) : (
                 <button
                   onClick={() => { setNameInput(storeName ?? ""); setEditing(true); }}
-                  className="text-sm font-semibold text-ink underline-offset-2 hover:underline"
+                  className="text-sm font-semibold text-ink underline-offset-2 transition-opacity hover:underline active:opacity-60"
                 >
                   {storeName || "—"}
                 </button>
@@ -165,7 +165,7 @@ export function Settings() {
                     {t("settings.verified")}
                   </span>
                 ) : (
-                  <button onClick={() => setShowStakeForm((v) => !v)} className="text-sm font-semibold text-primary">
+                  <button onClick={() => setShowStakeForm((v) => !v)} className="text-sm font-semibold text-primary transition-opacity active:opacity-50">
                     {showStakeForm ? t("settings.close") : t("settings.verifyStore")}
                   </button>
                 )}
@@ -206,7 +206,7 @@ export function Settings() {
                         setStaking(false);
                       }
                     }}
-                    className="w-full rounded-[12px] bg-primary py-2.5 font-display text-sm font-semibold text-white disabled:opacity-50"
+                    className="w-full rounded-[12px] bg-primary py-2.5 font-display text-sm font-semibold text-white transition-transform active:scale-[.98] disabled:opacity-50"
                   >
                     {staking ? t("login.verifying") : t("settings.sendAndVerify")}
                   </button>
@@ -226,7 +226,7 @@ export function Settings() {
               </div>
               <button
                 onClick={() => { setShowSend((v) => !v); setSelectedExchange(null); setSendTxHash(""); setSendError(""); setSendDest(""); setSendMemo(""); setSendAmount(""); }}
-                className="text-sm font-semibold text-primary"
+                className="text-sm font-semibold text-primary transition-opacity active:opacity-50"
               >
                 {showSend ? t("settings.close") : t("settings.send")}
               </button>
@@ -333,7 +333,7 @@ export function Settings() {
                           <div>
                             <label className="mb-1.5 flex items-center justify-between text-[12px]">
                               <span className="font-medium text-ink">{t("settings.usdcAmount")}</span>
-                              <button type="button" onClick={() => setSendAmount(balanceUsdc.toFixed(2))} className="text-primary text-[11px] font-semibold">
+                              <button type="button" onClick={() => setSendAmount(balanceUsdc.toFixed(2))} className="text-primary text-[11px] font-semibold transition-opacity active:opacity-50">
                                 {t("settings.max")} ${balanceUsdc.toFixed(2)}
                               </button>
                             </label>
@@ -358,7 +358,7 @@ export function Settings() {
                           <p className="mt-1 font-display text-[14px] font-bold text-emerald-700">{t("settings.sentSuccess")}</p>
                           <p className="mt-0.5 text-[11px] text-emerald-600">{t("settings.onWayTo")} {ex.name}</p>
                           <p className="mt-2.5 break-all rounded-[8px] bg-emerald-100 px-2.5 py-1.5 font-mono text-[9px] text-emerald-700">TX: {sendTxHash}</p>
-                          <button onClick={() => { setSendTxHash(""); setSendDest(""); setSendMemo(""); setSendAmount(""); }} className="mt-2 text-[11px] text-emerald-600 underline">
+                          <button onClick={() => { setSendTxHash(""); setSendDest(""); setSendMemo(""); setSendAmount(""); }} className="mt-2 text-[11px] text-emerald-600 underline transition-opacity active:opacity-50">
                             {t("settings.sendAgain")}
                           </button>
                         </div>
@@ -366,7 +366,7 @@ export function Settings() {
                         <button
                           disabled={sending || !sendDest.trim() || !sendAmount.trim() || (ex.needsMemo && !sendMemo.trim())}
                           onClick={sendUsdc}
-                          className="w-full rounded-[12px] py-3 font-display text-sm font-semibold text-white shadow-sm disabled:opacity-40"
+                          className="w-full rounded-[12px] py-3 font-display text-sm font-semibold text-white shadow-sm transition-transform active:scale-[.98] disabled:opacity-40"
                           style={{ background: ex.iconBg }}
                         >
                           {sending ? t("settings.sending") : `${t("settings.sendUsdcTo")} ${ex.name} →`}

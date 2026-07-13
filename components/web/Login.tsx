@@ -74,14 +74,16 @@ export function Login() {
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
             {t("login.easiest")}
           </p>
-          <button
-            onClick={handlePrivy}
-            disabled={busy || privyLoading}
-            className="flex w-full items-center justify-center gap-2.5 rounded-btn bg-[#2F2A6B] py-4 font-display text-[16px] font-semibold text-white disabled:opacity-60"
-          >
-            {privyLoading ? <Spinner /> : <MailIcon />}
-            {privyLoading ? t("login.opening") : t("login.emailCta")}
-          </button>
+          <MetalCta className="block w-full">
+            <button
+              onClick={handlePrivy}
+              disabled={busy || privyLoading}
+              className="liquid-surface flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-btn py-4 font-display text-[16px] font-semibold text-white disabled:opacity-60"
+            >
+              {privyLoading ? <Spinner /> : <MailIcon />}
+              {privyLoading ? t("login.opening") : t("login.emailCta")}
+            </button>
+          </MetalCta>
           <p className="text-[12px] leading-relaxed text-muted">
             {t("login.emailHelper")}
           </p>
@@ -102,15 +104,15 @@ export function Login() {
           <button
             onClick={() => handlePasskey("register")}
             disabled={busy || passkeyLoading}
-            className="flex w-full items-center justify-center gap-2.5 rounded-btn bg-[#0c0d12] py-4 font-display text-[16px] font-semibold text-white disabled:opacity-60"
+            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary disabled:opacity-60"
           >
-            {passkeyLoading ? <Spinner /> : <FingerprintIcon />}
+            {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
             {passkeyLoading ? t("login.preparing") : t("login.registerPasskey")}
           </button>
           <button
             onClick={() => handlePasskey("login")}
             disabled={busy || passkeyLoading}
-            className="flex w-full items-center justify-center gap-2.5 rounded-btn border border-ink/15 bg-paper py-4 font-display text-[16px] font-semibold text-ink disabled:opacity-60"
+            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary disabled:opacity-60"
           >
             {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
             {passkeyLoading ? t("login.verifying") : t("login.loginPasskey")}
@@ -125,16 +127,14 @@ export function Login() {
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
             {t("login.haveWallet")}
           </p>
-          <MetalCta className="block w-full">
-            <button
-              onClick={handleConnect}
-              disabled={busy}
-              className="liquid-surface flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-btn py-4 font-display text-[17px] font-semibold text-white disabled:opacity-60"
-            >
-              {busy ? <Spinner /> : <WalletIcon />}
-              {busy ? t("login.connecting") : t("login.connectWallet")}
-            </button>
-          </MetalCta>
+          <button
+            onClick={handleConnect}
+            disabled={busy}
+            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary disabled:opacity-60"
+          >
+            {busy ? <Spinner dark /> : <WalletIcon />}
+            {busy ? t("login.connecting") : t("login.connectWallet")}
+          </button>
           <p className="text-[12px] leading-relaxed text-muted">
             <strong className="text-ink">Albedo</strong> — {t("login.albedoHelper")}{" "}
             <strong className="text-ink">Freighter</strong> — {t("login.freighterHelper")}

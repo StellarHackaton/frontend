@@ -103,7 +103,7 @@ export function Orders() {
               {/* close button */}
               <button
                 onClick={() => setDetail(null)}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-ink/[.06]"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-ink/[.06] active:bg-ink/[.08]"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
