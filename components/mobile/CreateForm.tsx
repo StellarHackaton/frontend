@@ -4,9 +4,11 @@ import { MobileShell } from "./MobileShell";
 import { Button } from "@/components/ui/Button";
 import { BackButton } from "@/components/ui/BackButton";
 import { useCreateForm } from "@/lib/useCreateForm";
+import { useLang } from "@/lib/i18n";
 
 export function CreateForm() {
   const f = useCreateForm();
+  const { t } = useLang();
 
   return (
     <MobileShell>
@@ -75,33 +77,33 @@ export function CreateForm() {
 
         {/* Payment type toggle */}
         <div>
-          <div className="mb-2 text-[13px] font-medium text-muted">Tipe pembayaran</div>
+          <div className="mb-2 text-[13px] font-medium text-muted">{t("create.paymentType")}</div>
           <div className="flex overflow-hidden rounded-[16px] border border-white/70 bg-white/55 backdrop-blur-[16px]">
-            {(["one_time", "permanent"] as const).map((t) => (
+            {(["one_time", "permanent"] as const).map((type) => (
               <button
-                key={t}
-                onClick={() => f.setType(t)}
+                key={type}
+                onClick={() => f.setType(type)}
                 className={`flex-1 py-3 font-display text-[13px] font-semibold transition-colors ${
-                  f.type === t
+                  f.type === type
                     ? "bg-primary text-white"
                     : "text-muted"
                 }`}
               >
-                {t === "one_time" ? "1x (custom)" : "Toko (berulang)"}
+                {type === "one_time" ? t("create.oneTime") : t("create.recurring")}
               </button>
             ))}
           </div>
           <div className="mt-1.5 text-[11px] text-faint">
             {f.type === "one_time"
-              ? "Link sekali pakai — cocok untuk invoice custom ke klien."
-              : "Link permanen — buyer bisa bayar berkali-kali, cocok untuk produk toko."}
+              ? t("create.oneTimeHelperMobile")
+              : t("create.recurringHelperMobile")}
           </div>
         </div>
       </div>
 
       <div className="flex-none px-[22px] pb-8 pt-3.5">
         <Button onClick={f.submit} className={f.valid && !f.submitting ? "" : "opacity-60"}>
-          {f.submitting ? "Menyimpan…" : "Simpan ke katalog"}
+          {f.submitting ? t("common.saving") : t("create.saveToCatalog")}
         </Button>
       </div>
     </MobileShell>

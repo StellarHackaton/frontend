@@ -251,7 +251,7 @@ export function PhoneHero() {
                       {stage === "processing" && (
                         <motion.p exit={{ opacity: 0 }}
                           className="absolute bottom-16 text-[10px] font-medium uppercase tracking-[.06em] text-white/25">
-                          Memverifikasi…
+                          Verifying…
                         </motion.p>
                       )}
                     </AnimatePresence>

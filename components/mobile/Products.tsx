@@ -12,6 +12,7 @@ import { formatUsd } from "@/lib/format";
 import { listContainer, listItem } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardProduct } from "@/lib/useDashboard";
+import { useLang } from "@/lib/i18n";
 
 type SheetMode = "menu" | "edit" | "confirm-delete";
 
@@ -33,6 +34,7 @@ export function Products() {
   const router = useRouter();
   const { address } = useWalletContext();
   const { products, loading, refresh } = useDashboard(address);
+  const { t } = useLang();
 
   const [selected, setSelected] = useState<DashboardProduct | null>(null);
   const [mode, setMode] = useState<SheetMode>("menu");
@@ -79,7 +81,7 @@ export function Products() {
         body: JSON.stringify({ merchantAddress: address, productId: p.id }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Gagal membuat QR");
+      if (!res.ok) throw new Error(data.error ?? t("products.errCreateQR"));
       router.push(`/p/${data.orderId}`);
     } catch {
       setCreatingQR(null);
@@ -103,11 +105,11 @@ export function Products() {
           priceUsdc: price,
         }),
       });
-      if (!res.ok) throw new Error("Gagal menyimpan");
+      if (!res.ok) throw new Error(t("common.errSave"));
       refresh();
       closeSheet();
     } catch (e: any) {
-      setSheetError(e.message ?? "Gagal menyimpan");
+      setSheetError(e.message ?? t("common.errSave"));
       setSaving(false);
     }
   }
@@ -124,7 +126,7 @@ export function Products() {
       refresh();
       closeSheet();
     } catch {
-      setSheetError("Gagal menghapus");
+      setSheetError(t("common.errDelete"));
       setSaving(false);
     }
   }
@@ -141,14 +143,14 @@ export function Products() {
         ) : products.length === 0 ? (
           <EmptyState
             icon={BoxIcon}
-            title="Belum ada produk"
-            body="Tambah produk ke katalog kamu. QR pembayaran bisa dibuat kapan saja dari produk yang sudah ada."
+            title={t("products.emptyTitle")}
+            body={t("products.emptyBody")}
             action={
               <button
                 onClick={() => router.push("/create")}
                 className="liquid-surface rounded-btn px-5 py-2.5 text-[14px] font-semibold text-white"
               >
-                + Tambah produk
+                {t("products.addProduct")}
               </button>
             }
           />
@@ -168,6 +170,7 @@ export function Products() {
                 {/* ⋮ menu */}
                 <button
                   onClick={() => openMenu(p)}
+                  aria-label="More options"
                   className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-muted active:bg-ink/[.06]"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -196,7 +199,7 @@ export function Products() {
                       {p.description}
                     </p>
                   ) : (
-                    <p className="mb-4 text-[13px] italic text-faint">Belum ada deskripsi</p>
+                    <p className="mb-4 text-[13px] italic text-faint">{t("products.noDescription")}</p>
                   )}
 
                   {/* Footer */}
@@ -206,7 +209,7 @@ export function Products() {
                         {formatUsd(p.priceUSD)}
                       </div>
                       {p.paidCount > 0 && (
-                        <div className="text-[11px] text-faint">{p.paidCount}x terjual</div>
+                        <div className="text-[11px] text-faint">{p.paidCount}{t("products.soldSuffix")}</div>
                       )}
                     </div>
                     <button
@@ -219,7 +222,7 @@ export function Products() {
                           <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
                           </svg>
-                          Membuat…
+                          {t("create.creating")}
                         </>
                       ) : (
                         <>
@@ -227,7 +230,7 @@ export function Products() {
                             <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
                             <path d="M14 14h.01M14 17h.01M17 14h.01M17 17h.01M20 14h.01M20 17h.01M20 20h.01M17 20h.01M14 20h.01"/>
                           </svg>
-                          Buat QR
+                          {t("products.generateQR")}
                         </>
                       )}
                     </button>
@@ -272,7 +275,7 @@ export function Products() {
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" />
                       </svg>
                     </span>
-                    <span className="font-semibold">Edit produk</span>
+                    <span className="font-semibold">{t("products.editTitle")}</span>
                   </button>
                   <button
                     onClick={() => setMode("confirm-delete")}
@@ -285,15 +288,15 @@ export function Products() {
                         <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                       </svg>
                     </span>
-                    <span className="font-semibold text-red-500">Hapus produk</span>
+                    <span className="font-semibold text-red-500">{t("products.deleteProduct")}</span>
                   </button>
                 </>
               )}
 
               {mode === "edit" && (
                 <>
-                  <div className="mb-4 font-display text-[17px] font-bold">Edit produk</div>
-                  <label className="mb-1.5 block text-[13px] font-semibold text-muted">Nama produk</label>
+                  <div className="mb-4 font-display text-[17px] font-bold">{t("products.editTitle")}</div>
+                  <label className="mb-1.5 block text-[13px] font-semibold text-muted">{t("products.name")}</label>
                   <input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
@@ -302,7 +305,7 @@ export function Products() {
                     autoFocus
                   />
                   <label className="mb-1.5 block text-[13px] font-semibold text-muted">
-                    Deskripsi <span className="font-normal text-faint">(opsional)</span>
+                    {t("products.description")} <span className="font-normal text-faint">({t("products.optional")})</span>
                   </label>
                   <textarea
                     value={editDescription}
@@ -311,7 +314,7 @@ export function Products() {
                     maxLength={300}
                     className="mb-3 w-full resize-none rounded-[12px] border border-ink/[.12] bg-white px-4 py-3 text-[15px] outline-none focus:border-primary"
                   />
-                  <label className="mb-1.5 block text-[13px] font-semibold text-muted">Harga (USD)</label>
+                  <label className="mb-1.5 block text-[13px] font-semibold text-muted">{t("products.price")}</label>
                   <input
                     value={editPrice}
                     onChange={(e) => setEditPrice(e.target.value)}
@@ -322,11 +325,18 @@ export function Products() {
                   />
                   {sheetError && <p className="mb-3 text-[13px] text-red-500">{sheetError}</p>}
                   <div className="flex gap-3">
-                    <button onClick={() => setMode("menu")} className="flex-1 rounded-[14px] border border-ink/15 py-3.5 font-semibold text-muted active:bg-ink/[.04]">
-                      Batal
+                    <button
+                      onClick={() => setMode("menu")}
+                      className="flex-1 rounded-[14px] border border-ink/15 py-3.5 font-semibold text-muted active:bg-ink/[.04]"
+                    >
+                      {t("common.cancel")}
                     </button>
-                    <button onClick={saveEdit} disabled={saving || !editTitle.trim() || !parseFloat(editPrice)} className="flex-1 rounded-[14px] bg-primary py-3.5 font-semibold text-white disabled:opacity-50">
-                      {saving ? "Menyimpan…" : "Simpan"}
+                    <button
+                      onClick={saveEdit}
+                      disabled={saving || !editTitle.trim() || !parseFloat(editPrice)}
+                      className="flex-1 rounded-[14px] bg-primary py-3.5 font-semibold text-white disabled:opacity-50"
+                    >
+                      {saving ? t("common.saving") : t("common.save")}
                     </button>
                   </div>
                 </>
@@ -334,17 +344,24 @@ export function Products() {
 
               {mode === "confirm-delete" && (
                 <>
-                  <div className="mb-2 font-display text-[17px] font-bold">Hapus produk?</div>
+                  <div className="mb-2 font-display text-[17px] font-bold">{t("products.deleteTitle")}</div>
                   <p className="mb-5 text-[14px] text-muted">
-                    <span className="font-semibold text-ink">{selected.title}</span> akan dihapus dari katalog. Pesanan yang sudah ada tidak terpengaruh.
+                    <span className="font-semibold text-ink">{selected.title}</span> {t("products.deleteBody")}
                   </p>
                   {sheetError && <p className="mb-3 text-[13px] text-red-500">{sheetError}</p>}
                   <div className="flex gap-3">
-                    <button onClick={() => setMode("menu")} className="flex-1 rounded-[14px] border border-ink/15 py-3.5 font-semibold text-muted active:bg-ink/[.04]">
-                      Batal
+                    <button
+                      onClick={() => setMode("menu")}
+                      className="flex-1 rounded-[14px] border border-ink/15 py-3.5 font-semibold text-muted active:bg-ink/[.04]"
+                    >
+                      {t("common.cancel")}
                     </button>
-                    <button onClick={confirmDelete} disabled={saving} className="flex-1 rounded-[14px] bg-red-500 py-3.5 font-semibold text-white disabled:opacity-50">
-                      {saving ? "Menghapus…" : "Hapus"}
+                    <button
+                      onClick={confirmDelete}
+                      disabled={saving}
+                      className="flex-1 rounded-[14px] bg-red-500 py-3.5 font-semibold text-white disabled:opacity-50"
+                    >
+                      {saving ? t("products.deleting") : t("products.delete")}
                     </button>
                   </div>
                 </>

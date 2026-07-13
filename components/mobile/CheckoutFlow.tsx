@@ -184,7 +184,7 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
                   <>
                     <div className="my-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-ink/[.08]" />
-                      <span className="text-[12px] text-muted">atau dari chain lain</span>
+                      <span className="text-[12px] text-muted">or from another chain</span>
                       <div className="h-px flex-1 bg-ink/[.08]" />
                     </div>
                     <CctpCheckout

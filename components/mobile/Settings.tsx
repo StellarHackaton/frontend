@@ -10,12 +10,15 @@ import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard } from "@/lib/useDashboard";
 import { buildUsdcPaymentXdr, submitToHorizon, SEND_DESTINATIONS } from "@/lib/stellar-payment";
 import { ExchangeIcon } from "@/components/ui/ExchangeIcon";
+import { useLang } from "@/lib/i18n";
+import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS ?? "";
 
 export function Settings() {
   const { address, userInitial, disconnect, storeName, setStoreName, walletType, signXdr } = useWalletContext();
   const { balanceUsdc } = useDashboard(address);
+  const { t, lang } = useLang();
 
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState(storeName ?? "");
@@ -74,7 +77,7 @@ export function Settings() {
       setSendMemo("");
       setSendAmount("");
     } catch (e: any) {
-      setSendError(e.message ?? "Gagal mengirim USDC.");
+      setSendError(e.message ?? t("settings.errSend"));
     } finally {
       setSending(false);
     }
@@ -99,7 +102,7 @@ export function Settings() {
           <div className="overflow-hidden rounded-[20px] border border-white/65 bg-white/55 backdrop-blur-[16px]">
             {/* store name */}
             <div className="flex items-center justify-between px-5 py-[15px]">
-              <span className="text-sm text-muted">Nama toko</span>
+              <span className="text-sm text-muted">{t("settings.storeName")}</span>
               {editing ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -125,7 +128,7 @@ export function Settings() {
                     }}
                     className="text-[13px] font-semibold text-primary"
                   >
-                    {saving ? "…" : "Simpan"}
+                    {saving ? "…" : t("settings.save")}
                   </button>
                 </div>
               ) : (
@@ -138,31 +141,37 @@ export function Settings() {
               )}
             </div>
 
-            <Row label="Wallet" value={address ? `${address.slice(0, 8)}…${address.slice(-6)}` : "—"} mono top />
-            <Row label="Member since" value={joined} top />
-            <Row label="Payout balance" value={`$${balanceUsdc.toFixed(2)}`} top display />
-            <Row label="Receives" value="USDC (Stellar)" top />
-            <Row label="Network" value="Testnet" top />
+            <Row label={t("settings.wallet")} value={address ? `${address.slice(0, 8)}…${address.slice(-6)}` : "—"} mono top />
+            <Row label={t("settings.memberSince")} value={joined} top />
+            <Row label={t("settings.payoutBalance")} value={`$${balanceUsdc.toFixed(2)}`} top display />
+            <Row label={t("settings.receives")} value="USDC (Stellar)" top />
+            <Row label={t("settings.network")} value="Testnet" top />
+
+            {/* language */}
+            <div className="flex items-center justify-between border-t border-ink/[.06] px-5 py-[15px]">
+              <span className="text-sm text-muted">{t("settings.language")}</span>
+              <LanguageToggle />
+            </div>
 
             {/* verification */}
             <div className="border-t border-ink/[.06] px-5 py-[15px]">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted">Status toko</span>
+                <span className="text-sm text-muted">{t("settings.storeStatus")}</span>
                 {verified ? (
                   <span className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
                     <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] text-white">✓</span>
-                    Terverifikasi
+                    {t("settings.verified")}
                   </span>
                 ) : (
                   <button onClick={() => setShowStakeForm((v) => !v)} className="text-sm font-semibold text-primary">
-                    {showStakeForm ? "Tutup" : "Verifikasi toko"}
+                    {showStakeForm ? t("settings.close") : t("settings.verifyStore")}
                   </button>
                 )}
               </div>
               {!verified && showStakeForm && (
                 <div className="mt-3 space-y-3">
                   <p className="text-[12px] text-muted leading-relaxed">
-                    Kirim tepat <span className="font-semibold text-ink">10 USDC</span> ke alamat berikut, lalu masukkan TX Hash di bawah.
+                    {t("settings.stakeInstructions")}
                   </p>
                   <div className="rounded-[10px] bg-ink/[.04] px-3 py-2">
                     <p className="break-all font-mono text-[11px] text-ink select-all">{ADMIN_ADDRESS || "—"}</p>
@@ -170,7 +179,7 @@ export function Settings() {
                   <input
                     value={txHashInput}
                     onChange={(e) => setTxHashInput(e.target.value)}
-                    placeholder="TX Hash Stellar..."
+                    placeholder={t("settings.txHashPlaceholder")}
                     className="w-full rounded-[10px] border border-ink/[.12] bg-white px-3 py-2.5 font-mono text-[12px] text-ink outline-none placeholder:text-faint"
                   />
                   {stakeError && <p className="text-[12px] text-red-500">{stakeError}</p>}
@@ -187,17 +196,17 @@ export function Settings() {
                           body: JSON.stringify({ address, txHash: txHashInput.trim() }),
                         });
                         const data = await res.json();
-                        if (!res.ok) setStakeError(data.error ?? "Verifikasi gagal.");
+                        if (!res.ok) setStakeError(data.error ?? t("settings.errVerify"));
                         else { setVerified(true); setShowStakeForm(false); setTxHashInput(""); }
                       } catch {
-                        setStakeError("Terjadi kesalahan. Coba lagi.");
+                        setStakeError(t("settings.errGeneric"));
                       } finally {
                         setStaking(false);
                       }
                     }}
                     className="w-full rounded-[12px] bg-primary py-2.5 font-display text-sm font-semibold text-white disabled:opacity-50"
                   >
-                    {staking ? "Memverifikasi…" : "Kirim & Verifikasi"}
+                    {staking ? t("login.verifying") : t("settings.sendAndVerify")}
                   </button>
                 </div>
               )}
@@ -210,14 +219,14 @@ export function Settings() {
           <div className="overflow-hidden rounded-[20px] border border-white/65 bg-white/55 backdrop-blur-[16px]">
             <div className="flex items-center justify-between px-5 py-[15px]">
               <div>
-                <span className="text-sm font-semibold text-ink">Kirim USDC ke Exchange / Wallet</span>
-                <p className="text-[11px] text-muted">Transfer langsung via Stellar</p>
+                <span className="text-sm font-semibold text-ink">{t("settings.sendUsdcTitle")}</span>
+                <p className="text-[11px] text-muted">{t("settings.sendUsdcSub")}</p>
               </div>
               <button
                 onClick={() => { setShowSend((v) => !v); setSelectedExchange(null); setSendTxHash(""); setSendError(""); setSendDest(""); setSendMemo(""); setSendAmount(""); }}
                 className="text-sm font-semibold text-primary"
               >
-                {showSend ? "Tutup" : "Kirim"}
+                {showSend ? t("settings.close") : t("settings.send")}
               </button>
             </div>
 
@@ -228,7 +237,7 @@ export function Settings() {
                 <div>
                   <div className="mb-3 flex items-center gap-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary font-display text-[11px] font-bold text-white">1</span>
-                    <span className="text-[12px] font-semibold text-ink">Pilih tujuan</span>
+                    <span className="text-[12px] font-semibold text-ink">{t("settings.step1")}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {SEND_DESTINATIONS.map((ex) => {
@@ -264,10 +273,10 @@ export function Settings() {
                       <div>
                         <div className="mb-2.5 flex items-center gap-2">
                           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary font-display text-[11px] font-bold text-white">2</span>
-                          <span className="text-[12px] font-semibold text-ink">Cara dapat deposit address</span>
+                          <span className="text-[12px] font-semibold text-ink">{t("settings.step2GetAddress")}</span>
                         </div>
                         <div className="overflow-hidden rounded-[12px] bg-ink/[.03] border border-ink/[.05]">
-                          {ex.steps.map((step, i) => (
+                          {ex.steps[lang].map((step, i) => (
                             <div key={i} className="flex items-start gap-2.5 border-b border-ink/[.05] px-3 py-2.5 last:border-b-0">
                               <span
                                 className="mt-0.5 flex h-4 w-4 flex-none items-center justify-center rounded-full text-[9px] font-bold text-white"
@@ -285,13 +294,13 @@ export function Settings() {
                       <div>
                         <div className="mb-3 flex items-center gap-2">
                           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary font-display text-[11px] font-bold text-white">3</span>
-                          <span className="text-[12px] font-semibold text-ink">Isi detail pengiriman</span>
+                          <span className="text-[12px] font-semibold text-ink">{t("settings.step3")}</span>
                         </div>
                         <div className="space-y-3">
                           <div>
                             <label className="mb-1.5 flex items-center justify-between text-[12px]">
                               <span className="font-medium text-ink">
-                                {ex.id === "freighter" ? "Alamat Freighter" : `Deposit Address`}
+                                {ex.id === "freighter" ? t("settings.freighterAddress") : t("settings.depositAddress")}
                               </span>
                               <span className="text-faint">Stellar (G...)</span>
                             </label>
@@ -306,24 +315,24 @@ export function Settings() {
                           {ex.needsMemo && (
                             <div>
                               <label className="mb-1.5 flex items-center justify-between text-[12px]">
-                                <span className="font-medium text-ink">Memo</span>
-                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">Wajib</span>
+                                <span className="font-medium text-ink">{t("settings.memo")}</span>
+                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">{t("settings.required")}</span>
                               </label>
                               <input
                                 value={sendMemo}
                                 onChange={(e) => setSendMemo(e.target.value)}
-                                placeholder="Nomor memo dari exchange"
+                                placeholder={t("settings.memoPlaceholder")}
                                 className="w-full rounded-[10px] border border-ink/[.12] bg-white px-3 py-2.5 text-[13px] text-ink outline-none placeholder:text-faint focus:border-primary"
                               />
-                              <p className="mt-1 text-[10px] text-faint">Salah memo = dana tidak masuk ke akunmu.</p>
+                              <p className="mt-1 text-[10px] text-faint">{t("settings.memoHelper")}</p>
                             </div>
                           )}
 
                           <div>
                             <label className="mb-1.5 flex items-center justify-between text-[12px]">
-                              <span className="font-medium text-ink">Jumlah USDC</span>
+                              <span className="font-medium text-ink">{t("settings.usdcAmount")}</span>
                               <button type="button" onClick={() => setSendAmount(balanceUsdc.toFixed(2))} className="text-primary text-[11px] font-semibold">
-                                Maks ${balanceUsdc.toFixed(2)}
+                                {t("settings.max")} ${balanceUsdc.toFixed(2)}
                               </button>
                             </label>
                             <input
@@ -344,11 +353,11 @@ export function Settings() {
                       {sendTxHash ? (
                         <div className="rounded-[14px] bg-emerald-50 p-4 text-center">
                           <div className="text-[24px]">✅</div>
-                          <p className="mt-1 font-display text-[14px] font-bold text-emerald-700">Berhasil Dikirim!</p>
-                          <p className="mt-0.5 text-[11px] text-emerald-600">USDC dalam perjalanan ke {ex.name}</p>
+                          <p className="mt-1 font-display text-[14px] font-bold text-emerald-700">{t("settings.sentSuccess")}</p>
+                          <p className="mt-0.5 text-[11px] text-emerald-600">{t("settings.onWayTo")} {ex.name}</p>
                           <p className="mt-2.5 break-all rounded-[8px] bg-emerald-100 px-2.5 py-1.5 font-mono text-[9px] text-emerald-700">TX: {sendTxHash}</p>
                           <button onClick={() => { setSendTxHash(""); setSendDest(""); setSendMemo(""); setSendAmount(""); }} className="mt-2 text-[11px] text-emerald-600 underline">
-                            Kirim lagi
+                            {t("settings.sendAgain")}
                           </button>
                         </div>
                       ) : (
@@ -358,7 +367,7 @@ export function Settings() {
                           className="w-full rounded-[12px] py-3 font-display text-sm font-semibold text-white shadow-sm disabled:opacity-40"
                           style={{ background: ex.iconBg }}
                         >
-                          {sending ? "Mengirim…" : `Kirim USDC ke ${ex.name} →`}
+                          {sending ? t("settings.sending") : `${t("settings.sendUsdcTo")} ${ex.name} →`}
                         </button>
                       )}
                     </>
@@ -370,7 +379,7 @@ export function Settings() {
         </div>
 
         <div className="flex-none px-[22px] pb-[96px] pt-3.5">
-          <Button variant="glass" onClick={disconnect}>Sign out</Button>
+          <Button variant="glass" onClick={disconnect}>{t("settings.signOut")}</Button>
         </div>
         <TabBar />
       </MobileShell>

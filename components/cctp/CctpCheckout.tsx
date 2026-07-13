@@ -25,13 +25,13 @@ type Step = "idle" | "select-chain" | "connecting" | "approving" | "burning" | "
 
 const STEP_LABELS: Record<Step, string> = {
   idle: "",
-  "select-chain": "Pilih chain",
-  connecting: "Menghubungkan MetaMask…",
+  "select-chain": "Choose chain",
+  connecting: "Connecting MetaMask…",
   approving: "Approve USDC…",
-  burning: "Mengirim ke Stellar…",
-  attesting: "Menunggu konfirmasi Circle (~30 detik)…",
-  completing: "Meneruskan USDC ke merchant…",
-  done: "Pembayaran berhasil!",
+  burning: "Sending to Stellar…",
+  attesting: "Waiting for Circle confirmation (~30s)…",
+  completing: "Forwarding USDC to merchant…",
+  done: "Payment successful!",
 };
 
 export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, onError }: Props) {
@@ -45,7 +45,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
 
   async function getProvider() {
     const eth = (window as any).ethereum;
-    if (!eth) throw new Error("MetaMask tidak terdeteksi. Install MetaMask dulu.");
+    if (!eth) throw new Error("MetaMask not detected. Please install MetaMask first.");
     return eth;
   }
 
@@ -81,7 +81,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
       const receipt = await eth.request({ method: "eth_getTransactionReceipt", params: [hash] });
       if (receipt) return receipt;
     }
-    throw new Error("Transaction tidak dikonfirmasi setelah 3 menit.");
+    throw new Error("Transaction not confirmed after 3 minutes.");
   }
 
   // Encode a function call manually using viem-style ABI encoding (simple approach)
@@ -143,7 +143,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
       const eth = await getProvider();
       const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
       const account = accounts[0];
-      if (!account) throw new Error("Tidak ada akun MetaMask yang terhubung.");
+      if (!account) throw new Error("No MetaMask account connected.");
 
       await switchChain(eth, chain.chainId);
 
@@ -187,7 +187,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
           break;
         }
       }
-      if (!message) throw new Error("Attestation timeout — Circle testnet lambat, coba submit ulang manual.");
+      if (!message) throw new Error("Attestation timeout — Circle testnet is slow, try resubmitting manually.");
 
       // Step 4: Submit to Stellar via CctpForwarder
       setStep("completing");
@@ -197,13 +197,13 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
         body: JSON.stringify({ message, attestation, merchantAddress, orderId }),
       });
       const completeData = await completeRes.json();
-      if (!completeData.success) throw new Error(completeData.error ?? "Gagal menyelesaikan pembayaran.");
+      if (!completeData.success) throw new Error(completeData.error ?? "Failed to complete payment.");
 
       setStep("done");
       onSuccess();
     } catch (e: any) {
       setStep("idle");
-      onError(e.message ?? "Pembayaran CCTP gagal.");
+      onError(e.message ?? "CCTP payment failed.");
     }
   }
 
@@ -213,7 +213,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
     return (
       <div className="flex flex-col gap-3">
         <p className="text-center text-[13px] text-muted">
-          Bayar <strong className="text-ink">{amountUsdc} USDC</strong> dari chain lain
+          Pay <strong className="text-ink">{amountUsdc} USDC</strong> from another chain
         </p>
         <div className="grid grid-cols-2 gap-2">
           {chains.map((chain) => (
@@ -229,7 +229,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
           ))}
         </div>
         <p className="text-center text-[11px] text-muted">
-          Butuh MetaMask dengan USDC di chain yang dipilih
+          Requires MetaMask with USDC on the chosen chain
         </p>
       </div>
     );
@@ -239,9 +239,9 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
     return (
       <div className="flex flex-col items-center gap-2 py-4 text-center">
         <div className="text-3xl">✅</div>
-        <p className="font-display text-[16px] font-semibold text-ink">Pembayaran berhasil!</p>
+        <p className="font-display text-[16px] font-semibold text-ink">Payment successful!</p>
         <p className="text-[12px] text-muted">
-          USDC sudah masuk ke merchant via CCTP dari {selectedChain?.name}
+          USDC has reached the merchant via CCTP from {selectedChain?.name}
         </p>
       </div>
     );
@@ -258,12 +258,12 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
           rel="noopener noreferrer"
           className="text-[11px] text-indigo-500 underline"
         >
-          Lihat di explorer
+          View on explorer
         </a>
       )}
       {step === "attesting" && (
         <p className="text-[11px] text-muted">
-          Circle sedang memverifikasi burn transaction…
+          Circle is verifying the burn transaction…
         </p>
       )}
     </div>

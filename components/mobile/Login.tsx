@@ -6,10 +6,12 @@ import { MobileShell } from "./MobileShell";
 import { Button } from "@/components/ui/Button";
 import { useWalletContext } from "@/lib/wallet-context";
 import { LogoMark, Wordmark } from "@/components/ui/Wordmark";
+import { useLang } from "@/lib/i18n";
 
 export function Login() {
   const router = useRouter();
   const { connect, connectPasskey, connectPrivy, isConnected, authStatus } = useWalletContext();
+  const { t } = useLang();
   const [error, setError] = useState<string | null>(null);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [privyLoading, setPrivyLoading] = useState(false);
@@ -23,7 +25,7 @@ export function Login() {
     try {
       await connect();
     } catch {
-      setError("Koneksi wallet gagal. Coba lagi.");
+      setError(t("login.errWallet"));
     }
   };
 
@@ -33,7 +35,7 @@ export function Login() {
     try {
       await connectPasskey(mode);
     } catch (e: any) {
-      setError(e?.message ?? "Passkey gagal. Coba lagi.");
+      setError(e?.message ?? t("login.errPasskey"));
     } finally {
       setPasskeyLoading(false);
     }
@@ -45,7 +47,7 @@ export function Login() {
     try {
       await connectPrivy();
     } catch (e: any) {
-      setError(e?.message ?? "Login email gagal. Coba lagi.");
+      setError(e?.message ?? t("login.errEmail"));
     } finally {
       setPrivyLoading(false);
     }
@@ -62,7 +64,7 @@ export function Login() {
           <Wordmark size={36} />
         </div>
         <div className="mt-[18px] max-w-[260px] font-display text-[19px] font-medium leading-[1.4]">
-          Terima bayaran dalam bentuk apapun. Dapat dolar pas.
+          {t("login.tagline")}
         </div>
       </div>
 
@@ -79,16 +81,16 @@ export function Login() {
           className="flex h-[54px] w-full items-center justify-center gap-2.5 rounded-[20px] bg-[#2F2A6B] font-display text-[16px] font-semibold text-white disabled:opacity-60 active:scale-[.97]"
         >
           {privyLoading ? <Spinner /> : <MailIcon />}
-          {privyLoading ? "Membuka…" : "Masuk dengan Email"}
+          {privyLoading ? t("login.opening") : t("login.emailCta")}
         </button>
         <p className="text-center text-[11px] leading-relaxed text-muted">
-          Email atau Google. Wallet dibuat otomatis.
+          {t("login.emailHelper")}
         </p>
 
         {/* Divider */}
         <div className="flex items-center gap-3 py-1">
           <div className="h-px flex-1 bg-ink/[.08]" />
-          <span className="text-[11px] text-muted">atau pakai biometrik / wallet</span>
+          <span className="text-[11px] text-muted">{t("login.or")}</span>
           <div className="h-px flex-1 bg-ink/[.08]" />
         </div>
 
@@ -99,7 +101,7 @@ export function Login() {
           className="flex items-center justify-center gap-2"
         >
           {passkeyLoading ? <Spinner /> : <FingerprintIcon />}
-          {passkeyLoading ? "Menyiapkan…" : "Daftar dengan Sidik Jari"}
+          {passkeyLoading ? t("login.preparing") : t("login.registerPasskey")}
         </Button>
 
         <button
@@ -108,11 +110,11 @@ export function Login() {
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[20px] border border-ink/15 bg-white font-display text-[16px] font-semibold text-ink disabled:opacity-60 active:scale-[.97]"
         >
           {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
-          {passkeyLoading ? "Memverifikasi…" : "Masuk dengan Sidik Jari"}
+          {passkeyLoading ? t("login.verifying") : t("login.loginPasskey")}
         </button>
 
         <p className="text-center text-[11px] leading-relaxed text-muted">
-          Tidak perlu tahu crypto. Cukup sentuh sidik jari.
+          {t("login.passkeyHelper")}
         </p>
 
         {/* Classic wallet */}
@@ -123,7 +125,7 @@ export function Login() {
           className="flex items-center justify-center gap-2 h-[52px] rounded-[20px]"
         >
           {busy ? <Spinner dark /> : <WalletIcon />}
-          {busy ? "Menghubungkan…" : "Hubungkan Wallet (Albedo / Freighter)"}
+          {busy ? t("login.connecting") : t("login.connectWalletFull")}
         </Button>
       </div>
     </MobileShell>

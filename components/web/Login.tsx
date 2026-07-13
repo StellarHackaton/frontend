@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { MetalCta } from "@/components/ui/MetalCta";
 import { useWalletContext } from "@/lib/wallet-context";
 import { LogoMark, Wordmark } from "@/components/ui/Wordmark";
+import { useLang } from "@/lib/i18n";
 
 export function Login() {
   const router = useRouter();
   const { connect, connectPasskey, connectPrivy, isConnected, authStatus } = useWalletContext();
+  const { t } = useLang();
   const [error, setError] = useState<string | null>(null);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [privyLoading, setPrivyLoading] = useState(false);
@@ -22,7 +24,7 @@ export function Login() {
     try {
       await connect();
     } catch {
-      setError("Koneksi wallet gagal. Coba lagi.");
+      setError(t("login.errWallet"));
     }
   };
 
@@ -32,7 +34,7 @@ export function Login() {
     try {
       await connectPasskey(mode);
     } catch (e: any) {
-      setError(e?.message ?? "Passkey gagal. Coba lagi.");
+      setError(e?.message ?? t("login.errPasskey"));
     } finally {
       setPasskeyLoading(false);
     }
@@ -44,7 +46,7 @@ export function Login() {
     try {
       await connectPrivy();
     } catch (e: any) {
-      setError(e?.message ?? "Login email gagal. Coba lagi.");
+      setError(e?.message ?? t("login.errEmail"));
     } finally {
       setPrivyLoading(false);
     }
@@ -60,7 +62,7 @@ export function Login() {
           <Wordmark size={34} />
         </div>
         <div className="mx-auto mt-4 max-w-[300px] font-display text-[19px] font-medium leading-[1.4]">
-          Terima bayaran dalam bentuk apapun. Dapat dolar pas.
+          {t("login.tagline")}
         </div>
 
         {error && (
@@ -70,7 +72,7 @@ export function Login() {
         {/* ── Privy: email / Google (recommended for merchants) ── */}
         <div className="mt-8 flex flex-col gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
-            Cara termudah — tanpa wallet
+            {t("login.easiest")}
           </p>
           <button
             onClick={handlePrivy}
@@ -78,24 +80,24 @@ export function Login() {
             className="flex w-full items-center justify-center gap-2.5 rounded-btn bg-[#2F2A6B] py-4 font-display text-[16px] font-semibold text-white disabled:opacity-60"
           >
             {privyLoading ? <Spinner /> : <MailIcon />}
-            {privyLoading ? "Membuka…" : "Masuk dengan Email"}
+            {privyLoading ? t("login.opening") : t("login.emailCta")}
           </button>
           <p className="text-[12px] leading-relaxed text-muted">
-            Masuk pakai email atau Google. Wallet Stellar dibuat otomatis.
+            {t("login.emailHelper")}
           </p>
         </div>
 
         {/* ── Divider ── */}
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-ink/[.08]" />
-          <span className="text-[12px] text-muted">atau pakai biometrik / wallet</span>
+          <span className="text-[12px] text-muted">{t("login.or")}</span>
           <div className="h-px flex-1 bg-ink/[.08]" />
         </div>
 
         {/* ── Passkey / biometric (awam) ── */}
         <div className="flex flex-col gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
-            Untuk pengguna baru
+            {t("login.newUser")}
           </p>
           <button
             onClick={() => handlePasskey("register")}
@@ -103,7 +105,7 @@ export function Login() {
             className="flex w-full items-center justify-center gap-2.5 rounded-btn bg-[#0c0d12] py-4 font-display text-[16px] font-semibold text-white disabled:opacity-60"
           >
             {passkeyLoading ? <Spinner /> : <FingerprintIcon />}
-            {passkeyLoading ? "Menyiapkan…" : "Daftar dengan Sidik Jari"}
+            {passkeyLoading ? t("login.preparing") : t("login.registerPasskey")}
           </button>
           <button
             onClick={() => handlePasskey("login")}
@@ -111,17 +113,17 @@ export function Login() {
             className="flex w-full items-center justify-center gap-2.5 rounded-btn border border-ink/15 bg-paper py-4 font-display text-[16px] font-semibold text-ink disabled:opacity-60"
           >
             {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
-            {passkeyLoading ? "Memverifikasi…" : "Masuk dengan Sidik Jari"}
+            {passkeyLoading ? t("login.verifying") : t("login.loginPasskey")}
           </button>
           <p className="text-[11px] leading-relaxed text-muted">
-            Tidak perlu tahu crypto. Cukup sentuh sidik jari.
+            {t("login.passkeyHelper")}
           </p>
         </div>
 
         {/* ── Classic wallet (Albedo / Freighter) ── */}
         <div className="flex flex-col gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
-            Sudah punya wallet Stellar
+            {t("login.haveWallet")}
           </p>
           <MetalCta className="block w-full">
             <button
@@ -130,17 +132,17 @@ export function Login() {
               className="liquid-surface flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-btn py-4 font-display text-[17px] font-semibold text-white disabled:opacity-60"
             >
               {busy ? <Spinner /> : <WalletIcon />}
-              {busy ? "Menghubungkan…" : "Hubungkan Wallet"}
+              {busy ? t("login.connecting") : t("login.connectWallet")}
             </button>
           </MetalCta>
           <p className="text-[12px] leading-relaxed text-muted">
-            <strong className="text-ink">Albedo</strong> — tanpa install, buka di browser.{" "}
-            <strong className="text-ink">Freighter</strong> — jika sudah punya extension.
+            <strong className="text-ink">Albedo</strong> — {t("login.albedoHelper")}{" "}
+            <strong className="text-ink">Freighter</strong> — {t("login.freighterHelper")}
           </p>
         </div>
 
         <p className="mt-6 text-[12px] text-muted">
-          Dengan masuk, kamu setuju dengan Syarat &amp; Ketentuan Lunas.
+          {t("login.terms")}
         </p>
       </div>
     </main>

@@ -239,7 +239,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             });
             if (!res.ok) {
               const err = await res.json().catch(() => ({ error: res.statusText }));
-              throw new Error(err.error ?? "Gagal deploy smart wallet");
+              throw new Error(err.error ?? "Failed to deploy smart wallet");
             }
           }
 
@@ -295,7 +295,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     } catch {
       localStorage.removeItem(PRIVY_STORAGE_KEY);
       setAuthStatus("ready");
-      throw new Error("Login gagal atau dibatalkan");
+      throw new Error("Login failed or cancelled");
     }
     // Safety timeout: if Privy effect didn't resolve in 10s, reset status
     setTimeout(() => setAuthStatus((s) => (s === "connecting" ? "ready" : s)), 10_000);
@@ -344,7 +344,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ xdr: signedXdr }),
         });
-        if (!res.ok) throw new Error("Submission via Launchtube gagal");
+        if (!res.ok) throw new Error("Submission via Launchtube failed");
         const data = await res.json();
         return data.hash ?? signedXdr;
       }

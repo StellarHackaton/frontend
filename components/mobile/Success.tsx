@@ -365,7 +365,7 @@ export function Success({
               exit={{ opacity: 0 }}
               className="absolute bottom-20 text-[13px] font-medium tracking-[.04em] text-white/30 uppercase"
             >
-              Memverifikasi…
+              Verifying…
             </motion.div>
           )}
         </AnimatePresence>

@@ -3,9 +3,11 @@
 import { WebCard } from "./WebCard";
 import { MetalCta } from "@/components/ui/MetalCta";
 import { useCreateForm } from "@/lib/useCreateForm";
+import { useLang } from "@/lib/i18n";
 
 export function CreateForm() {
   const f = useCreateForm();
+  const { t } = useLang();
 
   return (
     <WebCard>
@@ -52,26 +54,26 @@ export function CreateForm() {
 
       {/* payment type toggle */}
       <div className="mt-7">
-        <div className="mb-2 text-[13px] font-medium text-muted">Tipe pembayaran</div>
+        <div className="mb-2 text-[13px] font-medium text-muted">{t("create.paymentType")}</div>
         <div className="flex gap-2">
-          {(["one_time", "permanent"] as const).map((t) => (
+          {(["one_time", "permanent"] as const).map((type) => (
             <button
-              key={t}
-              onClick={() => f.setType(t)}
+              key={type}
+              onClick={() => f.setType(type)}
               className={`flex-1 rounded-[14px] border py-2.5 font-display text-[14px] font-semibold transition-colors ${
-                f.type === t
+                f.type === type
                   ? "border-primary bg-primary/[.07] text-primary"
                   : "border-ink/[.12] bg-paper text-muted"
               }`}
             >
-              {t === "one_time" ? "1× (custom)" : "Toko (berulang)"}
+              {type === "one_time" ? t("create.oneTime") : t("create.recurring")}
             </button>
           ))}
         </div>
         <p className="mt-2 text-[12px] text-muted">
           {f.type === "one_time"
-            ? "Link sekali pakai untuk 1 buyer — cocok untuk freelancer."
-            : "Halaman produk permanen — buyer bisa bayar berkali-kali."}
+            ? t("create.oneTimeHelperWeb")
+            : t("create.recurringHelperWeb")}
         </p>
       </div>
 
@@ -83,7 +85,7 @@ export function CreateForm() {
             f.valid && !f.submitting ? "" : "opacity-60"
           }`}
         >
-          {f.submitting ? "Creating…" : f.type === "permanent" ? "Buat halaman produk" : "Create payment link"}
+          {f.submitting ? t("create.creating") : f.type === "permanent" ? t("create.createPage") : t("create.createLink")}
         </button>
       </MetalCta>
     </WebCard>

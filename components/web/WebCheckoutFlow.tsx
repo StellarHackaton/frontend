@@ -150,7 +150,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
                   <>
                     <div className="my-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-ink/[.08]" />
-                      <span className="text-[12px] text-muted">atau dari chain lain</span>
+                      <span className="text-[12px] text-muted">or from another chain</span>
                       <div className="h-px flex-1 bg-ink/[.08]" />
                     </div>
                     <CctpCheckout
@@ -329,7 +329,7 @@ function WebSuccess({ co }: { co: ReturnType<typeof useCheckout> }) {
           {stage === "loading" && (
             <motion.div exit={{ opacity: 0 }}
               className="mt-6 text-[13px] font-medium uppercase tracking-[.05em] text-white/30">
-              Memverifikasi…
+              Verifying…
             </motion.div>
           )}
         </AnimatePresence>
