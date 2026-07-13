@@ -295,6 +295,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (saved === "en" || saved === "id") setLangState(saved);
   }, []);
 
+  // Keep <html lang> in sync — screen readers and search crawlers rely on it,
+  // and it never reflects the client-only language choice otherwise.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const setLang = (l: Lang) => {
     setLangState(l);
     window.localStorage.setItem(STORAGE_KEY, l);

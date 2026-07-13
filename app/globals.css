@@ -25,6 +25,17 @@ body {
   height: 0;
 }
 
+/* Brand-consistent keyboard focus ring — indigo, only on :focus-visible so
+   mouse/touch taps stay clean. Inputs/textareas keep their own bespoke
+   focus treatment (colored border + shadow) so they're excluded here. */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid theme("colors.primary.DEFAULT");
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 @layer components {
   /* Glass surface — Liquid Glass design language */
   .glass {

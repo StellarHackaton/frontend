@@ -2,8 +2,11 @@
 
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { useWalletContext } from "@/lib/wallet-context";
+import { useLang } from "@/lib/i18n";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const NAV = [
   {
@@ -58,11 +61,14 @@ export function WebShell({
   const pathname = usePathname();
   const router = useRouter();
   const { address, authStatus, isConnected, disconnect, userInitial } = useWalletContext();
+  const { t } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     setMenuOpen(false);
+    setConfirmSignOut(false);
     await disconnect();
     // redirect handled by auth guard in Dashboard (watches authStatus)
   };
@@ -102,22 +108,28 @@ export function WebShell({
               <button
                 key={n.key}
                 onClick={() => router.push(n.href)}
-                className={`flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] transition-colors ${
-                  active
-                    ? "liquid-nav font-semibold text-primary"
-                    : "text-muted hover:bg-ink/[.04]"
+                className={`relative flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] transition-colors ${
+                  active ? "font-semibold text-primary" : "text-muted hover:bg-ink/[.04]"
                 }`}
               >
+                {active && (
+                  <motion.span
+                    layoutId="webnav-pill"
+                    className="liquid-nav absolute inset-0 rounded-[12px]"
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                  />
+                )}
                 <svg
                   width="18"
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke={active ? "#2F2A6B" : "#6B6A73"}
+                  className="relative"
                 >
                   {n.icon}
                 </svg>
-                {n.label}
+                <span className="relative">{n.label}</span>
               </button>
             );
           })}
@@ -153,10 +165,10 @@ export function WebShell({
                     </div>
                   )}
                   <button
-                    onClick={handleLogout}
+                    onClick={() => { setMenuOpen(false); setConfirmSignOut(true); }}
                     className="w-full px-4 py-3 text-left text-[14px] font-medium text-red-500 hover:bg-red-50"
                   >
-                    Keluar
+                    {t("settings.signOut")}
                   </button>
                 </div>
               )}
@@ -165,6 +177,16 @@ export function WebShell({
         </header>
         <div className="flex-1 p-9">{children}</div>
       </div>
+
+      <ConfirmDialog
+        open={confirmSignOut}
+        title={t("settings.signOutConfirmTitle")}
+        body={t("settings.signOutConfirmBody")}
+        confirmLabel={t("settings.signOut")}
+        danger
+        onConfirm={handleLogout}
+        onClose={() => setConfirmSignOut(false)}
+      />
     </div>
   );
 }
