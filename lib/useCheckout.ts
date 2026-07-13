@@ -114,6 +114,37 @@ export function useCheckout(orderId: string) {
     return () => { cancelled = true; };
   }, [order?.id, address, walletType]);
 
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function stopPoll() {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  }
+
+  function startPoll() {
+    stopPoll();
+    const start = Date.now();
+    pollRef.current = setInterval(async () => {
+      // Give up after 10 minutes
+      if (Date.now() - start > 10 * 60 * 1000) { stopPoll(); setEdge("expired"); setScreen("edge"); return; }
+      try {
+        const res = await fetch(`/api/orders/${orderId}`);
+        const { order: o } = await res.json();
+        if (!o) return;
+        if (o.status === "paid") {
+          stopPoll();
+          esRef.current?.close();
+          setTxHash(o.tx_hash ?? null);
+          setScreen("success");
+        } else if (o.status === "expired") {
+          stopPoll();
+          esRef.current?.close();
+          setEdge("expired");
+          setScreen("edge");
+        }
+      } catch {}
+    }, 3_000);
+  }
+
   function openSSE() {
     esRef.current?.close();
     const es = new EventSource(`/api/stream/${orderId}`);
@@ -121,19 +152,24 @@ export function useCheckout(orderId: string) {
     es.onmessage = ({ data }) => {
       const msg = JSON.parse(data);
       if (msg.type === "paid") {
+        stopPoll();
         setTxHash(msg.txHash);
         setScreen("success");
         es.close();
       } else if (msg.type === "timeout") {
+        stopPoll();
         setEdge("expired");
         setScreen("edge");
         es.close();
       }
     };
+    // SSE died (Vercel timeout) — polling takes over
     es.onerror = () => es.close();
+    // Always start polling as a fallback
+    startPoll();
   }
 
-  useEffect(() => () => { esRef.current?.close(); }, []);
+  useEffect(() => () => { esRef.current?.close(); stopPoll(); }, []);
 
   async function pay() {
     const option = options.find((o) => o.key === selectedKey);
