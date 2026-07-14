@@ -14,6 +14,7 @@ import { EDGE } from "@/lib/checkoutStatus";
 import { useCheckout } from "@/lib/useCheckout";
 import { useWalletContext } from "@/lib/wallet-context";
 import { CctpCheckout } from "@/components/cctp/CctpCheckout";
+import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { useState } from "react";
 
 export function CheckoutFlow({ orderId }: { orderId: string }) {
@@ -162,8 +163,10 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
                   <div className="pointer-events-none absolute -left-6 -top-11 h-40 w-40 rounded-full"
                     style={{ background: "radial-gradient(closest-side,rgba(255,255,255,.65),rgba(255,255,255,0))" }} />
                   <div className="relative flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-[#F1EFEA] text-xl shadow-[inset_0_1px_0_rgba(255,255,255,.8)]">
-                      {co.quotesLoading ? "⋯" : (selected?.emoji ?? "💰")}
+                    <div className="flex-none overflow-hidden rounded-[13px] shadow-[0_2px_8px_rgba(0,0,0,.15)]">
+                      {co.quotesLoading
+                        ? <div className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-[#F1EFEA] text-xl">⋯</div>
+                        : <PaymentIcon code={selected?.assetCode ?? "USDC"} size={40} radius={13} />}
                     </div>
                     <div className="text-left">
                       <div className="text-[11px] uppercase tracking-[.04em] text-muted">Pay with</div>

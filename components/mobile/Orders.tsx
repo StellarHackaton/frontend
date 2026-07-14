@@ -167,7 +167,7 @@ export function Orders() {
                   onClick={() => { setDetail(null); router.push(`/p/${detail.id}`); }}
                   className="w-full rounded-[14px] bg-primary py-3.5 font-semibold text-white active:opacity-80"
                 >
-                  Lihat QR →
+                  {t("orders.viewQr")}
                 </button>
               )}
             </motion.div>

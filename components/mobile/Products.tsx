@@ -242,25 +242,24 @@ export function Products() {
         )}
       </div>
 
-      {/* Bottom sheet */}
+      {/* Centered modal */}
       <AnimatePresence>
         {selected && (
-          <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeSheet}
+            className="fixed inset-0 z-40 flex items-center justify-center px-5 pb-[88px] bg-black/40 backdrop-blur-[3px]"
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={closeSheet}
-              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]"
-            />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 380, damping: 36 }}
-              className="fixed bottom-0 left-0 right-0 z-50 rounded-t-[28px] bg-paper px-5 pb-[calc(env(safe-area-inset-bottom)+24px)] pt-3 shadow-[0_-8px_40px_rgba(0,0,0,.18)]"
+              initial={{ opacity: 0, scale: 0.95, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 8 }}
+              transition={{ type: "spring", stiffness: 400, damping: 32 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-[360px] max-h-[80vh] overflow-y-auto rounded-[24px] bg-paper px-5 pb-6 pt-5 shadow-[0_24px_60px_rgba(0,0,0,.28)]"
             >
-              <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/15" />
 
               {mode === "menu" && (
                 <>
@@ -367,11 +366,11 @@ export function Products() {
                 </>
               )}
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      <Fab onClick={() => router.push("/create")} label={t("nav.newProduct")} />
+      {!selected && <Fab onClick={() => router.push("/create")} label={t("nav.newProduct")} />}
       <TabBar />
     </MobileShell>
   );

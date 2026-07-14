@@ -95,6 +95,7 @@ const dict = {
     "orders.item": "Item",
     "orders.time": "Time",
     "orders.status": "Status",
+    "orders.viewQr": "View QR →",
     "nav.newProduct": "New product",
 
     "products.editTitle": "Edit product",
@@ -224,6 +225,7 @@ const dict = {
     "orders.item": "Item",
     "orders.time": "Waktu",
     "orders.status": "Status",
+    "orders.viewQr": "Lihat QR →",
     "nav.newProduct": "Produk baru",
 
     "products.editTitle": "Edit produk",

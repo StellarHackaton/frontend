@@ -82,6 +82,6 @@ export function useCreateForm() {
     local,
     submitting,
     submit,
-    back: () => router.push("/dashboard"),
+    back: () => router.back(),
   };
 }
