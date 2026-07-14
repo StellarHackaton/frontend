@@ -42,6 +42,8 @@ export function Settings() {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const [sendTxHash, setSendTxHash] = useState("");
+  const [settingUpWallet, setSettingUpWallet] = useState(false);
+  const [setupMsg, setSetupMsg] = useState("");
 
   const { user: privyUser } = usePrivy();
   const privyEmail = privyUser?.email?.address
@@ -86,6 +88,30 @@ export function Settings() {
       setSendError(e.message ?? t("settings.errSend"));
     } finally {
       setSending(false);
+    }
+  }
+
+  async function setupWallet() {
+    if (!address) return;
+    setSettingUpWallet(true);
+    setSetupMsg("");
+    try {
+      const prepRes = await fetch("/api/onboard-privy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address }),
+      });
+      const prep = await prepRes.json();
+      if (prep.alreadySetup) { setSetupMsg("✅ Wallet sudah setup!"); return; }
+      if (!prep.xdr) { setSetupMsg("❌ Gagal ambil setup data"); return; }
+
+      const signedXdr = await signXdr(prep.xdr);
+      await submitToHorizon(signedXdr);
+      setSetupMsg("✅ USDC trustline berhasil ditambah!");
+    } catch (e: any) {
+      setSetupMsg(`❌ ${e.message ?? "Setup gagal"}`);
+    } finally {
+      setSettingUpWallet(false);
     }
   }
 
@@ -152,6 +178,23 @@ export function Settings() {
             <Row label={t("settings.payoutBalance")} value={`$${balanceUsdc.toFixed(2)}`} top display />
             <Row label={t("settings.receives")} value="USDC (Stellar)" top />
             <Row label={t("settings.network")} value="Testnet" top />
+
+            {/* setup wallet trustlines */}
+            <div className="border-t border-ink/[.06] px-5 py-[15px]">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted">USDC Trustline</span>
+                <button
+                  onClick={setupWallet}
+                  disabled={settingUpWallet}
+                  className="rounded-[10px] bg-primary px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50 transition-opacity active:opacity-70"
+                >
+                  {settingUpWallet ? "Setting up…" : "Setup Wallet"}
+                </button>
+              </div>
+              {setupMsg && (
+                <p className="mt-1.5 text-[12px] text-muted">{setupMsg}</p>
+              )}
+            </div>
 
             {/* language */}
             <div className="flex items-center justify-between border-t border-ink/[.06] px-5 py-[15px]">
