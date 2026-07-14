@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { TabBar } from "./TabBar";
@@ -84,6 +84,46 @@ export function Dashboard() {
   });
   const thisMonthSum = thisMonthPaid.reduce((s, o) => s + o.amountUsdc, 0);
   const targetPct = monthlyTarget > 0 ? Math.min(100, (thisMonthSum / monthlyTarget) * 100) : 0;
+
+  // last 6 calendar months of paid revenue, from real orders
+  const monthly = useMemo(() => {
+    const bars: { label: string; value: number }[] = [];
+    const d = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
+      const sum = orders
+        .filter((o) => o.status === "paid" && o.paidAt)
+        .filter((o) => {
+          const p = new Date(o.paidAt!);
+          return p.getFullYear() === m.getFullYear() && p.getMonth() === m.getMonth();
+        })
+        .reduce((s, o) => s + o.amountUsdc, 0);
+      bars.push({ label: m.toLocaleDateString("en-US", { month: "short" }), value: sum });
+    }
+    return bars;
+  }, [orders]);
+  const monthlyMax = Math.max(1, ...monthly.map((m) => m.value));
+  const selectedMonthIdx = monthly.length - 1;
+
+  // last 5 days, order activity per day
+  const activityDays = useMemo(() => {
+    const out: { label: string; date: number; count: number; isToday: boolean }[] = [];
+    const d = new Date();
+    for (let i = 4; i >= 0; i--) {
+      const day = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i);
+      const count = orders.filter((o) => {
+        const c = new Date(o.createdAt);
+        return c.getFullYear() === day.getFullYear() && c.getMonth() === day.getMonth() && c.getDate() === day.getDate();
+      }).length;
+      out.push({
+        label: day.toLocaleDateString("en-US", { weekday: "short" }),
+        date: day.getDate(),
+        count,
+        isToday: i === 0,
+      });
+    }
+    return out;
+  }, [orders]);
 
   function openNotif() {
     setNotifOpen((v) => !v);
@@ -350,8 +390,56 @@ export function Dashboard() {
         {/* grabber */}
         <div className="mx-auto mt-2.5 h-1 w-10 flex-none rounded-full bg-ink/15" />
         <div className="flex-1 overflow-y-auto px-4 pb-[110px]">
-          {/* monthly target progress */}
+          {/* revenue chart */}
           <div className="liquid-glass mt-1 rounded-[20px] p-5">
+            <div className="font-display text-[15px] font-bold">Revenue, last 6 months</div>
+            <div className="mt-4 flex gap-2.5">
+              <div className="flex h-[130px] flex-col justify-between pb-5 text-[10px] text-faint">
+                <span>${monthlyMax.toFixed(0)}</span>
+                <span>${(monthlyMax / 2).toFixed(0)}</span>
+                <span>$0</span>
+              </div>
+              <div className="flex h-[130px] flex-1 items-end justify-between gap-1.5 border-l border-ink/[.08] pl-3">
+                {monthly.map((m, i) => (
+                  <div key={m.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${Math.max(4, (m.value / monthlyMax) * 100)}%` }}
+                      transition={{ duration: 0.6, ease: EASE, delay: i * 0.05 }}
+                      className={`w-full max-w-[20px] rounded-[6px] ${
+                        i === selectedMonthIdx
+                          ? "bg-gradient-to-t from-primary to-[#8B7FFF] shadow-[0_3px_10px_rgba(47,42,107,.35)]"
+                          : "bg-ink/[.10]"
+                      }`}
+                    />
+                    <span className={`text-[10px] ${i === selectedMonthIdx ? "font-semibold text-ink" : "text-faint"}`}>{m.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* this week activity */}
+          <div className="liquid-glass mt-4 rounded-[20px] p-5">
+            <div className="font-display text-[15px] font-bold">This week</div>
+            <div className="mt-4 flex justify-between">
+              {activityDays.map((d) => (
+                <div key={d.label + d.date} className="flex flex-col items-center gap-2">
+                  <span className="text-[11px] text-faint">{d.label}</span>
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-medium ${
+                      d.isToday ? "bg-ink font-bold text-white" : d.count > 0 ? "bg-primary/10 font-semibold text-primary" : "text-ink"
+                    }`}
+                  >
+                    {d.date}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* monthly target progress */}
+          <div className="liquid-glass mt-4 rounded-[20px] p-5">
             <div className="flex items-center justify-between">
               <span className="font-display text-[15px] font-bold">Monthly target</span>
               {editingTarget ? (
