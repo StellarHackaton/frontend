@@ -10,11 +10,10 @@ import { useLang } from "@/lib/i18n";
 
 export function Login() {
   const router = useRouter();
-  const { connect, connectPasskey, connectPrivy, isConnected } = useWalletContext();
+  const { connect, connectPrivy, isConnected } = useWalletContext();
   const { t } = useLang();
   const [error, setError] = useState<string | null>(null);
   const [privyLoading, setPrivyLoading] = useState(false);
-  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [walletLoading, setWalletLoading] = useState(false);
 
   useEffect(() => {
@@ -33,18 +32,6 @@ export function Login() {
     }
   };
 
-  const handlePasskey = async (mode: "register" | "login") => {
-    setError(null);
-    setPasskeyLoading(true);
-    try {
-      await connectPasskey(mode);
-    } catch (e: any) {
-      setError(e?.message ?? t("login.errPasskey"));
-    } finally {
-      setPasskeyLoading(false);
-    }
-  };
-
   const handleConnect = async () => {
     setError(null);
     setWalletLoading(true);
@@ -57,7 +44,7 @@ export function Login() {
     }
   };
 
-  const busy = privyLoading || passkeyLoading || walletLoading;
+  const busy = privyLoading || walletLoading;
 
   return (
     <MobileShell>
@@ -78,7 +65,7 @@ export function Login() {
           <p className="mb-1 text-center text-[13px] text-red-500">{error}</p>
         )}
 
-        {/* ── Section 1: Email / Google ── */}
+        {/* Email / Google via Privy */}
         <SectionLabel text="EASIEST — NO WALLET NEEDED" />
 
         <Button onClick={handlePrivy} disabled={busy}>
@@ -92,28 +79,7 @@ export function Login() {
           {t("login.emailHelper")}
         </p>
 
-        {/* ── Section 2: Passkey / biometric ── */}
-        <SectionLabel text="FOR NEW USERS" />
-
-        <Button variant="glass" onClick={() => handlePasskey("register")} disabled={busy}>
-          <span className="flex items-center justify-center gap-2.5">
-            {passkeyLoading ? <Spinner dark /> : <FingerprintIcon />}
-            {passkeyLoading ? t("login.preparing") : t("login.registerPasskey")}
-          </span>
-        </Button>
-
-        <Button variant="glass" onClick={() => handlePasskey("login")} disabled={busy}>
-          <span className="flex items-center justify-center gap-2.5">
-            {passkeyLoading ? <Spinner dark /> : <FingerprintIcon />}
-            {passkeyLoading ? t("login.verifying") : t("login.loginPasskey")}
-          </span>
-        </Button>
-
-        <p className="text-center text-[11px] leading-relaxed text-muted">
-          {t("login.passkeyHelper")}
-        </p>
-
-        {/* ── Section 3: Classic wallet ── */}
+        {/* Freighter / classic wallet */}
         <SectionLabel text="ALREADY HAVE A STELLAR WALLET" />
 
         <Button variant="glass" onClick={handleConnect} disabled={busy}>
@@ -144,17 +110,6 @@ function MailIcon() {
   );
 }
 
-function FingerprintIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-      <path d="M12 10a2 2 0 0 0-2 2c0 1.5-.5 3-1.5 4" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M12 6a6 6 0 0 1 6 6c0 2.5-.8 4.8-2 6.5" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M12 2a10 10 0 0 1 10 10c0 4-1.5 7.5-4 10" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M5 19.5A14 14 0 0 1 2 12a10 10 0 0 1 5-8.7" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M8 21.5A9.9 9.9 0 0 1 6 16c0-1.5.4-3 1-4.2" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 function WalletIcon() {
   return (

@@ -8,135 +8,114 @@ type Stage = "loading" | "check" | "title" | "receipt";
 
 const EXPLORER_BASE = "https://stellar.expert/explorer/testnet/tx";
 
-function downloadReceiptImage(
+
+function buildReceiptText(item: string, seller: string, priceUSD: number, payingWith: string, txHash: string | null) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const lines = [
+    `✅ Payment confirmed — Lunas ✓`,
+    ``,
+    `Item      : ${item}`,
+    seller ? `Seller    : ${seller}` : null,
+    `Amount    : $${priceUSD.toFixed(2)}`,
+    `Paid with : ${payingWith}`,
+    `Date      : ${dateStr}`,
+    `Time      : ${timeStr}`,
+    txHash ? `TX Hash   : ${txHash}` : null,
+    txHash ? `Proof     : ${EXPLORER_BASE}/${txHash}` : null,
+  ].filter(Boolean);
+  return lines.join("\n");
+}
+
+function buildReceiptBlob(
   item: string,
   seller: string,
   priceUSD: number,
   payingWith: string,
   txHash: string | null,
-) {
-  const W = 640;
-  const rows = [
-    { label: "Item", value: item },
-    seller ? { label: "Seller", value: seller } : null,
-    { label: "Amount", value: `$${priceUSD.toFixed(2)}` },
-    { label: "Paid with", value: payingWith },
-    { label: "Date", value: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) },
-    txHash ? { label: "Proof", value: txHash.slice(0, 20) + "…" } : null,
-  ].filter(Boolean) as { label: string; value: string }[];
+): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
-  const ROW_H = 56;
-  const H = 200 + rows.length * ROW_H + 80;
-  const canvas = document.createElement("canvas");
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d")!;
+    const W = 640;
+    const TX_H = txHash ? 80 : 0;
+    const topRows = [
+      { label: "Item", value: item },
+      seller ? { label: "Seller", value: seller } : null,
+      { label: "Amount", value: `$${priceUSD.toFixed(2)}` },
+      { label: "Paid with", value: payingWith },
+      { label: "Date", value: dateStr },
+      { label: "Time", value: timeStr },
+    ].filter(Boolean) as { label: string; value: string }[];
 
-  // background
-  ctx.fillStyle = "#FBFAF7";
-  ctx.fillRect(0, 0, W, H);
+    const ROW_H = 56;
+    const H = 200 + topRows.length * ROW_H + TX_H + 80;
+    const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d")!;
 
-  // green header
-  ctx.fillStyle = "#1F9D78";
-  ctx.fillRect(0, 0, W, 160);
+    ctx.fillStyle = "#FBFAF7";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#1F9D78";
+    ctx.fillRect(0, 0, W, 160);
 
-  // check circle outer glow
-  ctx.fillStyle = "rgba(255,255,255,.18)";
-  ctx.beginPath();
-  ctx.arc(W / 2, 74, 46, 0, Math.PI * 2);
-  ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.18)";
+    ctx.beginPath(); ctx.arc(W / 2, 74, 46, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(W / 2, 74, 36, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#1F9D78"; ctx.lineWidth = 4.5; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath(); ctx.moveTo(W / 2 - 14, 74); ctx.lineTo(W / 2 - 1, 87); ctx.lineTo(W / 2 + 18, 60); ctx.stroke();
 
-  // check circle
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.arc(W / 2, 74, 36, 0, Math.PI * 2);
-  ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 30px system-ui,-apple-system,sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Lunas ✓", W / 2, 140);
 
-  // checkmark
-  ctx.strokeStyle = "#1F9D78";
-  ctx.lineWidth = 4.5;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(W / 2 - 14, 74);
-  ctx.lineTo(W / 2 - 1, 87);
-  ctx.lineTo(W / 2 + 18, 60);
-  ctx.stroke();
+    ctx.fillStyle = "#FBFAF7";
+    ctx.beginPath(); ctx.moveTo(0, 160);
+    const zw = 18;
+    for (let x = 0; x <= W + zw; x += zw) { ctx.lineTo(x + zw / 2, 172); ctx.lineTo(x + zw, 160); }
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
 
-  // "Lunas ✓" in header
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 30px system-ui,-apple-system,sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("Lunas ✓", W / 2, 140);
+    let y = 198;
+    topRows.forEach((row, i) => {
+      if (i > 0) {
+        ctx.strokeStyle = "rgba(21,22,27,.07)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(40, y - 10); ctx.lineTo(W - 40, y - 10); ctx.stroke();
+      }
+      ctx.font = "15px system-ui,-apple-system,sans-serif";
+      ctx.fillStyle = "#6B6A73"; ctx.textAlign = "left";
+      ctx.fillText(row.label, 40, y + 8);
+      const isAmount = row.label === "Amount";
+      ctx.font = isAmount ? "bold 18px system-ui,-apple-system,sans-serif" : "16px system-ui,-apple-system,sans-serif";
+      ctx.fillStyle = isAmount ? "#1F9D78" : "#15161B"; ctx.textAlign = "right";
+      ctx.fillText(row.value, W - 40, y + 8);
+      y += ROW_H;
+    });
 
-  // zigzag receipt edge
-  ctx.fillStyle = "#FBFAF7";
-  ctx.beginPath();
-  ctx.moveTo(0, 160);
-  const zw = 18;
-  for (let x = 0; x <= W + zw; x += zw) {
-    ctx.lineTo(x + zw / 2, 172);
-    ctx.lineTo(x + zw, 160);
-  }
-  ctx.lineTo(W, H);
-  ctx.lineTo(0, H);
-  ctx.closePath();
-  ctx.fill();
-
-  // rows
-  let y = 198;
-  rows.forEach((row, i) => {
-    if (i > 0) {
-      ctx.strokeStyle = "rgba(21,22,27,.07)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(40, y - 10);
-      ctx.lineTo(W - 40, y - 10);
-      ctx.stroke();
+    if (txHash) {
+      ctx.strokeStyle = "rgba(21,22,27,.07)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(40, y - 10); ctx.lineTo(W - 40, y - 10); ctx.stroke();
+      ctx.font = "15px system-ui,-apple-system,sans-serif";
+      ctx.fillStyle = "#6B6A73"; ctx.textAlign = "left";
+      ctx.fillText("TX Hash", 40, y + 8);
+      ctx.font = "12px ui-monospace,monospace";
+      ctx.fillStyle = "#15161B"; ctx.textAlign = "left";
+      ctx.fillText(txHash.slice(0, 32), 40, y + 30);
+      ctx.fillText(txHash.slice(32), 40, y + 48);
+      y += TX_H;
     }
 
-    ctx.font = "15px system-ui,-apple-system,sans-serif";
-    ctx.fillStyle = "#6B6A73";
-    ctx.textAlign = "left";
-    ctx.fillText(row.label, 40, y + 8);
+    ctx.font = "13px system-ui,-apple-system,sans-serif";
+    ctx.fillStyle = "rgba(21,22,27,.28)"; ctx.textAlign = "center";
+    ctx.fillText("Powered by Lunas · lunas-pay.vercel.app", W / 2, y + 26);
 
-    const isAmount = row.label === "Amount";
-    ctx.font = isAmount ? "bold 18px system-ui,-apple-system,sans-serif" : "16px system-ui,-apple-system,sans-serif";
-    ctx.fillStyle = isAmount ? "#1F9D78" : "#15161B";
-    ctx.textAlign = "right";
-    ctx.fillText(row.value, W - 40, y + 8);
-
-    y += ROW_H;
+    canvas.toBlob((blob) => resolve(blob), "image/png");
   });
-
-  // footer
-  ctx.font = "13px system-ui,-apple-system,sans-serif";
-  ctx.fillStyle = "rgba(21,22,27,.28)";
-  ctx.textAlign = "center";
-  ctx.fillText("Powered by Lunas", W / 2, y + 26);
-
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `lunas-receipt-${Date.now()}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, "image/png");
-}
-
-function buildReceiptText(item: string, seller: string, priceUSD: number, payingWith: string, txHash: string | null) {
-  const lines = [
-    `✅ Payment confirmed — Lunas ✓`,
-    ``,
-    `Item    : ${item}`,
-    seller ? `Seller  : ${seller}` : null,
-    `Amount  : $${priceUSD.toFixed(2)}`,
-    `Paid with: ${payingWith}`,
-    txHash ? `Proof   : ${EXPLORER_BASE}/${txHash}` : null,
-  ].filter(Boolean);
-  return lines.join("\n");
 }
 
 const SHARE_OPTIONS = [
@@ -228,28 +207,59 @@ export function Success({
   const [stage, setStage] = useState<Stage>("loading");
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [receiptBlob, setReceiptBlob] = useState<Blob | null>(null);
 
-  function handleShare(id: string) {
+  // Pre-generate receipt image as soon as receipt is visible
+  useEffect(() => {
+    if (stage === "receipt") {
+      buildReceiptBlob(item, seller, priceUSD, payingWith, txHash ?? null)
+        .then((blob) => setReceiptBlob(blob));
+    }
+  }, [stage, item, seller, priceUSD, payingWith, txHash]);
+
+  async function handleShare(id: string) {
     const text = buildReceiptText(item, seller, priceUSD, payingWith, txHash ?? null);
+    const file = receiptBlob ? new File([receiptBlob], "lunas-receipt.png", { type: "image/png" }) : null;
+    const canShareImage = !!file && !!navigator.canShare?.({ files: [file] });
 
-    if (id === "native" && navigator.share) {
-      navigator.share({ title: "Lunas ✓ — Payment confirmed", text }).catch(() => {});
-    } else if (id === "whatsapp") {
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-    } else if (id === "telegram") {
-      window.open(`https://t.me/share/url?url=${encodeURIComponent(txHash ? `${EXPLORER_BASE}/${txHash}` : "")}&text=${encodeURIComponent(text)}`, "_blank");
+    if (id === "native" || id === "whatsapp" || id === "telegram") {
+      // Try to share the image file natively (works on mobile Chrome/Safari)
+      if (canShareImage) {
+        navigator.share({ files: [file!], title: "Lunas ✓ Receipt" }).catch(() => {});
+      } else if (id === "native" && navigator.share) {
+        navigator.share({ title: "Lunas ✓ — Payment confirmed", text }).catch(() => {});
+      } else if (id === "whatsapp") {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+      } else if (id === "telegram") {
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(txHash ? `${EXPLORER_BASE}/${txHash}` : "")}&text=${encodeURIComponent(text)}`, "_blank");
+      }
+      setShareOpen(false);
     } else if (id === "email") {
       window.open(`mailto:?subject=${encodeURIComponent("Payment confirmed — Lunas ✓")}&body=${encodeURIComponent(text)}`, "_blank");
+      setShareOpen(false);
     } else if (id === "copy") {
-      navigator.clipboard.writeText(text).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
+      // Copy image to clipboard if supported, else fallback to text
+      if (receiptBlob && typeof ClipboardItem !== "undefined") {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": receiptBlob })]);
+        } catch {
+          await navigator.clipboard.writeText(text);
+        }
+      } else {
+        await navigator.clipboard.writeText(text);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } else if (id === "download") {
-      downloadReceiptImage(item, seller, priceUSD, payingWith, txHash ?? null);
+      if (receiptBlob) {
+        const url = URL.createObjectURL(receiptBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `lunas-receipt-${Date.now()}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
     }
-
-    if (id !== "copy" && id !== "download") setShareOpen(false);
   }
 
   useEffect(() => {
