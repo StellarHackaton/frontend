@@ -83,10 +83,21 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
 function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; orderId: string }) {
   const { address, connect, authStatus } = useWalletContext();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [cctpLabel, setCctpLabel] = useState<string | null>(null);
 
   const product = co.order;
   const selected = co.selected;
   const canPay = !!selected && selected.enabled && !!address;
+
+  if (cctpLabel) {
+    return (
+      <MobileShell>
+        <motion.div className="flex flex-1 flex-col" variants={screenIn} initial="initial" animate="animate">
+          <Processing payingWith={cctpLabel} />
+        </motion.div>
+      </MobileShell>
+    );
+  }
 
   return (
     <MobileShell>
@@ -192,8 +203,9 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
                       amountUsdc={co.priceUSD.toFixed(2)}
                       merchantAddress={co.order.merchant_address}
                       orderId={orderId}
-                      onSuccess={() => co.openSSE()}
-                      onError={(msg) => co.setPayError(msg)}
+                      onSuccess={() => { setCctpLabel(null); co.openSSE(); }}
+                      onError={(msg) => { setCctpLabel(null); co.setPayError(msg); }}
+                      onProcessing={(label) => setCctpLabel(label)}
                     />
                   </>
                 )}

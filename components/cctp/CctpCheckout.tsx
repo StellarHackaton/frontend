@@ -19,6 +19,7 @@ interface Props {
   orderId: string;
   onSuccess: () => void;
   onError: (msg: string) => void;
+  onProcessing?: (label: string) => void;
 }
 
 type Step = "idle" | "select-chain" | "connecting" | "approving" | "burning" | "attesting" | "completing" | "done";
@@ -29,15 +30,22 @@ const STEP_LABELS: Record<Step, string> = {
   connecting: "Connecting MetaMask…",
   approving: "Approve USDC…",
   burning: "Sending to Stellar…",
-  attesting: "Waiting for Circle confirmation (~30s)…",
+  attesting: "Waiting for Circle confirmation…",
   completing: "Forwarding USDC to merchant…",
   done: "Payment successful!",
 };
 
-export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, onError }: Props) {
+const PROCESSING_STEPS: Step[] = ["connecting", "approving", "burning", "attesting", "completing"];
+
+export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, onError, onProcessing }: Props) {
   const [step, setStep] = useState<Step>("idle");
   const [selectedChain, setSelectedChain] = useState<EvmChain | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+
+  function goStep(s: Step) {
+    setStep(s);
+    if (PROCESSING_STEPS.includes(s)) onProcessing?.(STEP_LABELS[s]);
+  }
 
   const chains = Object.values(EVM_CHAINS);
 
@@ -139,7 +147,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
   async function pay(chain: EvmChain) {
     setSelectedChain(chain);
     try {
-      setStep("connecting");
+      goStep("connecting");
       const eth = await getProvider();
       const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
       const account = accounts[0];
@@ -151,13 +159,13 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
       const hookData = encodeHookData(merchantAddress);
 
       // Step 1: Approve TokenMessengerV2 to spend USDC + fee
-      setStep("approving");
+      goStep("approving");
       const approveData = encodeApprove(TOKEN_MESSENGER_V2, amount + MAX_FEE);
       const approveTx = await callContract(eth, account, chain.usdcAddress, approveData);
       await waitForReceipt(eth, approveTx);
 
       // Step 2: depositForBurnWithHook
-      setStep("burning");
+      goStep("burning");
       const burnData = encodeDepositForBurnWithHook(
         amount,
         STELLAR_DOMAIN,
@@ -172,7 +180,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
       await waitForReceipt(eth, burnTx);
 
       // Step 3: Poll Circle attestation
-      setStep("attesting");
+      goStep("attesting");
       let message = "";
       let attestation = "";
       for (let i = 0; i < 120; i++) {
@@ -190,7 +198,7 @@ export function CctpCheckout({ amountUsdc, merchantAddress, orderId, onSuccess, 
       if (!message) throw new Error("Attestation timeout — Circle testnet is slow, try resubmitting manually.");
 
       // Step 4: Submit to Stellar via CctpForwarder
-      setStep("completing");
+      goStep("completing");
       const completeRes = await fetch("/api/cctp/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -13,10 +13,12 @@ import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useEffect, useState } from "react";
 import { CctpCheckout } from "@/components/cctp/CctpCheckout";
+import { Processing } from "@/components/ui/Processing";
 
 export function WebCheckoutFlow({ orderId }: { orderId: string }) {
   const co = useCheckout(orderId);
   const { address, connect, authStatus } = useWalletContext();
+  const [cctpLabel, setCctpLabel] = useState<string | null>(null);
 
   if (co.orderLoading) {
     return (
@@ -45,18 +47,10 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
     );
   }
 
-  if (co.screen === "processing") {
+  if (co.screen === "processing" || cctpLabel) {
     return (
       <WebCard>
-        <div className="flex flex-col items-center py-10">
-          <div className="relative mb-7 flex h-[90px] w-[90px] items-center justify-center">
-            <div className="absolute h-[70px] w-[70px] rounded-full"
-              style={{ background: "radial-gradient(closest-side,rgba(47,42,107,.16),rgba(47,42,107,0))" }} />
-            <div className="h-4 w-4 animate-wobble rounded-full bg-primary" />
-          </div>
-          <div className="font-display text-[23px] font-semibold">Processing your payment…</div>
-          <div className="mt-2 text-[15px] text-muted">Paying with {co.selected?.label ?? "…"}</div>
-        </div>
+        <Processing payingWith={cctpLabel ?? co.selected?.label ?? "…"} />
       </WebCard>
     );
   }
@@ -158,8 +152,9 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
                       amountUsdc={co.priceUSD.toFixed(2)}
                       merchantAddress={co.order.merchant_address}
                       orderId={orderId}
-                      onSuccess={() => co.openSSE()}
-                      onError={(msg) => co.setPayError(msg)}
+                      onSuccess={() => { setCctpLabel(null); co.openSSE(); }}
+                      onError={(msg) => { setCctpLabel(null); co.setPayError(msg); }}
+                      onProcessing={(label) => setCctpLabel(label)}
                     />
                   </>
                 )}
