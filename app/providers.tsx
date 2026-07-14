@@ -14,7 +14,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           appearance: {
             theme: "light",
             accentColor: "#2F2A6B",
-            logo: "/icon-192.png",
+            // Privy's login popup fetches this from its own context, so a
+            // relative path 404s — it needs a full absolute URL.
+            logo: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/icons/icon-192.png`,
           },
           embeddedWallets: { createOnLogin: "off" } as any,
         }}

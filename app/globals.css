@@ -163,6 +163,45 @@ a:focus-visible,
     animation: liquidSpin 26s linear infinite;
   }
 
+  /* Colored liquid-glass tints — same frosted glass body, biased iridescence
+     for dashboard stat cards that need to read at a glance (paid/awaiting/etc). */
+  .liquid-glass.tint-emerald::before {
+    background: conic-gradient(
+      from 0deg,
+      rgba(31, 157, 120, 0.22),
+      rgba(16, 210, 160, 0.16),
+      rgba(120, 255, 200, 0.24),
+      rgba(31, 157, 120, 0.22)
+    );
+  }
+  .liquid-glass.tint-amber::before {
+    background: conic-gradient(
+      from 0deg,
+      rgba(255, 170, 40, 0.24),
+      rgba(255, 130, 60, 0.16),
+      rgba(255, 210, 100, 0.26),
+      rgba(255, 170, 40, 0.24)
+    );
+  }
+  .liquid-glass.tint-violet::before {
+    background: conic-gradient(
+      from 0deg,
+      rgba(120, 90, 240, 0.24),
+      rgba(0, 190, 255, 0.16),
+      rgba(168, 85, 247, 0.26),
+      rgba(120, 90, 240, 0.24)
+    );
+  }
+  .liquid-glass.tint-blue::before {
+    background: conic-gradient(
+      from 0deg,
+      rgba(0, 150, 255, 0.24),
+      rgba(80, 200, 255, 0.18),
+      rgba(120, 100, 255, 0.2),
+      rgba(0, 150, 255, 0.24)
+    );
+  }
+
   /* Liquid nav pill — soft frosted active state for sidebar/tab items */
   .liquid-nav {
     position: relative;
