@@ -14,7 +14,8 @@ import { contractConfirmPayment } from "@/lib/contract";
 export const runtime = "nodejs";
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://soroban-testnet.stellar.org";
-const NETWORK = StellarSdk.Networks.TESTNET;
+const IS_MAINNET = process.env.NEXT_PUBLIC_STELLAR_NETWORK === "mainnet";
+const NETWORK = IS_MAINNET ? StellarSdk.Networks.PUBLIC : StellarSdk.Networks.TESTNET;
 
 // Server keypair to pay Stellar tx fees (uses CHECKOUT_ADMIN_SECRET from .env.local)
 const ADMIN_SECRET = process.env.CHECKOUT_ADMIN_SECRET!;
@@ -38,6 +39,27 @@ export async function POST(req: NextRequest) {
 
     const adminKeypair = StellarSdk.Keypair.fromSecret(ADMIN_SECRET);
     const server = new StellarSdk.rpc.Server(RPC_URL);
+    const horizonUrl = IS_MAINNET
+      ? "https://horizon.stellar.org"
+      : "https://horizon-testnet.stellar.org";
+    const usdcIssuer = process.env.NEXT_PUBLIC_USDC_ISSUER ?? "GDUTNTK3AA5RUV3QCFYD3REH4MP7ET6BMIRYH5NGI6SOY6HZUPCINXZ3";
+
+    // Pre-check: verify merchant has USDC trustline
+    try {
+      const acctRes = await fetch(`${horizonUrl}/accounts/${merchantAddress}`);
+      if (acctRes.ok) {
+        const acctData = await acctRes.json();
+        const hasUsdcTrust = acctData.balances?.some(
+          (b: any) => b.asset_code === "USDC" && b.asset_issuer === usdcIssuer
+        );
+        if (!hasUsdcTrust) {
+          return NextResponse.json(
+            { error: "Merchant account has no USDC trustline. Please add USDC to your Stellar wallet first." },
+            { status: 400 }
+          );
+        }
+      }
+    } catch { /* ignore pre-check failure, let simulation catch it */ }
 
     // Convert hex strings to Buffer (strip 0x prefix)
     const messageBytes = Buffer.from(message.replace(/^0x/, ""), "hex");

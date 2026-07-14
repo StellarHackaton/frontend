@@ -33,7 +33,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Attestation API error: ${res.status}` }, { status: 502 });
     }
 
-    const data = await res.json();
+    const text = await res.text();
+    if (!text || !text.trim()) {
+      return NextResponse.json({ status: "pending" });
+    }
+    let data: any;
+    try { data = JSON.parse(text); } catch {
+      return NextResponse.json({ status: "pending" });
+    }
     const msg = data?.messages?.[0];
 
     if (!msg) {

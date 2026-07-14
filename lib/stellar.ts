@@ -130,7 +130,7 @@ export async function buildPaymentXdr(params: {
       })
     )
     .addMemo(StellarSdk.Memo.text(params.memoText))
-    .setTimeout(60)
+    .setTimeout(300)
     .build();
 
   return tx.toXDR();

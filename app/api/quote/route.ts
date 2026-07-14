@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPaymentPaths } from '@/lib/stellar';
-import { getOrder } from '@/lib/db';
+import { getOrder, getProduct } from '@/lib/db';
 
 export const runtime = 'nodejs';
 
@@ -12,7 +12,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'orderId and buyerAddress required' }, { status: 400 });
   }
 
-  const order = await getOrder(orderId);
+  let order = await getOrder(orderId);
+
+  // Fallback: orderId might actually be a product ID (permanent product accessed via /pay/[productId])
+  if (!order) {
+    const product = await getProduct(orderId);
+    if (product) {
+      order = {
+        id: product.id,
+        product_id: product.id,
+        merchant_address: product.merchant_address,
+        amount_stroops: product.price_stroops,
+        status: 'pending',
+        asset_paid: null,
+        tx_hash: null,
+        paid_at: null,
+        created_at: product.created_at,
+      } as any;
+    }
+  }
+
   if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
   if (order.status !== 'pending') {
     return NextResponse.json({ error: 'Order is not pending', status: order.status }, { status: 409 });

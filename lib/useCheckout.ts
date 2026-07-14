@@ -186,7 +186,7 @@ export function useCheckout(orderId: string) {
           buyerAddress: address,
           sendAssetCode: option.assetCode,
           sendAssetIssuer: option.assetIssuer,
-          sendMax: (parseFloat(option.sourceAmount) * 1.005).toFixed(7), // 0.5% slippage
+          sendMax: (parseFloat(option.sourceAmount) * 1.02).toFixed(7), // 2% slippage
           path: option.path,
         }),
       });
@@ -210,18 +210,27 @@ export function useCheckout(orderId: string) {
         });
         if (!submitRes.ok) {
           const err = await submitRes.json().catch(() => ({}));
-          const code =
-            err?.extras?.result_codes?.operations?.[0] ??
-            err?.extras?.result_codes?.transaction ??
-            "submission_failed";
-          throw new Error(code);
+          console.error("Horizon 400:", JSON.stringify(err?.extras?.result_codes));
+          const opCode = err?.extras?.result_codes?.operations?.[0];
+          const txCode = err?.extras?.result_codes?.transaction;
+          const code = opCode ?? txCode ?? "submission_failed";
+          const friendly: Record<string, string> = {
+            op_over_source_max: "Kurs XLM berubah, coba lagi",
+            op_no_path: "Tidak ada jalur konversi, coba aset lain",
+            op_underfunded: "Saldo tidak cukup",
+            op_no_trust: "Merchant belum aktifkan USDC",
+            tx_bad_seq: "Coba lagi (sequence error)",
+            tx_insufficient_fee: "Fee tidak cukup",
+          };
+          throw new Error(friendly[code] ?? code);
         }
         const submitJson = await submitRes.json().catch(() => ({}));
         txHash = submitJson.hash ?? null;
       }
 
-      // Confirm payment in DB directly — don't rely solely on SSE (Vercel timeout)
+      // Store hash in state immediately so Success screen has it from the start
       if (txHash) {
+        setTxHash(txHash);
         fetch(`/api/orders/${orderId}/confirm`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -232,8 +241,12 @@ export function useCheckout(orderId: string) {
       // Open SSE + polling as backup
       openSSE();
     } catch (err: any) {
-      setPayError(err?.message ?? "Payment failed");
-      setScreen("checkout");
+      // If tx was already submitted (txHash exists), don't go back to checkout
+      // — stay on processing and let SSE/poll detect confirmation
+      if (!txHash) {
+        setPayError(err?.message ?? "Payment failed");
+        setScreen("checkout");
+      }
     }
   }
 

@@ -32,7 +32,7 @@ export function Processing({ payingWith }: { payingWith: string }) {
         </div>
       </div>
       <div className="font-display text-[23px] font-semibold">Processing your payment…</div>
-      <div className="mt-2 text-[15px] text-muted">Paying with {payingWith}</div>
+      <div className="mt-2 text-[15px] text-muted">{payingWith}</div>
 
       <style jsx>{`
         ${CONV.map(
