@@ -16,6 +16,7 @@ import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { replayTour } from "@/components/ui/Tour";
 import { MOBILE_TOUR_KEY } from "@/lib/tourSteps";
+import { useToast } from "@/components/ui/Toast";
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS ?? "";
 
@@ -24,6 +25,7 @@ export function Settings() {
   const { address, userInitial, disconnect, storeName, setStoreName, walletType, signXdr } = useWalletContext();
   const { balanceUsdc } = useDashboard(address);
   const { t, lang } = useLang();
+  const toast = useToast();
   const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const [editing, setEditing] = useState(false);
@@ -102,14 +104,14 @@ export function Settings() {
         body: JSON.stringify({ address }),
       });
       const prep = await prepRes.json();
-      if (prep.alreadySetup) { setSetupMsg("✅ Wallet sudah setup!"); return; }
-      if (!prep.xdr) { setSetupMsg("❌ Gagal ambil setup data"); return; }
+      if (prep.alreadySetup) { setSetupMsg(`✅ ${t("settings.walletAlreadySetup")}`); return; }
+      if (!prep.xdr) { setSetupMsg(`❌ ${t("settings.walletSetupFetchFailed")}`); return; }
 
       const signedXdr = await signXdr(prep.xdr);
       await submitToHorizon(signedXdr);
-      setSetupMsg("✅ USDC trustline berhasil ditambah!");
+      setSetupMsg(`✅ ${t("settings.walletSetupSuccess")}`);
     } catch (e: any) {
-      setSetupMsg(`❌ ${e.message ?? "Setup gagal"}`);
+      setSetupMsg(`❌ ${e.message ?? t("settings.walletSetupFailed")}`);
     } finally {
       setSettingUpWallet(false);
     }
@@ -149,14 +151,21 @@ export function Settings() {
                     onClick={async () => {
                       if (!address || !nameInput.trim()) return;
                       setSaving(true);
-                      await fetch("/api/merchant/profile", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ address, storeName: nameInput.trim() }),
-                      });
-                      setStoreName(nameInput.trim());
-                      setEditing(false);
-                      setSaving(false);
+                      try {
+                        const res = await fetch("/api/merchant/profile", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ address, storeName: nameInput.trim() }),
+                        });
+                        if (!res.ok) throw new Error();
+                        setStoreName(nameInput.trim());
+                        setEditing(false);
+                        toast(t("settings.storeNameSaved"), "success");
+                      } catch {
+                        toast(t("settings.storeNameSaveFailed"), "error");
+                      } finally {
+                        setSaving(false);
+                      }
                     }}
                     className="text-[13px] font-semibold text-primary transition-opacity active:opacity-50"
                   >

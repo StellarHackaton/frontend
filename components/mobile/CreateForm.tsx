@@ -20,12 +20,12 @@ export function CreateForm() {
       <div className="flex flex-1 flex-col gap-[26px] px-[22px] py-4">
         <div>
           <div className="mb-2 text-[13px] font-medium text-muted">
-            Product name
+            {t("create.nameLabel")}
           </div>
           <input
             value={f.name}
             onChange={(e) => f.setName(e.target.value)}
-            placeholder="Sunset print A3"
+            placeholder={t("create.namePlaceholder")}
             className={`h-[54px] w-full rounded-[18px] border bg-white/55 px-4 text-base text-ink shadow-[0_6px_18px_rgba(21,22,27,.05),inset_0_1px_0_rgba(255,255,255,.85)] outline-none backdrop-blur-[16px] placeholder:text-faint focus:shadow-[0_0_0_3px_rgba(47,42,107,.14)] ${
               f.touched && f.nameErr
                 ? "border-danger focus:border-danger"
@@ -39,12 +39,12 @@ export function CreateForm() {
 
         <div>
           <div className="mb-2 text-[13px] font-medium text-muted">
-            Description <span className="text-faint">(optional)</span>
+            {t("create.descriptionLabel")} <span className="text-faint">({t("create.optional")})</span>
           </div>
           <textarea
             value={f.description}
             onChange={(e) => f.setDescription(e.target.value)}
-            placeholder="Tell buyers what they're getting…"
+            placeholder={t("create.descriptionPlaceholder")}
             rows={3}
             maxLength={300}
             className="w-full resize-none rounded-[18px] border border-white/70 bg-white/55 px-4 py-3 text-base text-ink shadow-[0_6px_18px_rgba(21,22,27,.05),inset_0_1px_0_rgba(255,255,255,.85)] outline-none backdrop-blur-[16px] placeholder:text-faint focus:border-primary focus:shadow-[0_0_0_3px_rgba(47,42,107,.14)]"
@@ -52,7 +52,7 @@ export function CreateForm() {
         </div>
 
         <div>
-          <div className="mb-3 text-[13px] font-medium text-muted">Price</div>
+          <div className="mb-3 text-[13px] font-medium text-muted">{t("create.priceLabel")}</div>
           <div className="flex items-baseline justify-center gap-1.5 pb-2 pt-5">
             <span className="font-display text-[38px] font-extrabold leading-none text-ink/35">
               $

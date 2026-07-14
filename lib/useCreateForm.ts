@@ -5,10 +5,12 @@ import { useState } from "react";
 import { formatRp } from "@/lib/format";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useToast } from "@/components/ui/Toast";
+import { useLang } from "@/lib/i18n";
 
 export function useCreateForm() {
   const router = useRouter();
   const toast = useToast();
+  const { t } = useLang();
   const { address } = useWalletContext();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -18,11 +20,11 @@ export function useCreateForm() {
   const [submitting, setSubmitting] = useState(false);
 
   const priceNum = parseFloat(price);
-  const nameErr = name.trim() === "" ? "Give your product a name." : "";
+  const nameErr = name.trim() === "" ? t("create.errName") : "";
   const priceErr = !price.trim()
-    ? "Set a price."
+    ? t("create.errPrice")
     : !(priceNum > 0)
-    ? "Price must be more than 0."
+    ? t("create.errPriceMin")
     : "";
   const valid = !nameErr && !priceErr;
   const local = priceNum > 0 ? formatRp(priceNum) : "";
@@ -39,7 +41,7 @@ export function useCreateForm() {
       return;
     }
     if (!address) {
-      toast("Connect your wallet first.", "error");
+      toast(t("create.errWallet"), "error");
       return;
     }
     setSubmitting(true);
@@ -56,11 +58,11 @@ export function useCreateForm() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan produk");
-      toast("Produk berhasil ditambahkan", "success");
+      if (!res.ok) throw new Error(data.error ?? t("create.saveError"));
+      toast(t("create.saveSuccess"), "success");
       router.push("/products");
     } catch (err: any) {
-      toast(err.message ?? "Something went wrong", "error");
+      toast(err.message ?? t("create.errGeneric"), "error");
     } finally {
       setSubmitting(false);
     }

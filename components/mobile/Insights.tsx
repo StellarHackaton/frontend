@@ -5,13 +5,14 @@ import { motion } from "framer-motion";
 import { MobileShell } from "./MobileShell";
 import { MobileHeader } from "@/components/ui/MobileHeader";
 import { TabBar } from "./TabBar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { EASE } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard } from "@/lib/useDashboard";
 
 export function Insights() {
   const { address } = useWalletContext();
-  const { orders } = useDashboard(address);
+  const { orders, loading } = useDashboard(address);
   const [monthlyTarget, setMonthlyTarget] = useState(200);
 
   useEffect(() => {
@@ -77,6 +78,30 @@ export function Insights() {
       <MobileHeader title="Insights" />
 
       <div className="flex-1 overflow-y-auto px-4 pb-[110px] pt-1">
+        {loading ? (
+          <div className="flex flex-col gap-4">
+            <div className="liquid-glass rounded-[20px] p-5">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="mt-5 h-[130px] w-full" rounded="rounded-[14px]" />
+            </div>
+            <div className="liquid-glass rounded-[20px] p-5">
+              <Skeleton className="h-4 w-24" />
+              <div className="mt-4 flex justify-between">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-8" rounded="rounded-full" />
+                ))}
+              </div>
+            </div>
+            <div className="liquid-glass flex items-center justify-between gap-3 rounded-[20px] p-5">
+              <div className="flex-1">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="mt-2 h-3 w-20" />
+              </div>
+              <Skeleton className="h-16 w-16" rounded="rounded-full" />
+            </div>
+          </div>
+        ) : (
+        <>
         {/* revenue chart */}
         <div className="liquid-glass rounded-[20px] p-5">
           <div className="font-display text-[15px] font-bold">Revenue, last 6 months</div>
@@ -155,6 +180,8 @@ export function Insights() {
             </span>
           </div>
         </div>
+        </>
+        )}
       </div>
 
       <TabBar />

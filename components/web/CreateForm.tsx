@@ -19,11 +19,11 @@ export function CreateForm() {
         </div>
       </div>
 
-      <div className="mb-2 text-[13px] font-medium text-muted">Product name</div>
+      <div className="mb-2 text-[13px] font-medium text-muted">{t("create.nameLabel")}</div>
       <input
         value={f.name}
         onChange={(e) => f.setName(e.target.value)}
-        placeholder="Sunset print A3"
+        placeholder={t("create.namePlaceholder")}
         className={`h-[52px] w-full rounded-[14px] border bg-paper px-4 text-base text-ink outline-none placeholder:text-faint focus:shadow-[0_0_0_3px_rgba(47,42,107,.14)] ${
           f.touched && f.nameErr
             ? "border-danger focus:border-danger"
@@ -34,7 +34,7 @@ export function CreateForm() {
         <div className="mt-1.5 text-xs text-danger">{f.nameErr}</div>
       )}
 
-      <div className="mb-2 mt-7 text-[13px] font-medium text-muted">Price</div>
+      <div className="mb-2 mt-7 text-[13px] font-medium text-muted">{t("create.priceLabel")}</div>
       <div className="flex items-baseline justify-center gap-1.5 pb-2 pt-4">
         <span className="font-display text-[38px] font-extrabold leading-none text-ink/35">
           $

@@ -13,6 +13,7 @@ import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { replayTour } from "@/components/ui/Tour";
 import { WEB_TOUR_KEY } from "@/lib/tourSteps";
+import { useToast } from "@/components/ui/Toast";
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS ?? "";
 
@@ -23,6 +24,7 @@ export function Settings() {
   const { user: privyUser } = usePrivy();
   const { balanceUsdc } = useDashboard(address);
   const { t, lang } = useLang();
+  const toast = useToast();
   const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const privyEmail = privyUser?.email?.address
@@ -68,14 +70,21 @@ export function Settings() {
   async function saveName() {
     if (!address || !nameInput.trim()) return;
     setSaving(true);
-    await fetch("/api/merchant/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address, storeName: nameInput.trim() }),
-    });
-    setStoreName(nameInput.trim());
-    setEditing(false);
-    setSaving(false);
+    try {
+      const res = await fetch("/api/merchant/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address, storeName: nameInput.trim() }),
+      });
+      if (!res.ok) throw new Error();
+      setStoreName(nameInput.trim());
+      setEditing(false);
+      toast(t("settings.storeNameSaved"), "success");
+    } catch {
+      toast(t("settings.storeNameSaveFailed"), "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function submitStake() {
