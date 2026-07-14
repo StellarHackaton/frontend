@@ -32,6 +32,12 @@ const TABS = [
     ),
   },
   {
+    key: "insights",
+    label: "Insights",
+    href: "/insights",
+    icon: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />,
+  },
+  {
     key: "settings",
     label: "Settings",
     href: "/settings",
