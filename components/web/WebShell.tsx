@@ -98,7 +98,7 @@ export function WebShell({
         <div className="pl-2.5">
           <Wordmark size={20} />
         </div>
-        <nav className="mt-8 flex flex-col gap-1">
+        <nav data-tour="web-sidebar-nav" className="mt-8 flex flex-col gap-1">
           {NAV.map((n) => {
             const active =
               n.href === "/dashboard"
@@ -144,7 +144,7 @@ export function WebShell({
           </div>
           <div className="flex items-center gap-4">
             {action}
-            <div ref={menuRef} className="relative">
+            <div ref={menuRef} data-tour="web-account-menu" className="relative">
               <button
                 onClick={() => setMenuOpen((o) => !o)}
                 className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full bg-primary-soft font-display font-bold text-primary"

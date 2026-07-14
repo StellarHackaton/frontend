@@ -51,7 +51,10 @@ export function TabBar() {
   return (
     // Floating capsule, centered, detached from edges — Apple-style.
     <div className="pointer-events-none fixed inset-x-0 bottom-[max(18px,env(safe-area-inset-bottom))] z-50 flex justify-center">
-      <nav className="pointer-events-auto flex items-center gap-1 rounded-full bg-ink/80 p-1.5 shadow-[0_18px_40px_rgba(21,22,27,.4)] backdrop-blur-2xl ring-1 ring-white/10">
+      <nav
+        data-tour="mobile-tabbar"
+        className="pointer-events-auto flex items-center gap-1 rounded-full bg-ink/80 p-1.5 shadow-[0_18px_40px_rgba(21,22,27,.4)] backdrop-blur-2xl ring-1 ring-white/10"
+      >
         {TABS.map((t) => {
           const active =
             t.href === "/dashboard"

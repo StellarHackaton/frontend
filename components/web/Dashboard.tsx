@@ -13,6 +13,8 @@ import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
 import { timeAgo } from "@/lib/time";
+import { Tour } from "@/components/ui/Tour";
+import { WEB_TOUR_KEY, WEB_TOUR_STEPS } from "@/lib/tourSteps";
 
 export function Dashboard() {
   const router = useRouter();
@@ -48,9 +50,11 @@ export function Dashboard() {
     <WebShell
       title="Home"
       action={
-        <MetalButton onClick={() => router.push("/create")} full={false} size="sm">
-          {t("nav.newProduct")}
-        </MetalButton>
+        <span data-tour="web-new-product" className="inline-flex">
+          <MetalButton onClick={() => router.push("/create")} full={false} size="sm">
+            {t("nav.newProduct")}
+          </MetalButton>
+        </span>
       }
     >
       {/* balance + stats */}
@@ -61,7 +65,7 @@ export function Dashboard() {
         transition={{ duration: 0.5, ease: EASE }}
       >
         {/* balance */}
-        <div className="liquid-glass flex flex-col rounded-[28px] p-9">
+        <div data-tour="web-balance" className="liquid-glass flex flex-col rounded-[28px] p-9">
           <div className="flex items-center justify-between">
             <div className="text-[13px] uppercase tracking-[.1em] text-muted">
               Balance
@@ -134,7 +138,7 @@ export function Dashboard() {
 
       {/* orders table */}
       <div className="mb-4 font-display text-lg font-semibold">Orders</div>
-      <div className="liquid-glass overflow-hidden rounded-[20px]">
+      <div data-tour="web-orders-table" className="liquid-glass overflow-hidden rounded-[20px]">
         <div className="grid grid-cols-[2fr_1fr_1fr_1fr] border-b border-ink/[.06] px-6 py-4 text-xs font-semibold uppercase tracking-[.06em] text-faint">
           <span>Item</span>
           <span>Time</span>
@@ -192,6 +196,8 @@ export function Dashboard() {
           </motion.div>
         )}
       </div>
+
+      <Tour steps={WEB_TOUR_STEPS} storageKey={WEB_TOUR_KEY} />
     </WebShell>
   );
 }

@@ -109,6 +109,22 @@ export default function Landing() {
               See how it works
             </Link>
           </div>
+
+          <a
+            href="https://faucet.circle.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-primary"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22c4-4 8-7.58 8-12a8 8 0 1 0-16 0c0 4.42 4 8 8 12Z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+            Need testnet USDC on Base? Get some from the Circle faucet
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 7h10v10M7 17 17 7" />
+            </svg>
+          </a>
         </Reveal>
 
         {/* hero phone */}

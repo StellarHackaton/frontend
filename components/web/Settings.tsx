@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard } from "@/lib/useDashboard";
@@ -10,11 +11,14 @@ import { ExchangeIcon } from "@/components/ui/ExchangeIcon";
 import { useLang } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { replayTour } from "@/components/ui/Tour";
+import { WEB_TOUR_KEY } from "@/lib/tourSteps";
 
 const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS ?? "";
 
 
 export function Settings() {
+  const router = useRouter();
   const { address, userInitial, disconnect, storeName, setStoreName, walletType, signXdr } = useWalletContext();
   const { user: privyUser } = usePrivy();
   const { balanceUsdc } = useDashboard(address);
@@ -176,6 +180,20 @@ export function Settings() {
               <span className="text-[15px] text-muted">{t("settings.language")}</span>
               <LanguageToggle />
             </div>
+
+            {/* replay tour */}
+            <button
+              onClick={() => {
+                replayTour(WEB_TOUR_KEY);
+                router.push("/dashboard");
+              }}
+              className="flex w-full items-center justify-between border-t border-ink/[.06] px-7 py-[18px] text-left hover:bg-ink/[.02]"
+            >
+              <span className="text-[15px] text-muted">{t("settings.replayTour")}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F2A6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
 
             {/* verification */}
             <div className="border-t border-ink/[.06] px-7 py-[18px]">

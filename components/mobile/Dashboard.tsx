@@ -13,6 +13,8 @@ import { useDashboard } from "@/lib/useDashboard";
 import { useEscClose } from "@/lib/useEscClose";
 import { useLang } from "@/lib/i18n";
 import { timeAgo } from "@/lib/time";
+import { Tour } from "@/components/ui/Tour";
+import { MOBILE_TOUR_KEY, MOBILE_TOUR_STEPS } from "@/lib/tourSteps";
 
 export function Dashboard() {
   const router = useRouter();
@@ -122,6 +124,7 @@ export function Dashboard() {
         {/* top bar */}
         <div className="relative z-20 mb-7 flex items-center justify-between">
           <button
+            data-tour="mobile-nav-account"
             onClick={() => router.push("/settings")}
             aria-label="Account"
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 font-display text-base font-bold text-white ring-1 ring-white/15 backdrop-blur-md active:scale-90"
@@ -132,6 +135,7 @@ export function Dashboard() {
             )}
           </button>
           <button
+            data-tour="mobile-nav-notif"
             onClick={openNotif}
             aria-label="Notifications"
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur-md active:scale-90"
@@ -221,28 +225,30 @@ export function Dashboard() {
         </AnimatePresence>
 
         {/* balance */}
-        <div className="relative text-[15px] text-white/55">Total balance</div>
-        {loading ? (
-          <div className="relative mt-2 h-12 w-40 animate-pulse rounded-xl bg-white/10" />
-        ) : (
-          <>
-            <div className="tnum relative mt-1 font-display text-[52px] font-extrabold leading-none tracking-[-.04em]">
-              ${whole}
-              <span className="text-white/45">.{cents}</span>
-            </div>
-            <div className="relative mt-1.5 text-[13px] text-white/45">≈ Rp{idr}</div>
-            {balanceCircleUsdc > 0 && (
-              <div className="relative mt-2">
-                <span className="rounded-full bg-indigo-500/20 px-3 py-1 text-[11px] font-semibold text-indigo-300">
-                  ${balanceCircleUsdc.toFixed(2)} Circle USDC (cross-chain)
-                </span>
+        <div data-tour="mobile-balance">
+          <div className="relative text-[15px] text-white/55">Total balance</div>
+          {loading ? (
+            <div className="relative mt-2 h-12 w-40 animate-pulse rounded-xl bg-white/10" />
+          ) : (
+            <>
+              <div className="tnum relative mt-1 font-display text-[52px] font-extrabold leading-none tracking-[-.04em]">
+                ${whole}
+                <span className="text-white/45">.{cents}</span>
               </div>
-            )}
-          </>
-        )}
+              <div className="relative mt-1.5 text-[13px] text-white/45">≈ Rp{idr}</div>
+              {balanceCircleUsdc > 0 && (
+                <div className="relative mt-2">
+                  <span className="rounded-full bg-indigo-500/20 px-3 py-1 text-[11px] font-semibold text-indigo-300">
+                    ${balanceCircleUsdc.toFixed(2)} Circle USDC (cross-chain)
+                  </span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         {/* action pills */}
-        <div className="relative mt-6 flex gap-2.5">
+        <div data-tour="mobile-quick-actions" className="relative mt-6 flex gap-2.5">
           <button
             onClick={() => router.push("/create")}
             className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[15px] font-semibold text-ink shadow-[0_8px_20px_rgba(0,0,0,.25)] active:scale-95"
@@ -391,6 +397,7 @@ export function Dashboard() {
       </motion.div>
 
       <TabBar />
+      <Tour steps={MOBILE_TOUR_STEPS} storageKey={MOBILE_TOUR_KEY} />
     </div>
   );
 }

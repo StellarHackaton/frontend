@@ -271,8 +271,13 @@ export function Success({
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-[#0c0d12]">
-      {/* top animated area */}
-      <div className="relative flex flex-1 flex-col items-center justify-center px-6">
+      {/* top animated area — fills the whole screen while alone, then rises
+          smoothly (layout animation) as the receipt reveals below it. */}
+      <motion.div
+        layout
+        transition={{ type: "spring", stiffness: 260, damping: 30 }}
+        className="relative flex flex-1 flex-col items-center justify-center px-6"
+      >
         {/* ambient glow */}
         <AnimatePresence>
           {stage !== "loading" && (
@@ -285,7 +290,12 @@ export function Success({
         </AnimatePresence>
 
         {/* icon stage */}
-        <div className="relative flex h-36 w-36 items-center justify-center">
+        <motion.div
+          layout
+          animate={{ scale: stage === "receipt" ? 0.8 : 1 }}
+          transition={{ type: "spring", stiffness: 260, damping: 30 }}
+          className="relative flex h-36 w-36 items-center justify-center"
+        >
           {/* spinner */}
           <AnimatePresence>
             {stage === "loading" && (
@@ -342,16 +352,17 @@ export function Success({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
 
         {/* "Lunas ✓" */}
         <AnimatePresence>
           {(stage === "title" || stage === "receipt") && (
             <motion.div
+              layout
               initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0, scale: stage === "receipt" ? 0.86 : 1 }}
               transition={{ type: "spring", stiffness: 280, damping: 22 }}
-              className="mt-6 text-center"
+              className={stage === "receipt" ? "mt-2 text-center" : "mt-6 text-center"}
             >
               <div className="font-display text-[52px] font-extrabold leading-none tracking-[-.03em] text-white">
                 Lunas <span className="text-success">✓</span>
@@ -379,7 +390,7 @@ export function Success({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* receipt sheet slides up */}
       <AnimatePresence>
