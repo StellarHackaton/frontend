@@ -15,18 +15,28 @@ import { useLang } from "@/lib/i18n";
 import { timeAgo } from "@/lib/time";
 import { Tour } from "@/components/ui/Tour";
 import { MOBILE_TOUR_KEY, MOBILE_TOUR_STEPS } from "@/lib/tourSteps";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export function Dashboard() {
   const router = useRouter();
-  const { address, userInitial, authStatus, isConnected, storeName } = useWalletContext();
+  const { address, userInitial, authStatus, isConnected, storeName, disconnect } = useWalletContext();
   const { balanceUsdc, balanceCircleUsdc, orders, loading } = useDashboard(address);
   const { t, lang } = useLang();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [lastSeen, setLastSeen] = useState<number>(0);
   const [monthlyTarget, setMonthlyTarget] = useState(200);
   const [editingTarget, setEditingTarget] = useState(false);
   const [targetInput, setTargetInput] = useState("");
   useEscClose(notifOpen, () => setNotifOpen(false));
+  useEscClose(accountOpen, () => setAccountOpen(false));
+
+  const handleLogout = async () => {
+    setAccountOpen(false);
+    setConfirmSignOut(false);
+    await disconnect();
+  };
 
   useEffect(() => {
     setLastSeen(parseInt(localStorage.getItem("lunas_notif_seen") ?? "0", 10));
@@ -125,7 +135,7 @@ export function Dashboard() {
         <div className="relative z-20 mb-7 flex items-center justify-between">
           <button
             data-tour="mobile-nav-account"
-            onClick={() => router.push("/settings")}
+            onClick={() => { setNotifOpen(false); setAccountOpen((v) => !v); }}
             aria-label="Account"
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 font-display text-base font-bold text-white ring-1 ring-white/15 backdrop-blur-md active:scale-90"
           >
@@ -136,7 +146,7 @@ export function Dashboard() {
           </button>
           <button
             data-tour="mobile-nav-notif"
-            onClick={openNotif}
+            onClick={() => { setAccountOpen(false); openNotif(); }}
             aria-label="Notifications"
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur-md active:scale-90"
           >
@@ -147,6 +157,53 @@ export function Dashboard() {
             {newCount > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#FF5A5A] ring-2 ring-[#0c0d12]" />}
           </button>
         </div>
+
+        {/* account popover */}
+        <AnimatePresence>
+          {accountOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setAccountOpen(false)}
+                className="fixed inset-0 z-30"
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                className="absolute left-6 top-[58px] z-40 w-[240px] origin-top-left overflow-hidden rounded-[20px] bg-paper text-ink shadow-[0_24px_60px_rgba(0,0,0,.45)] ring-1 ring-black/5"
+              >
+                {address && (
+                  <div className="border-b border-ink/[.06] px-4 py-3.5">
+                    <p className="text-[11px] text-muted">{t("settings.wallet")}</p>
+                    <p className="mt-0.5 truncate font-mono text-[12.5px] text-ink">
+                      {address.slice(0, 8)}…{address.slice(-6)}
+                    </p>
+                  </div>
+                )}
+                <button
+                  onClick={() => { setAccountOpen(false); router.push("/settings"); }}
+                  className="flex w-full items-center gap-2.5 border-b border-ink/[.06] px-4 py-3 text-left text-[14px] font-medium text-ink active:bg-ink/[.04]"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 3v3M12 18v3M3 12h3M18 12h3" strokeLinecap="round" />
+                  </svg>
+                  Settings
+                </button>
+                <button
+                  onClick={() => { setAccountOpen(false); setConfirmSignOut(true); }}
+                  className="w-full px-4 py-3 text-left text-[14px] font-medium text-red-500 active:bg-red-50"
+                >
+                  {t("settings.signOut")}
+                </button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* notifications popover */}
         <AnimatePresence>
@@ -398,6 +455,16 @@ export function Dashboard() {
 
       <TabBar />
       <Tour steps={MOBILE_TOUR_STEPS} storageKey={MOBILE_TOUR_KEY} />
+
+      <ConfirmDialog
+        open={confirmSignOut}
+        title={t("settings.signOutConfirmTitle")}
+        body={t("settings.signOutConfirmBody")}
+        confirmLabel={t("settings.signOut")}
+        danger
+        onConfirm={handleLogout}
+        onClose={() => setConfirmSignOut(false)}
+      />
     </div>
   );
 }
