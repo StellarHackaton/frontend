@@ -9,10 +9,9 @@ import { useLang } from "@/lib/i18n";
 
 export function Login() {
   const router = useRouter();
-  const { connect, connectPasskey, connectPrivy, isConnected, authStatus } = useWalletContext();
+  const { connect, connectPrivy, isConnected, authStatus } = useWalletContext();
   const { t } = useLang();
   const [error, setError] = useState<string | null>(null);
-  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [privyLoading, setPrivyLoading] = useState(false);
 
   useEffect(() => {
@@ -25,18 +24,6 @@ export function Login() {
       await connect();
     } catch {
       setError(t("login.errWallet"));
-    }
-  };
-
-  const handlePasskey = async (mode: "register" | "login") => {
-    setError(null);
-    setPasskeyLoading(true);
-    try {
-      await connectPasskey(mode);
-    } catch (e: any) {
-      setError(e?.message ?? t("login.errPasskey"));
-    } finally {
-      setPasskeyLoading(false);
     }
   };
 
@@ -96,32 +83,6 @@ export function Login() {
           <div className="h-px flex-1 bg-ink/[.08]" />
         </div>
 
-        {/* ── Passkey / biometric (awam) ── */}
-        <div className="flex flex-col gap-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
-            {t("login.newUser")}
-          </p>
-          <button
-            onClick={() => handlePasskey("register")}
-            disabled={busy || passkeyLoading}
-            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
-          >
-            {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
-            {passkeyLoading ? t("login.preparing") : t("login.registerPasskey")}
-          </button>
-          <button
-            onClick={() => handlePasskey("login")}
-            disabled={busy || passkeyLoading}
-            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
-          >
-            {passkeyLoading ? <Spinner dark /> : <FingerprintIcon dark />}
-            {passkeyLoading ? t("login.verifying") : t("login.loginPasskey")}
-          </button>
-          <p className="text-[11px] leading-relaxed text-muted">
-            {t("login.passkeyHelper")}
-          </p>
-        </div>
-
         {/* ── Classic wallet (Albedo / Freighter) ── */}
         <div className="flex flex-col gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-muted">
@@ -154,19 +115,6 @@ function MailIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" aria-hidden>
       <rect x="2" y="4" width="20" height="16" rx="2" strokeWidth="1.8" />
       <path d="M2 7l10 7 10-7" strokeWidth="1.8" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function FingerprintIcon({ dark }: { dark?: boolean }) {
-  const color = dark ? "#15161B" : "white";
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} aria-hidden>
-      <path d="M12 10a2 2 0 0 0-2 2c0 1.5-.5 3-1.5 4" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M12 6a6 6 0 0 1 6 6c0 2.5-.8 4.8-2 6.5" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M12 2a10 10 0 0 1 10 10c0 4-1.5 7.5-4 10" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M5 19.5A14 14 0 0 1 2 12a10 10 0 0 1 5-8.7" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M8 21.5A9.9 9.9 0 0 1 6 16c0-1.5.4-3 1-4.2" strokeWidth="1.7" strokeLinecap="round" />
     </svg>
   );
 }
