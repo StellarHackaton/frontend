@@ -314,26 +314,18 @@ export function Settings() {
                   <div className="grid grid-cols-4 gap-2">
                     {SEND_DESTINATIONS.map((ex) => {
                       const active = selectedExchange === ex.id;
-                      const locked = !!ex.mainnetOnly;
                       return (
                         <button
                           key={ex.id}
-                          disabled={locked}
-                          onClick={() => { if (!locked) { setSelectedExchange(ex.id); setSendDest(""); setSendMemo(""); setSendError(""); setSendTxHash(""); } }}
+                          onClick={() => { setSelectedExchange(ex.id); setSendDest(""); setSendMemo(""); setSendError(""); setSendTxHash(""); }}
                           className="relative flex flex-col items-center overflow-hidden rounded-[14px] transition-all duration-150"
                           style={{
                             boxShadow: active ? `0 0 0 2px ${ex.iconBg}` : "0 0 0 1.5px rgba(21,22,27,.09)",
                             transform: active ? "scale(1.05)" : "scale(1)",
-                            opacity: locked ? 0.5 : 1,
                           }}
                         >
                           {active && (
                             <span className="absolute right-1 top-1 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[7px] text-white" style={{ background: ex.iconBg }}>✓</span>
-                          )}
-                          {locked && (
-                            <span className="absolute inset-x-0 top-1 z-10 mx-auto w-fit rounded-full bg-black/70 px-1.5 py-[2px] text-[7px] font-semibold text-white leading-tight text-center">
-                              Mainnet only
-                            </span>
                           )}
                           <div className="aspect-square w-full">
                             <ExchangeIcon id={ex.id} fill />
