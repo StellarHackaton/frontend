@@ -61,7 +61,7 @@ export const SEND_DESTINATIONS = [
   {
     id: "binance", name: "Binance",
     iconBg: "#F0B90B", iconText: "#fff", iconLabel: "B",
-    brandColor: "#F0B90B", needsMemo: true,
+    brandColor: "#F0B90B", needsMemo: true, mainnetOnly: true,
     steps: {
       en: [
         "Open Binance → Wallet menu → Deposit",
@@ -78,7 +78,7 @@ export const SEND_DESTINATIONS = [
   {
     id: "okx", name: "OKX",
     iconBg: "#000", iconText: "#fff", iconLabel: "OKX",
-    brandColor: "#000", needsMemo: true,
+    brandColor: "#000", needsMemo: true, mainnetOnly: true,
     steps: {
       en: [
         "Open OKX → Assets menu → Deposit",
@@ -95,7 +95,7 @@ export const SEND_DESTINATIONS = [
   {
     id: "bybit", name: "Bybit",
     iconBg: "#F7A600", iconText: "#fff", iconLabel: "By",
-    brandColor: "#F7A600", needsMemo: true,
+    brandColor: "#F7A600", needsMemo: true, mainnetOnly: true,
     steps: {
       en: [
         "Open Bybit → Assets menu → Deposit",
@@ -112,7 +112,7 @@ export const SEND_DESTINATIONS = [
   {
     id: "freighter", name: "Freighter",
     iconBg: "#5B4CDB", iconText: "#fff", iconLabel: "⬡",
-    brandColor: "#5B4CDB", needsMemo: false,
+    brandColor: "#5B4CDB", needsMemo: false, mainnetOnly: false,
     steps: {
       en: [
         "Open the Freighter extension in your browser",
