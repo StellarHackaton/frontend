@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckoutOption } from "@/lib/useCheckout";
 import { useEscClose } from "@/lib/useEscClose";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
+import { sheetSpring } from "@/lib/motion";
+import { useLang } from "@/lib/i18n";
 
 interface Props {
   open: boolean;
@@ -15,6 +17,7 @@ interface Props {
 
 export function PayWithSheet({ open, options, selectedKey, onClose, onSelect }: Props) {
   useEscClose(open, onClose);
+  const { t } = useLang();
   return (
     <AnimatePresence>
       {open && (
@@ -31,12 +34,12 @@ export function PayWithSheet({ open, options, selectedKey, onClose, onSelect }: 
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ duration: 0.4, ease: [0.32, 1.4, 0.4, 1] }}
+            transition={sheetSpring}
             className="glass-sheet absolute inset-x-0 bottom-0 rounded-t-[30px] px-5 pb-8 pt-3"
           >
             <div className="mx-auto mb-4 h-1 w-[38px] rounded-full bg-ink/[.16]" />
-            <div className="font-display text-[22px] font-bold tracking-[-.01em]">Pay with</div>
-            <div className="mb-[18px] mt-1 text-sm text-muted">Choose the balance you want to use</div>
+            <div className="font-display text-[22px] font-bold tracking-[-.01em]">{t("checkout.payWith")}</div>
+            <div className="mb-[18px] mt-1 text-sm text-muted">{t("checkout.chooseBalance")}</div>
             <div className="flex flex-col gap-2.5">
               {options.map((o) => {
                 const selected = o.key === selectedKey;

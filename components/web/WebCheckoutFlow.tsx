@@ -3,8 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { WebCard } from "./WebCard";
 import { formatRp, formatUsd } from "@/lib/format";
-import { EASE, listContainer, listItem, screenIn } from "@/lib/motion";
-import { EDGE } from "@/lib/checkoutStatus";
+import { EASE, listContainer, listItem, screenIn, sheetSpring } from "@/lib/motion";
+import { getEdgeConfig } from "@/lib/checkoutStatus";
 import { MetalButton } from "@/components/ui/MetalButton";
 import { DotLoader } from "@/components/ui/DotLoader";
 import { useEscClose } from "@/lib/useEscClose";
@@ -14,10 +14,13 @@ import { useWalletContext } from "@/lib/wallet-context";
 import { useEffect, useState } from "react";
 import { CctpCheckout } from "@/components/cctp/CctpCheckout";
 import { Processing } from "@/components/ui/Processing";
+import { EXPLORER_BASE, SHARE_OPTIONS, useReceiptShare } from "@/lib/receipt";
+import { useLang, type Key } from "@/lib/i18n";
 
 export function WebCheckoutFlow({ orderId }: { orderId: string }) {
   const co = useCheckout(orderId);
   const { address, connect, authStatus } = useWalletContext();
+  const { t } = useLang();
   const [cctpLabel, setCctpLabel] = useState<string | null>(null);
 
   if (co.orderLoading) {
@@ -31,7 +34,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
   }
 
   if (co.screen === "edge" && co.edge) {
-    const cfg = EDGE[co.edge];
+    const cfg = getEdgeConfig(t)[co.edge];
     return (
       <WebCard>
         <div className="flex flex-col items-center py-6 text-center">
@@ -40,7 +43,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
           <div className="mt-3 max-w-[300px] text-[15px] leading-[1.5] text-muted">{cfg.body}</div>
           <div className="mt-8 flex w-full flex-col gap-2.5">
             {cfg.primary && <MetalButton>{cfg.primary}</MetalButton>}
-            <a href="/" className="flex h-11 items-center justify-center text-[15px] text-muted">Back</a>
+            <a href="/" className="flex h-11 items-center justify-center text-[15px] text-muted">{t("common.back")}</a>
           </div>
         </div>
       </WebCard>
@@ -73,7 +76,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
                 {co.order?.product_title?.[0] ?? "?"}
               </div>
               <div>
-                <div className="font-display text-[17px] font-semibold">{co.order?.product_title ?? "Loading…"}</div>
+                <div className="font-display text-[17px] font-semibold">{co.order?.product_title ?? t("checkout.loadingProduct")}</div>
                 {co.order?.merchant_name && (
                   <div className="flex items-center gap-1 text-[12px] text-muted">
                     <span>{co.order.merchant_name}</span>
@@ -89,7 +92,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}>
-              <div className="mb-3 text-[13px] uppercase tracking-[.1em] text-muted">Total</div>
+              <div className="mb-3 text-[13px] uppercase tracking-[.1em] text-muted">{t("checkout.total")}</div>
               <div className="tnum font-display text-[64px] font-extrabold leading-[.95] tracking-[-.045em] sm:text-[72px]">
                 {formatRp(co.priceUSD)}
               </div>
@@ -98,12 +101,12 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
 
             {!address ? (
               <div className="flex flex-col items-center gap-4 rounded-[18px] border border-ink/[.08] bg-paper px-6 py-6 text-center">
-                <div className="text-[15px] font-semibold">Connect your wallet to pay</div>
+                <div className="text-[15px] font-semibold">{t("checkout.connectToPayWeb")}</div>
                 <button
                   onClick={connect}
                   className="liquid-surface rounded-btn px-6 py-3 font-display text-[15px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98]"
                 >
-                  {authStatus === "connecting" ? "Connecting…" : "Connect wallet"}
+                  {authStatus === "connecting" ? t("login.connecting") : t("checkout.connectWalletBtn")}
                 </button>
               </div>
             ) : (
@@ -123,8 +126,8 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
 
                 <div className="my-4 text-center text-[13px] text-muted">
                   {co.edge === "nobalance"
-                    ? "No compatible balance found in this wallet."
-                    : "Pay with any balance you already have."}
+                    ? t("checkout.noBalance")
+                    : t("checkout.payAnyBalance")}
                 </div>
 
                 {canPay ? (
@@ -133,11 +136,11 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
                     whileTap={{ scale: 0.97 }}
                     className="liquid-surface w-full overflow-hidden rounded-btn py-4 font-display text-[17px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98]"
                   >
-                    Pay
+                    {t("checkout.payButton")}
                   </motion.button>
                 ) : (
                   <button disabled className="w-full cursor-not-allowed rounded-btn bg-ink/20 py-4 font-display text-[17px] font-semibold text-muted">
-                    {co.quotesLoading ? "Finding options…" : address ? "Not enough balance" : "Connect wallet"}
+                    {co.quotesLoading ? t("checkout.findingOptions") : address ? t("checkout.notEnoughBalance") : t("checkout.connectWalletBtn")}
                   </button>
                 )}
 
@@ -145,7 +148,7 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
                   <>
                     <div className="my-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-ink/[.08]" />
-                      <span className="text-[12px] text-muted">or from another chain</span>
+                      <span className="text-[12px] text-muted">{t("checkout.orAnotherChain")}</span>
                       <div className="h-px flex-1 bg-ink/[.08]" />
                     </div>
                     <CctpCheckout
@@ -178,10 +181,11 @@ function WebPayPicker({
   onSelect: (key: string) => void;
   loading: boolean;
 }) {
+  const { t } = useLang();
   if (loading) {
     return (
       <div className="flex h-[58px] items-center justify-center rounded-[18px] border border-ink/[.08] bg-paper">
-        <span className="text-[15px] text-muted">Finding payment options…</span>
+        <span className="text-[15px] text-muted">{t("checkout.findingPaymentOptionsWeb")}</span>
       </div>
     );
   }
@@ -243,8 +247,24 @@ function Row({
 
 type SuccessStage = "loading" | "check" | "title" | "receipt";
 
+const SHARE_LABEL_KEY: Record<string, Key> = {
+  native: "checkout.shareNative",
+  whatsapp: "checkout.shareWhatsapp",
+  telegram: "checkout.shareTelegram",
+  email: "checkout.shareEmail",
+  copy: "checkout.shareCopy",
+  download: "checkout.shareDownload",
+};
+
 function WebSuccess({ co }: { co: ReturnType<typeof useCheckout> }) {
+  const { t } = useLang();
   const [stage, setStage] = useState<SuccessStage>("loading");
+  const item = co.order?.product_title ?? t("checkout.productFallback");
+  const payingWith = co.selected?.label ?? "";
+  const { copied, shareOpen, setShareOpen, handleShare } = useReceiptShare(
+    item, "", co.priceUSD, payingWith, co.txHash, stage === "receipt"
+  );
+  useEscClose(shareOpen, () => setShareOpen(false));
 
   useEffect(() => {
     const t1 = setTimeout(() => setStage("check"),   900);
@@ -318,14 +338,14 @@ function WebSuccess({ co }: { co: ReturnType<typeof useCheckout> }) {
               </div>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
                 className="mt-2 text-[14px] text-white/45">
-                Paid with {co.selected?.label ?? "wallet"} · received ${co.priceUSD.toFixed(2)}
+                {t("checkout.paidWithPrefix")} {payingWith} {t("checkout.receivedPrefix")} ${co.priceUSD.toFixed(2)}
               </motion.div>
             </motion.div>
           )}
           {stage === "loading" && (
             <motion.div exit={{ opacity: 0 }}
               className="mt-6 text-[13px] font-medium uppercase tracking-[.05em] text-white/30">
-              Verifying…
+              {t("checkout.verifying")}
             </motion.div>
           )}
         </AnimatePresence>
@@ -335,26 +355,76 @@ function WebSuccess({ co }: { co: ReturnType<typeof useCheckout> }) {
       <AnimatePresence>
         {stage === "receipt" && (
           <motion.div initial={{ y: "100%" }} animate={{ y: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 30 }}
+            transition={sheetSpring}
             className="rounded-t-[24px] bg-paper px-6 pb-6 pt-5 text-ink shadow-[0_-8px_32px_rgba(0,0,0,.3)]">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/15" />
             <div className="mb-4 overflow-hidden rounded-[16px] border border-ink/[.07]">
-              <Row label="Item" value={co.order?.product_title ?? "Product"} />
-              <Row label="Total" value={formatRp(co.priceUSD)} top display />
+              <Row label={t("orders.item")} value={item} />
+              <Row label={t("checkout.total")} value={formatRp(co.priceUSD)} top display />
+              {payingWith && <Row label={t("orders.paidWith")} value={payingWith} top />}
               {co.txHash && (
                 <div className="border-t border-ink/[.06] py-3 px-1">
-                  <a href={`https://stellar.expert/explorer/testnet/tx/${co.txHash}`}
+                  <a href={`${EXPLORER_BASE}/${co.txHash}`}
                     target="_blank" rel="noopener noreferrer"
                     className="text-sm font-semibold text-primary">
-                    View proof ↗
+                    {t("checkout.viewProof")} ↗
                   </a>
                 </div>
               )}
             </div>
-            <MetalButton onClick={() => window.location.href = "/"} preset="gold" className="!py-3 text-[15px]">
-              Done
-            </MetalButton>
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => setShareOpen(true)}
+                className="liquid-glass flex-1 rounded-btn py-3 font-display text-[15px] font-semibold text-ink transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98]"
+              >
+                {t("checkout.shareReceipt")}
+              </button>
+              <div className="flex-1">
+                <MetalButton onClick={() => window.location.href = "/"} preset="gold" className="!py-3 text-[15px]">
+                  {t("checkout.done")}
+                </MetalButton>
+              </div>
+            </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* share sheet */}
+      <AnimatePresence>
+        {shareOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-5"
+              onClick={() => setShareOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={sheetSpring}
+              onClick={(e) => e.stopPropagation()}
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-paper px-6 pb-7 pt-6 text-ink shadow-[0_24px_60px_rgba(0,0,0,.28)]"
+            >
+              <p className="mb-5 text-center font-display text-[17px] font-semibold">{t("checkout.shareReceipt")}</p>
+              <div className="grid grid-cols-3 gap-4">
+                {SHARE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => handleShare(opt.id)}
+                    className="flex flex-col items-center gap-2 transition-transform hover:-translate-y-0.5 active:scale-90"
+                  >
+                    <div className={`flex h-[54px] w-[54px] items-center justify-center rounded-[16px] ${opt.bg} ${opt.color}`}>
+                      {opt.id === "copy" && copied
+                        ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        : opt.icon}
+                    </div>
+                    <span className="text-[11px] text-muted">{opt.id === "copy" && copied ? t("checkout.shareCopied") : t(SHARE_LABEL_KEY[opt.id])}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

@@ -32,3 +32,11 @@ export const listItem: Variants = {
 // Press feedback for tappable surfaces.
 export const tap = { scale: 0.97 } as const;
 export const tapSm = { scale: 0.94 } as const;
+
+// Bottom-sheet reveal (slide up from y:"100%"). Shared so every sheet in the
+// app — pay-with, share, product forms — settles with the same feel.
+export const sheetSpring: Transition = {
+  type: "spring",
+  stiffness: 300,
+  damping: 32,
+};

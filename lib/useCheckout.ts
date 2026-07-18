@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useWalletContext } from "./wallet-context";
 import { formatUsd } from "./format";
+import { useLang } from "./i18n";
 
 export interface CheckoutOption {
   key: string;
@@ -39,6 +40,7 @@ const EMOJI: Record<string, string> = {
 
 export function useCheckout(orderId: string) {
   const { address, walletType, signXdr } = useWalletContext();
+  const { t } = useLang();
 
   const [order, setOrder] = useState<CheckoutOrder | null>(null);
   const [orderLoading, setOrderLoading] = useState(true);
@@ -50,6 +52,7 @@ export function useCheckout(orderId: string) {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [payError, setPayError] = useState<string | null>(null);
   const esRef = useRef<EventSource | null>(null);
+  const payingRef = useRef(false);
 
   // Fetch order on mount
   useEffect(() => {
@@ -172,8 +175,10 @@ export function useCheckout(orderId: string) {
   useEffect(() => () => { esRef.current?.close(); stopPoll(); }, []);
 
   async function pay() {
+    if (payingRef.current) return;
     const option = options.find((o) => o.key === selectedKey);
     if (!option || !address || !order) return;
+    payingRef.current = true;
     setPayError(null);
     setScreen("processing");
     try {
@@ -191,7 +196,7 @@ export function useCheckout(orderId: string) {
         }),
       });
       const { xdr, error: txErr } = await txRes.json();
-      if (!xdr) throw new Error(txErr ?? "Failed to build transaction");
+      if (!xdr) throw new Error(txErr ?? t("checkout.errBuildTx"));
 
       // Sign (passkey: signs+submits via /api/passkey/send; classic: signs only)
       const result = await signXdr(xdr);
@@ -215,12 +220,12 @@ export function useCheckout(orderId: string) {
           const txCode = err?.extras?.result_codes?.transaction;
           const code = opCode ?? txCode ?? "submission_failed";
           const friendly: Record<string, string> = {
-            op_over_source_max: "Kurs XLM berubah, coba lagi",
-            op_no_path: "Tidak ada jalur konversi, coba aset lain",
-            op_underfunded: "Saldo tidak cukup",
-            op_no_trust: "Merchant belum aktifkan USDC",
-            tx_bad_seq: "Coba lagi (sequence error)",
-            tx_insufficient_fee: "Fee tidak cukup",
+            op_over_source_max: t("checkout.errRateChanged"),
+            op_no_path: t("checkout.errNoPath"),
+            op_underfunded: t("checkout.notEnoughBalance"),
+            op_no_trust: t("checkout.errNoTrust"),
+            tx_bad_seq: t("checkout.errBadSeq"),
+            tx_insufficient_fee: t("checkout.errInsufficientFee"),
           };
           throw new Error(friendly[code] ?? code);
         }
@@ -244,7 +249,8 @@ export function useCheckout(orderId: string) {
       // If tx was already submitted (txHash exists), don't go back to checkout
       // — stay on processing and let SSE/poll detect confirmation
       if (!txHash) {
-        setPayError(err?.message ?? "Payment failed");
+        payingRef.current = false;
+        setPayError(err?.message ?? t("checkout.errPaymentFailed"));
         setScreen("checkout");
       }
     }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useLang } from "@/lib/i18n";
+
 const CONV = [
   { x: 54, y: 0, delay: 0 },
   { x: 27, y: 46, delay: 0.32 },
@@ -10,6 +12,7 @@ const CONV = [
 ];
 
 export function Processing({ payingWith }: { payingWith: string }) {
+  const { t } = useLang();
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8">
       <div className="relative mb-11 flex h-[180px] w-[180px] items-center justify-center">
@@ -31,7 +34,7 @@ export function Processing({ payingWith }: { payingWith: string }) {
           <div className="absolute left-[15px] top-[13px] h-[13px] w-[18px] rounded-full bg-white/50 blur-[2px]" />
         </div>
       </div>
-      <div className="font-display text-[23px] font-semibold">Processing your payment…</div>
+      <div className="font-display text-[23px] font-semibold">{t("checkout.processingPayment")}</div>
       <div className="mt-2 text-[15px] text-muted">{payingWith}</div>
 
       <style jsx>{`

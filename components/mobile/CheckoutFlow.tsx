@@ -10,15 +10,17 @@ import { Processing } from "./Processing";
 import { Success } from "./Success";
 import { formatRp, formatUsd } from "@/lib/format";
 import { screenIn } from "@/lib/motion";
-import { EDGE } from "@/lib/checkoutStatus";
+import { getEdgeConfig } from "@/lib/checkoutStatus";
 import { useCheckout } from "@/lib/useCheckout";
 import { useWalletContext } from "@/lib/wallet-context";
+import { useLang } from "@/lib/i18n";
 import { CctpCheckout } from "@/components/cctp/CctpCheckout";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { useState } from "react";
 
 export function CheckoutFlow({ orderId }: { orderId: string }) {
   const co = useCheckout(orderId);
+  const { t } = useLang();
 
   if (co.orderLoading) {
     return (
@@ -31,7 +33,7 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
   }
 
   if (co.screen === "edge" && co.edge) {
-    const cfg = EDGE[co.edge];
+    const cfg = getEdgeConfig(t)[co.edge];
     return (
       <MobileShell>
         <motion.div className="flex flex-1 flex-col" variants={screenIn} initial="initial" animate="animate">
@@ -44,7 +46,7 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
           </div>
           <div className="flex flex-none flex-col gap-1.5 px-[22px] pb-8 pt-3.5">
             {cfg.primary && <Button className="h-[54px] rounded-[20px]">{cfg.primary}</Button>}
-            <a href="/" className="flex h-11 items-center justify-center text-[15px] text-muted">Back</a>
+            <a href="/" className="flex h-11 items-center justify-center text-[15px] text-muted">{t("common.back")}</a>
           </div>
         </motion.div>
       </MobileShell>
@@ -66,7 +68,7 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
       <MobileShell>
         <motion.div key="success" className="flex flex-1 flex-col" variants={screenIn} initial="initial" animate="animate">
           <Success
-            item={co.order?.product_title ?? "Product"}
+            item={co.order?.product_title ?? t("checkout.productFallback")}
             seller=""
             priceUSD={co.priceUSD}
             payingWith={co.selected?.label ?? ""}
@@ -83,6 +85,7 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
 
 function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; orderId: string }) {
   const { address, connect, authStatus } = useWalletContext();
+  const { t } = useLang();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [cctpLabel, setCctpLabel] = useState<string | null>(null);
 
@@ -118,7 +121,7 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
                 {product?.product_title?.[0] ?? "?"}
               </div>
               <div className="relative">
-                <div className="font-display text-[17px] font-semibold">{product?.product_title ?? "Loading…"}</div>
+                <div className="font-display text-[17px] font-semibold">{product?.product_title ?? t("checkout.loadingProduct")}</div>
                 {product?.merchant_name && (
                   <div className="flex items-center gap-1 text-[12px] text-muted">
                     <span>{product.merchant_name}</span>
@@ -136,7 +139,7 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
             >
-              <div className="mb-3 text-[13px] uppercase tracking-[.1em] text-muted">Total</div>
+              <div className="mb-3 text-[13px] uppercase tracking-[.1em] text-muted">{t("checkout.total")}</div>
               <div className="tnum font-display text-[66px] font-extrabold leading-[.95] tracking-[-.045em]">
                 {formatRp(co.priceUSD)}
               </div>
@@ -145,12 +148,12 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
 
             {!address ? (
               <div className="flex flex-col items-center gap-3 rounded-card border border-ink/[.08] bg-white/60 p-5 text-center">
-                <div className="text-[15px] font-semibold">Connect wallet to pay</div>
+                <div className="text-[15px] font-semibold">{t("checkout.connectToPay")}</div>
                 <Button
                   onClick={connect}
                   className="h-[46px] rounded-[18px] text-[15px]"
                 >
-                  {authStatus === "connecting" ? "Connecting…" : "Connect wallet"}
+                  {authStatus === "connecting" ? t("login.connecting") : t("checkout.connectWalletBtn")}
                 </Button>
               </div>
             ) : (
@@ -169,9 +172,9 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
                         : <PaymentIcon code={selected?.assetCode ?? "USDC"} size={40} radius={13} />}
                     </div>
                     <div className="text-left">
-                      <div className="text-[11px] uppercase tracking-[.04em] text-muted">Pay with</div>
+                      <div className="text-[11px] uppercase tracking-[.04em] text-muted">{t("checkout.payWith")}</div>
                       <div className="font-display text-base font-semibold">
-                        {co.quotesLoading ? "Finding options…" : (selected?.label ?? "Select")}
+                        {co.quotesLoading ? t("checkout.findingOptions") : (selected?.label ?? t("checkout.select"))}
                       </div>
                     </div>
                   </div>
@@ -191,15 +194,15 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
 
                 <div className="mt-3 text-center text-[13px] text-muted">
                   {co.edge === "nobalance"
-                    ? "No compatible balance found."
-                    : "Pay with any balance you already have."}
+                    ? t("checkout.noBalance")
+                    : t("checkout.payAnyBalance")}
                 </div>
 
                 {co.order?.merchant_address && (
                   <>
                     <div className="my-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-ink/[.08]" />
-                      <span className="text-[12px] text-muted">or from another chain</span>
+                      <span className="text-[12px] text-muted">{t("checkout.orAnotherChain")}</span>
                       <div className="h-px flex-1 bg-ink/[.08]" />
                     </div>
                     <CctpCheckout
@@ -218,9 +221,9 @@ function CheckoutLive({ co, orderId }: { co: ReturnType<typeof useCheckout>; ord
 
           <div className="flex-none px-[22px] pb-8 pt-3.5">
             {canPay && !co.quotesLoading ? (
-              <Button plain onClick={co.pay}>Pay</Button>
+              <Button plain onClick={co.pay}>{t("checkout.payButton")}</Button>
             ) : address ? (
-              <Button variant="disabled">{co.quotesLoading ? "Finding options…" : "Not enough balance"}</Button>
+              <Button variant="disabled">{co.quotesLoading ? t("checkout.findingOptions") : t("checkout.notEnoughBalance")}</Button>
             ) : null}
           </div>
         </motion.div>

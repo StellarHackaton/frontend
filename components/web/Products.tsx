@@ -12,6 +12,7 @@ import { listContainer, listItem } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardProduct } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
+import { useEscClose } from "@/lib/useEscClose";
 
 type Modal = { type: "edit"; product: DashboardProduct } | { type: "delete"; product: DashboardProduct } | null;
 
@@ -55,6 +56,8 @@ export function Products() {
     setModal({ type: "delete", product: p });
     setOpenMenuId(null);
   }
+
+  useEscClose(!!modal, () => setModal(null));
 
   async function handleGetQR(p: DashboardProduct) {
     if (!address) return;
@@ -216,7 +219,7 @@ export function Products() {
                   <div className="font-display text-[17px] font-semibold leading-tight">{p.title}</div>
                   {p.type === "permanent" && (
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                      Permanent
+                      {t("product.permanent")}
                     </span>
                   )}
                 </div>

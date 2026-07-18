@@ -13,6 +13,7 @@ import { listContainer, listItem } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardProduct } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
+import { useEscClose } from "@/lib/useEscClose";
 
 type SheetMode = "menu" | "edit" | "confirm-delete";
 
@@ -64,6 +65,8 @@ export function Products() {
     setSaving(false);
     setSheetError("");
   }
+
+  useEscClose(!!selected, closeSheet);
 
   async function handleGetQR(p: DashboardProduct) {
     if (!address) return;
@@ -183,12 +186,12 @@ export function Products() {
                 <div className="p-5 pr-10">
                   {/* Title + badge */}
                   <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                    <span className="font-display text-[16px] font-bold leading-tight">
+                    <span className="break-words font-display text-[16px] font-bold leading-tight">
                       {p.title}
                     </span>
                     {p.type === "permanent" && (
                       <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                        Permanent
+                        {t("product.permanent")}
                       </span>
                     )}
                   </div>

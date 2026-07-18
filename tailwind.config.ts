@@ -19,7 +19,10 @@ const config: Config = {
         },
         success: "#1F9D78",
         muted: "#6B6A73",
-        faint: "#9B9AA1",
+        // Darkened from #9B9AA1 — that shade sat at ~2.7:1 contrast on
+        // `paper`, failing WCAG AA for the small (11-13px) text it's used
+        // for app-wide. This hits ~4.57:1.
+        faint: "#737278",
         danger: "#D14343",
       },
       fontFamily: {

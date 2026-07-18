@@ -83,7 +83,7 @@ export function OnboardingFlow() {
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="mt-1 w-full rounded-[14px] bg-primary py-3.5 font-display text-[16px] font-semibold text-white disabled:opacity-50"
+              className="mt-1 w-full rounded-[14px] bg-primary py-3.5 font-display text-[16px] font-semibold text-white transition-transform active:scale-[.98] disabled:opacity-50"
             >
               {loading ? t("common.saving") : t("onboarding.continue")}
             </button>

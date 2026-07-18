@@ -14,6 +14,7 @@ import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardOrder } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
 import { timeAgo, formatDT } from "@/lib/time";
+import { useEscClose } from "@/lib/useEscClose";
 
 const HORIZON_EXPLORER = "https://stellar.expert/explorer/testnet/tx/";
 
@@ -23,6 +24,7 @@ export function Orders() {
   const { orders, loading } = useDashboard(address);
   const [detail, setDetail] = useState<DashboardOrder | null>(null);
   const { t, lang } = useLang();
+  useEscClose(!!detail, () => setDetail(null));
 
   return (
     <WebShell
@@ -111,6 +113,7 @@ export function Orders() {
             >
               <button
                 onClick={() => setDetail(null)}
+                aria-label={t("settings.close")}
                 className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-ink/[.06]"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">

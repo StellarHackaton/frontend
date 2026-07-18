@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import type { Key } from "@/lib/i18n";
 
 export type EdgeState = "nobalance" | "expired" | "paid";
 
@@ -30,24 +31,26 @@ const check = (
   </svg>
 );
 
-export const EDGE: Record<EdgeState, EdgeConfig> = {
-  nobalance: {
-    icon: card,
-    title: "This balance can't be used yet",
-    body: "Top up a supported balance, then try again.",
-    primary: "Top up",
-    tone: "neutral",
-  },
-  expired: {
-    icon: clock,
-    title: "This link has expired",
-    body: "Ask the seller for a fresh payment link.",
-    tone: "neutral",
-  },
-  paid: {
-    icon: check,
-    title: "Already paid",
-    body: "This order is settled. Nothing more to do.",
-    tone: "success",
-  },
-};
+export function getEdgeConfig(t: (key: Key) => string): Record<EdgeState, EdgeConfig> {
+  return {
+    nobalance: {
+      icon: card,
+      title: t("checkout.edgeNobalanceTitle"),
+      body: t("checkout.edgeNobalanceBody"),
+      primary: t("checkout.edgeNobalancePrimary"),
+      tone: "neutral",
+    },
+    expired: {
+      icon: clock,
+      title: t("checkout.edgeExpiredTitle"),
+      body: t("checkout.edgeExpiredBody"),
+      tone: "neutral",
+    },
+    paid: {
+      icon: check,
+      title: t("checkout.edgePaidTitle"),
+      body: t("checkout.edgePaidBody"),
+      tone: "success",
+    },
+  };
+}
