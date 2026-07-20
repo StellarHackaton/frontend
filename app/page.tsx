@@ -152,8 +152,14 @@ export default function Landing() {
               delay={i * 0.08}
               className="rounded-card border border-ink/[.08] bg-white p-8"
             >
-              <div className="mb-4 flex h-16 w-16 items-center justify-center">
-                <Image src={s.img} alt="" width={64} height={64} className="h-full w-full object-contain" />
+              <div className="mb-5 flex h-24 w-24 items-center justify-center">
+                <Image
+                  src={s.img}
+                  alt=""
+                  width={200}
+                  height={200}
+                  className="h-full w-full object-contain drop-shadow-[0_10px_20px_rgba(47,42,107,.18)]"
+                />
               </div>
               <div className="font-display text-[21px] font-bold">{s.title}</div>
               <div className="mt-2.5 text-[15px] leading-[1.55] text-muted">
