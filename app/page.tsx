@@ -1,10 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { Reveal } from "@/components/ui/Reveal";
 import { formatRp } from "@/lib/format";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { PhoneHero } from "@/components/ui/PhoneHero";
-import { MetalLink } from "@/components/ui/MetalButton";
 
 const PAY_METHODS = [
   { code: "EURC",  name: "Euro"           },
@@ -17,38 +17,17 @@ const STEPS = [
   {
     title: "Create a product",
     body: "Set a normal price. We handle the rest.",
-    icon: (
-      <path d="M12 5v14M5 12h14" stroke="#2F2A6B" strokeWidth="2" strokeLinecap="round" />
-    ),
-    tint: "bg-primary-soft",
+    img: "/icons/steps/product-card.png",
   },
   {
     title: "Share the link or QR",
     body: "Send it anywhere your buyers already are.",
-    icon: (
-      <path
-        d="M9 15l6-6M10 6.5l1-1a4 4 0 0 1 6 6l-1 1M14 17.5l-1 1a4 4 0 0 1-6-6l1-1"
-        stroke="#2F2A6B"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-    tint: "bg-primary-soft",
+    img: "/icons/steps/payment-link.png",
   },
   {
     title: "Get paid",
     body: "Buyers pay with any balance. You receive exact dollars.",
-    icon: (
-      <path
-        d="M5 12.5l4.5 4.5L19 7"
-        stroke="#1F9D78"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-    tint: "bg-success/[.12]",
+    img: "/icons/steps/paid-chip.png",
   },
 ];
 
@@ -173,12 +152,8 @@ export default function Landing() {
               delay={i * 0.08}
               className="rounded-card border border-ink/[.08] bg-white p-8"
             >
-              <div
-                className={`mb-5 flex h-12 w-12 items-center justify-center rounded-[14px] ${s.tint}`}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  {s.icon}
-                </svg>
+              <div className="mb-4 flex h-16 w-16 items-center justify-center">
+                <Image src={s.img} alt="" width={64} height={64} className="h-full w-full object-contain" />
               </div>
               <div className="font-display text-[21px] font-bold">{s.title}</div>
               <div className="mt-2.5 text-[15px] leading-[1.55] text-muted">
@@ -291,9 +266,12 @@ export default function Landing() {
             <p className="mt-3.5 text-[17px] text-white/70">
               Create a product, share the link, watch it land.
             </p>
-            <MetalLink href="/login" preset="gold" className="mt-7 px-9 py-4 text-base">
+            <Link
+              href="/login"
+              className="mt-7 inline-block rounded-btn bg-white px-9 py-4 font-display text-base font-semibold text-primary shadow-[0_10px_30px_rgba(0,0,0,.35)] transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.97]"
+            >
               Get started
-            </MetalLink>
+            </Link>
           </div>
         </Reveal>
       </section>
