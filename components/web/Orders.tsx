@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { MetalButton } from "@/components/ui/MetalButton";
 import { EmptyState, ReceiptIcon } from "@/components/ui/EmptyState";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
-import { listContainer, listItem } from "@/lib/motion";
+import { listContainer, listItem, dialogSpring } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardOrder } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
@@ -107,7 +107,7 @@ export function Orders() {
               initial={{ scale: 0.96, opacity: 0, y: 8 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.96, opacity: 0, y: 8 }}
-              transition={{ type: "spring", stiffness: 400, damping: 32 }}
+              transition={dialogSpring}
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-[440px] rounded-[24px] bg-paper p-6 shadow-[0_24px_60px_rgba(0,0,0,.22)]"
             >

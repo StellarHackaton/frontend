@@ -23,7 +23,14 @@ const config: Config = {
         // `paper`, failing WCAG AA for the small (11-13px) text it's used
         // for app-wide. This hits ~4.57:1.
         faint: "#737278",
-        danger: "#D14343",
+        // One destructive-red across the app — replaces the ad-hoc mix of
+        // this token, Tailwind red-500/red-600/red-50/red-100 that had
+        // drifted in across files for the same "delete/error" meaning.
+        danger: {
+          DEFAULT: "#D14343",
+          pressed: "#B93636",
+          soft: "#FBEAEA",
+        },
       },
       fontFamily: {
         display: ["var(--font-hanken)", "ui-sans-serif", "sans-serif"],
@@ -32,6 +39,9 @@ const config: Config = {
       borderRadius: {
         card: "24px",
         btn: "16px",
+        // Bottom-sheet reveals (pay-with, receipt, share) had drifted across
+        // three different literal radii (24/30/32px) for the same gesture.
+        sheet: "28px",
       },
       boxShadow: {
         card: "0 6px 18px rgba(21,22,27,.06)",

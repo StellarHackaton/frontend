@@ -4,7 +4,7 @@ export function StatusPill({ status }: { status: "paid" | "pending" | "expired" 
     status === "paid"
       ? "bg-success/[.14] text-success"
       : status === "expired"
-      ? "bg-red-500/[.12] text-red-500"
+      ? "bg-danger/[.12] text-danger"
       : "bg-ink/[.06] text-muted";
   return (
     <span

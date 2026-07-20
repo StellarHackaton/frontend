@@ -62,7 +62,7 @@ export function Login() {
       {/* Buttons */}
       <div className="flex flex-none flex-col gap-3 px-[22px] pb-10 pt-3">
         {error && (
-          <p className="mb-1 text-center text-[13px] text-red-500">{error}</p>
+          <p className="mb-1 text-center text-[13px] text-danger">{error}</p>
         )}
 
         {/* Email / Google via Privy */}

@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEscClose } from "@/lib/useEscClose";
 import { useLang } from "@/lib/i18n";
+import { dialogSpring } from "@/lib/motion";
 
 interface Props {
   open: boolean;
@@ -34,7 +35,7 @@ export function ConfirmDialog({ open, title, body, confirmLabel, danger, onConfi
               initial={{ opacity: 0, scale: 0.96, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 8 }}
-              transition={{ type: "spring", stiffness: 420, damping: 30 }}
+              transition={dialogSpring}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-[360px] rounded-[24px] bg-paper p-6 text-center shadow-[0_24px_60px_rgba(0,0,0,.22)]"
             >
@@ -50,7 +51,7 @@ export function ConfirmDialog({ open, title, body, confirmLabel, danger, onConfi
                 <button
                   onClick={onConfirm}
                   className={`flex-1 rounded-[14px] py-3 font-display text-[14px] font-semibold text-white ${
-                    danger ? "bg-red-500 active:bg-red-600" : "bg-primary active:bg-primary/90"
+                    danger ? "bg-danger active:bg-danger-pressed" : "bg-primary active:bg-primary/90"
                   }`}
                 >
                   {confirmLabel}

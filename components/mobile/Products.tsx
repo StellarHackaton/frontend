@@ -9,7 +9,7 @@ import { Fab } from "@/components/ui/Fab";
 import { MobileHeader } from "@/components/ui/MobileHeader";
 import { EmptyState, BoxIcon } from "@/components/ui/EmptyState";
 import { formatUsd } from "@/lib/format";
-import { listContainer, listItem } from "@/lib/motion";
+import { listContainer, listItem, dialogSpring } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardProduct } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
@@ -218,7 +218,7 @@ export function Products() {
                     <button
                       onClick={() => handleGetQR(p)}
                       disabled={creatingQR === p.id}
-                      className="flex items-center gap-1.5 rounded-[12px] bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(47,42,107,.25)] active:opacity-80 disabled:opacity-60"
+                      className="flex items-center gap-1.5 rounded-[12px] bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(47,42,107,.25)] active:opacity-80 disabled:opacity-50"
                     >
                       {creatingQR === p.id ? (
                         <>
@@ -259,7 +259,7 @@ export function Products() {
               initial={{ opacity: 0, scale: 0.95, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 8 }}
-              transition={{ type: "spring", stiffness: 400, damping: 32 }}
+              transition={dialogSpring}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-[360px] max-h-[80vh] overflow-y-auto rounded-[24px] bg-paper px-5 pb-6 pt-5 shadow-[0_24px_60px_rgba(0,0,0,.28)]"
             >
@@ -283,14 +283,14 @@ export function Products() {
                     onClick={() => setMode("confirm-delete")}
                     className="flex w-full items-center gap-3 rounded-[16px] px-4 py-3.5 text-left active:bg-ink/[.04]"
                   >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-red-500">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-danger-soft text-danger">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="3 6 5 6 21 6" />
                         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                         <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                       </svg>
                     </span>
-                    <span className="font-semibold text-red-500">{t("products.deleteProduct")}</span>
+                    <span className="font-semibold text-danger">{t("products.deleteProduct")}</span>
                   </button>
                 </>
               )}
@@ -325,7 +325,7 @@ export function Products() {
                     step="0.01"
                     className="mb-5 w-full rounded-[12px] border border-ink/[.12] bg-white px-4 py-3 font-mono text-[15px] outline-none focus:border-primary"
                   />
-                  {sheetError && <p className="mb-3 text-[13px] text-red-500">{sheetError}</p>}
+                  {sheetError && <p className="mb-3 text-[13px] text-danger">{sheetError}</p>}
                   <div className="flex gap-3">
                     <button
                       onClick={() => setMode("menu")}
@@ -350,7 +350,7 @@ export function Products() {
                   <p className="mb-5 text-[14px] text-muted">
                     <span className="font-semibold text-ink">{selected.title}</span> {t("products.deleteBody")}
                   </p>
-                  {sheetError && <p className="mb-3 text-[13px] text-red-500">{sheetError}</p>}
+                  {sheetError && <p className="mb-3 text-[13px] text-danger">{sheetError}</p>}
                   <div className="flex gap-3">
                     <button
                       onClick={() => setMode("menu")}
@@ -361,7 +361,7 @@ export function Products() {
                     <button
                       onClick={confirmDelete}
                       disabled={saving}
-                      className="flex-1 rounded-[14px] bg-red-500 py-3.5 font-semibold text-white transition-transform active:scale-[.98] disabled:opacity-50"
+                      className="flex-1 rounded-[14px] bg-danger py-3.5 font-semibold text-white transition-transform active:scale-[.98] disabled:opacity-50"
                     >
                       {saving ? t("products.deleting") : t("products.delete")}
                     </button>

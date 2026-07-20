@@ -151,8 +151,8 @@ export function Dashboard() {
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur-md active:scale-90"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)">
-              <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" strokeWidth="1.7" strokeLinejoin="round" />
-              <path d="M10 19a2 2 0 0 0 4 0" strokeWidth="1.7" strokeLinecap="round" />
+              <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" strokeWidth="1.8" strokeLinejoin="round" />
+              <path d="M10 19a2 2 0 0 0 4 0" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
             {newCount > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#FF5A5A] ring-2 ring-[#0c0d12]" />}
           </button>
@@ -196,7 +196,7 @@ export function Dashboard() {
                 </button>
                 <button
                   onClick={() => { setAccountOpen(false); setConfirmSignOut(true); }}
-                  className="w-full px-4 py-3 text-left text-[14px] font-medium text-red-500 active:bg-red-50"
+                  className="w-full px-4 py-3 text-left text-[14px] font-medium text-danger active:bg-danger-soft"
                 >
                   {t("settings.signOut")}
                 </button>

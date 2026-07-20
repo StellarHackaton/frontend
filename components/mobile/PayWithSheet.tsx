@@ -35,7 +35,7 @@ export function PayWithSheet({ open, options, selectedKey, onClose, onSelect }: 
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={sheetSpring}
-            className="glass-sheet absolute inset-x-0 bottom-0 rounded-t-[30px] px-5 pb-8 pt-3"
+            className="glass-sheet absolute inset-x-0 bottom-0 rounded-t-sheet px-5 pb-8 pt-3"
           >
             <div className="mx-auto mb-4 h-1 w-[38px] rounded-full bg-ink/[.16]" />
             <div className="font-display text-[22px] font-bold tracking-[-.01em]">{t("checkout.payWith")}</div>

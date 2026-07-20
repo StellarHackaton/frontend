@@ -6,7 +6,7 @@ import { formatRp, formatUsd } from "@/lib/format";
 import { EASE, listContainer, listItem, screenIn, sheetSpring } from "@/lib/motion";
 import { getEdgeConfig } from "@/lib/checkoutStatus";
 import { MetalButton } from "@/components/ui/MetalButton";
-import { DotLoader } from "@/components/ui/DotLoader";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useEscClose } from "@/lib/useEscClose";
 import { useCheckout, CheckoutOption } from "@/lib/useCheckout";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
@@ -26,9 +26,19 @@ export function WebCheckoutFlow({ orderId }: { orderId: string }) {
   if (co.orderLoading) {
     return (
       <WebCard>
-        <div className="flex items-center justify-center py-16">
-          <DotLoader />
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-[46px] w-[46px] flex-none" rounded="rounded-[14px]" />
+          <div>
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="mt-2 h-3 w-20" />
+          </div>
         </div>
+        <div className="flex flex-col items-center py-9">
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="mt-4 h-16 w-52" />
+          <Skeleton className="mt-3 h-4 w-24" />
+        </div>
+        <Skeleton className="h-[58px] w-full" rounded="rounded-[18px]" />
       </WebCard>
     );
   }
@@ -356,7 +366,7 @@ function WebSuccess({ co }: { co: ReturnType<typeof useCheckout> }) {
         {stage === "receipt" && (
           <motion.div initial={{ y: "100%" }} animate={{ y: 0 }}
             transition={sheetSpring}
-            className="rounded-t-[24px] bg-paper px-6 pb-6 pt-5 text-ink shadow-[0_-8px_32px_rgba(0,0,0,.3)]">
+            className="rounded-t-sheet bg-paper px-6 pb-6 pt-5 text-ink shadow-[0_-8px_32px_rgba(0,0,0,.3)]">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/15" />
             <div className="mb-4 overflow-hidden rounded-[16px] border border-ink/[.07]">
               <Row label={t("orders.item")} value={item} />

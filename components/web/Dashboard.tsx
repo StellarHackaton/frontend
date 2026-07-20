@@ -163,7 +163,7 @@ export function Dashboard() {
       action={
         <div className="flex items-center gap-3">
           <div className="liquid-glass flex items-center gap-2 rounded-btn px-4 py-2.5 text-[13.5px] text-muted transition-shadow focus-within:shadow-[0_0_0_2px_rgba(47,42,107,.28)]">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-none">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="flex-none">
               <circle cx="11" cy="11" r="7" />
               <path d="m21 21-4.3-4.3" />
             </svg>
@@ -312,7 +312,7 @@ export function Dashboard() {
           loading={loading}
           tint="emerald"
           icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 6 9 17l-5-5" />
             </svg>
           }
@@ -450,7 +450,7 @@ export function Dashboard() {
         </div>
       </motion.div>
 
-      {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
+      {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
       {/* orders table */}
       <div className="mb-4 flex items-center justify-between">

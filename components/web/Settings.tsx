@@ -233,7 +233,7 @@ export function Settings() {
                     placeholder={t("settings.txHashPlaceholder")}
                     className="w-full rounded-[12px] border border-ink/[.12] bg-white px-4 py-3 font-mono text-[13px] text-ink outline-none placeholder:text-faint"
                   />
-                  {stakeError && <p className="text-[13px] text-red-500">{stakeError}</p>}
+                  {stakeError && <p className="text-[13px] text-danger">{stakeError}</p>}
                   <button
                     disabled={staking || !txHashInput.trim()}
                     onClick={submitStake}
@@ -347,7 +347,7 @@ export function Settings() {
                             <div>
                               <label className="mb-1.5 flex items-center justify-between text-[13px]">
                                 <span className="font-medium text-ink">{t("settings.memo")}</span>
-                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-600">{t("settings.required")}</span>
+                                <span className="rounded-full bg-danger-soft px-2 py-0.5 text-[11px] font-semibold text-danger">{t("settings.required")}</span>
                               </label>
                               <input
                                 value={sendMemo}
@@ -387,7 +387,7 @@ export function Settings() {
                       </div>
 
                       {sendError && (
-                        <div className="mb-4 rounded-[12px] bg-red-50 px-4 py-3 text-[13px] text-red-600">
+                        <div className="mb-4 rounded-[12px] bg-danger-soft px-4 py-3 text-[13px] text-danger">
                           {sendError}
                         </div>
                       )}
@@ -408,7 +408,7 @@ export function Settings() {
                         <button
                           disabled={sending || !sendDest.trim() || !sendAmount.trim() || (ex.needsMemo && !sendMemo.trim())}
                           onClick={sendUsdc}
-                          className="w-full rounded-[14px] py-3.5 font-display text-[15px] font-semibold text-white shadow-md transition-opacity disabled:opacity-40"
+                          className="w-full rounded-[14px] py-3.5 font-display text-[15px] font-semibold text-white shadow-md transition-opacity disabled:opacity-50"
                           style={{ background: `linear-gradient(135deg, ${ex.iconBg}, ${ex.iconBg}cc)` }}
                         >
                           {sending ? t("settings.sending") : `${t("settings.sendUsdcTo")} ${ex.name} →`}
@@ -423,7 +423,7 @@ export function Settings() {
 
           <button
             onClick={() => setConfirmSignOut(true)}
-            className="liquid-glass !border-red-400/40 mt-6 w-full rounded-btn py-3.5 font-display text-[15px] font-semibold text-red-500"
+            className="liquid-glass !border-danger/40 mt-6 w-full rounded-btn py-3.5 font-display text-[15px] font-semibold text-danger"
           >
             {t("settings.signOut")}
           </button>

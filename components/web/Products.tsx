@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { MetalButton } from "@/components/ui/MetalButton";
 import { EmptyState, BoxIcon } from "@/components/ui/EmptyState";
 import { formatUsd } from "@/lib/format";
-import { listContainer, listItem } from "@/lib/motion";
+import { listContainer, listItem, dialogSpring } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardProduct } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
@@ -199,7 +199,7 @@ export function Products() {
                       </button>
                       <button
                         onClick={() => openDelete(p)}
-                        className="flex w-full items-center gap-2.5 px-4 py-3 text-[13px] font-semibold text-red-500 hover:bg-red-50"
+                        className="flex w-full items-center gap-2.5 px-4 py-3 text-[13px] font-semibold text-danger hover:bg-danger-soft"
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="3 6 5 6 21 6" />
@@ -240,7 +240,7 @@ export function Products() {
                 <button
                   onClick={() => handleGetQR(p)}
                   disabled={creatingQR === p.id}
-                  className="flex items-center gap-1.5 rounded-[11px] bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(47,42,107,.2)] hover:bg-primary/90 disabled:opacity-60"
+                  className="flex items-center gap-1.5 rounded-[11px] bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(47,42,107,.2)] hover:bg-primary/90 disabled:opacity-50"
                 >
                   {creatingQR === p.id ? (
                     <>
@@ -280,7 +280,7 @@ export function Products() {
               initial={{ opacity: 0, scale: 0.96, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 8 }}
-              transition={{ type: "spring", stiffness: 420, damping: 30 }}
+              transition={dialogSpring}
               className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[24px] bg-paper p-7 shadow-[0_24px_60px_rgba(0,0,0,.22)]"
             >
               {modal.type === "edit" && (
@@ -313,7 +313,7 @@ export function Products() {
                     step="0.01"
                     className="mb-5 w-full rounded-[12px] border border-ink/[.12] bg-white px-4 py-3 font-mono text-[15px] text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-                  {modalError && <p className="mb-3 text-[13px] text-red-500">{modalError}</p>}
+                  {modalError && <p className="mb-3 text-[13px] text-danger">{modalError}</p>}
                   <div className="flex gap-3">
                     <button
                       onClick={() => setModal(null)}
@@ -338,7 +338,7 @@ export function Products() {
                   <p className="mb-6 text-[15px] text-muted">
                     <span className="font-semibold text-ink">{modal.product.title}</span> {t("products.deleteBody")}
                   </p>
-                  {modalError && <p className="mb-3 text-[13px] text-red-500">{modalError}</p>}
+                  {modalError && <p className="mb-3 text-[13px] text-danger">{modalError}</p>}
                   <div className="flex gap-3">
                     <button
                       onClick={() => setModal(null)}
@@ -349,7 +349,7 @@ export function Products() {
                     <button
                       onClick={confirmDelete}
                       disabled={saving}
-                      className="flex-1 rounded-[12px] bg-red-500 py-3 font-semibold text-white hover:bg-red-600 disabled:opacity-50"
+                      className="flex-1 rounded-[12px] bg-danger py-3 font-semibold text-white hover:bg-danger-pressed disabled:opacity-50"
                     >
                       {saving ? t("products.deleting") : t("products.delete")}
                     </button>

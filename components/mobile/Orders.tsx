@@ -10,7 +10,7 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import { RowSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState, ReceiptIcon } from "@/components/ui/EmptyState";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
-import { listContainer, listItem } from "@/lib/motion";
+import { listContainer, listItem, dialogSpring } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard, type DashboardOrder } from "@/lib/useDashboard";
 import { useLang } from "@/lib/i18n";
@@ -98,7 +98,7 @@ export function Orders() {
               initial={{ opacity: 0, scale: 0.95, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 8 }}
-              transition={{ type: "spring", stiffness: 400, damping: 32 }}
+              transition={dialogSpring}
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-h-full overflow-y-auto rounded-[24px] bg-paper px-5 pb-6 pt-5 shadow-[0_24px_60px_rgba(0,0,0,.28)]"
             >

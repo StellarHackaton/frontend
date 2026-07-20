@@ -176,7 +176,7 @@ export function Success({
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             transition={sheetSpring}
-            className="rounded-t-[32px] bg-paper px-[22px] pb-8 pt-5 shadow-[0_-12px_40px_rgba(0,0,0,.35)]"
+            className="rounded-t-sheet bg-paper px-[22px] pb-8 pt-5 shadow-[0_-12px_40px_rgba(0,0,0,.35)]"
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/15" />
             <div className="mb-4 overflow-hidden rounded-[20px] border border-ink/[.07]">
@@ -224,7 +224,7 @@ export function Success({
                   <motion.div
                     initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                     transition={sheetSpring}
-                    className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] bg-paper px-5 pb-10 pt-5 shadow-[0_-8px_40px_rgba(0,0,0,.18)]"
+                    className="fixed inset-x-0 bottom-0 z-50 rounded-t-sheet bg-paper px-5 pb-10 pt-5 shadow-[0_-8px_40px_rgba(0,0,0,.18)]"
                   >
                     <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-ink/15" />
                     <p className="mb-5 text-center font-display text-[17px] font-semibold text-ink">{t("checkout.shareReceipt")}</p>

@@ -166,7 +166,7 @@ export function WebShell({
                   )}
                   <button
                     onClick={() => { setMenuOpen(false); setConfirmSignOut(true); }}
-                    className="w-full px-4 py-3 text-left text-[14px] font-medium text-red-500 hover:bg-red-50"
+                    className="w-full px-4 py-3 text-left text-[14px] font-medium text-danger hover:bg-danger-soft"
                   >
                     {t("settings.signOut")}
                   </button>

@@ -40,3 +40,11 @@ export const sheetSpring: Transition = {
   stiffness: 300,
   damping: 32,
 };
+
+// Centered dialog pop-in (scale + fade), for ConfirmDialog / Toast /
+// detail-modal patterns — keeps that gesture on one spring app-wide.
+export const dialogSpring: Transition = {
+  type: "spring",
+  stiffness: 420,
+  damping: 30,
+};

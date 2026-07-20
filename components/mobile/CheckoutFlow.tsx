@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/ui/Wordmark";
-import { DotLoader } from "@/components/ui/DotLoader";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { MobileShell } from "./MobileShell";
 import { PayWithSheet } from "./PayWithSheet";
 import { Processing } from "./Processing";
@@ -25,8 +25,23 @@ export function CheckoutFlow({ orderId }: { orderId: string }) {
   if (co.orderLoading) {
     return (
       <MobileShell>
-        <div className="flex flex-1 items-center justify-center">
-          <DotLoader />
+        <div className="flex h-[54px] flex-none items-center px-6">
+          <Wordmark />
+        </div>
+        <div className="flex flex-1 flex-col px-[22px] pb-4 pt-2">
+          <div className="glass relative flex items-center gap-3 overflow-hidden rounded-card p-3">
+            <Skeleton className="h-[46px] w-[46px] flex-none" rounded="rounded-[15px]" />
+            <div className="flex-1">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="mt-2 h-3 w-20" />
+            </div>
+          </div>
+          <div className="my-auto flex flex-col items-center py-[30px]">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="mt-3.5 h-14 w-44" />
+            <Skeleton className="mt-3 h-4 w-24" />
+          </div>
+          <Skeleton className="h-[62px] w-full" rounded="rounded-card" />
         </div>
       </MobileShell>
     );

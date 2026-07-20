@@ -53,7 +53,7 @@ export function Login() {
         </div>
 
         {error && (
-          <p className="mt-4 text-[13px] text-red-500">{error}</p>
+          <p className="mt-4 text-[13px] text-danger">{error}</p>
         )}
 
         {/* ── Privy: email / Google (recommended for merchants) ── */}
@@ -65,7 +65,7 @@ export function Login() {
             <button
               onClick={handlePrivy}
               disabled={busy || privyLoading}
-              className="liquid-surface flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-btn py-4 font-display text-[16px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
+              className="liquid-surface flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-btn py-4 font-display text-[16px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-50"
             >
               {privyLoading ? <Spinner /> : <MailIcon />}
               {privyLoading ? t("login.opening") : t("login.emailCta")}
@@ -91,7 +91,7 @@ export function Login() {
           <button
             onClick={handleConnect}
             disabled={busy}
-            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-60"
+            className="liquid-glass !border-primary/40 flex w-full items-center justify-center gap-2.5 rounded-btn py-4 font-display text-[16px] font-semibold text-primary transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98] disabled:opacity-50"
           >
             {busy ? <Spinner dark /> : <WalletIcon />}
             {busy ? t("login.connecting") : t("login.connectWallet")}

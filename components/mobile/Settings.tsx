@@ -135,7 +135,7 @@ export function Settings() {
 
           <div className="overflow-hidden rounded-[20px] border border-white/65 bg-white/55 backdrop-blur-[16px]">
             {/* store name */}
-            <div className="flex items-center justify-between px-5 py-[15px]">
+            <div className="flex items-center justify-between px-5 py-4">
               <span className="text-sm text-muted">{t("settings.storeName")}</span>
               {editing ? (
                 <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export function Settings() {
             <Row label={t("settings.network")} value="Testnet" top />
 
             {/* setup wallet trustlines */}
-            <div className="border-t border-ink/[.06] px-5 py-[15px]">
+            <div className="border-t border-ink/[.06] px-5 py-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted">USDC Trustline</span>
                 <button
@@ -206,7 +206,7 @@ export function Settings() {
             </div>
 
             {/* language */}
-            <div className="flex items-center justify-between border-t border-ink/[.06] px-5 py-[15px]">
+            <div className="flex items-center justify-between border-t border-ink/[.06] px-5 py-4">
               <span className="text-sm text-muted">{t("settings.language")}</span>
               <LanguageToggle />
             </div>
@@ -217,7 +217,7 @@ export function Settings() {
                 replayTour(MOBILE_TOUR_KEY);
                 router.push("/dashboard");
               }}
-              className="flex w-full items-center justify-between border-t border-ink/[.06] px-5 py-[15px] text-left transition-opacity active:opacity-60"
+              className="flex w-full items-center justify-between border-t border-ink/[.06] px-5 py-4 text-left transition-opacity active:opacity-60"
             >
               <span className="text-sm text-muted">{t("settings.replayTour")}</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F2A6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -226,7 +226,7 @@ export function Settings() {
             </button>
 
             {/* verification */}
-            <div className="border-t border-ink/[.06] px-5 py-[15px]">
+            <div className="border-t border-ink/[.06] px-5 py-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted">{t("settings.storeStatus")}</span>
                 {verified ? (
@@ -254,7 +254,7 @@ export function Settings() {
                     placeholder={t("settings.txHashPlaceholder")}
                     className="w-full rounded-[10px] border border-ink/[.12] bg-white px-3 py-2.5 font-mono text-[12px] text-ink outline-none placeholder:text-faint"
                   />
-                  {stakeError && <p className="text-[12px] text-red-500">{stakeError}</p>}
+                  {stakeError && <p className="text-[12px] text-danger">{stakeError}</p>}
                   <button
                     disabled={staking || !txHashInput.trim()}
                     onClick={async () => {
@@ -289,7 +289,7 @@ export function Settings() {
         {/* Direct USDC transfer */}
         <div className="flex-none px-[22px] pt-3.5">
           <div className="overflow-hidden rounded-[20px] border border-white/65 bg-white/55 backdrop-blur-[16px]">
-            <div className="flex items-center justify-between px-5 py-[15px]">
+            <div className="flex items-center justify-between px-5 py-4">
               <div>
                 <span className="text-sm font-semibold text-ink">{t("settings.sendUsdcTitle")}</span>
                 <p className="text-[11px] text-muted">{t("settings.sendUsdcSub")}</p>
@@ -388,7 +388,7 @@ export function Settings() {
                             <div>
                               <label className="mb-1.5 flex items-center justify-between text-[12px]">
                                 <span className="font-medium text-ink">{t("settings.memo")}</span>
-                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">{t("settings.required")}</span>
+                                <span className="rounded-full bg-danger-soft px-2 py-0.5 text-[10px] font-semibold text-danger">{t("settings.required")}</span>
                               </label>
                               <input
                                 value={sendMemo}
@@ -419,7 +419,7 @@ export function Settings() {
                       </div>
 
                       {sendError && (
-                        <div className="rounded-[10px] bg-red-50 px-3 py-2.5 text-[12px] text-red-600">{sendError}</div>
+                        <div className="rounded-[10px] bg-danger-soft px-3 py-2.5 text-[12px] text-danger">{sendError}</div>
                       )}
 
                       {sendTxHash ? (
@@ -436,7 +436,7 @@ export function Settings() {
                         <button
                           disabled={sending || !sendDest.trim() || !sendAmount.trim() || (ex.needsMemo && !sendMemo.trim())}
                           onClick={sendUsdc}
-                          className="w-full rounded-[12px] py-3 font-display text-sm font-semibold text-white shadow-sm transition-transform active:scale-[.98] disabled:opacity-40"
+                          className="w-full rounded-[12px] py-3 font-display text-sm font-semibold text-white shadow-sm transition-transform active:scale-[.98] disabled:opacity-50"
                           style={{ background: ex.iconBg }}
                         >
                           {sending ? t("settings.sending") : `${t("settings.sendUsdcTo")} ${ex.name} →`}
@@ -475,7 +475,7 @@ function Row({
   label: string; value: string; top?: boolean; display?: boolean; mono?: boolean;
 }) {
   return (
-    <div className={`flex items-center justify-between px-5 py-[15px] ${top ? "border-t border-ink/[.06]" : ""}`}>
+    <div className={`flex items-center justify-between px-5 py-4 ${top ? "border-t border-ink/[.06]" : ""}`}>
       <span className="text-sm text-muted">{label}</span>
       <span className={display ? "tnum font-display text-sm font-bold text-ink" : mono ? "truncate font-mono text-[12px] text-ink" : "text-sm text-ink"}>
         {value}
