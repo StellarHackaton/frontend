@@ -4,6 +4,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { formatRp } from "@/lib/format";
 import { PaymentIcon } from "@/components/ui/PaymentIcon";
 import { PhoneHero } from "@/components/ui/PhoneHero";
+import { MetalLink } from "@/components/ui/MetalButton";
 
 const PAY_METHODS = [
   { code: "EURC",  name: "Euro"           },
@@ -265,19 +266,35 @@ export default function Landing() {
 
       {/* closing CTA */}
       <section className="px-5 py-14 sm:px-14">
-        <Reveal className="mx-auto max-w-[1240px] rounded-card bg-primary p-10 text-center sm:p-16">
-          <h2 className="font-display text-[30px] font-extrabold tracking-[-.03em] text-white sm:text-[42px]">
-            Start getting paid in minutes
-          </h2>
-          <p className="mt-3.5 text-[17px] text-white/70">
-            Create a product, share the link, watch it land.
-          </p>
-          <Link
-            href="/login"
-            className="liquid-glass !border-white/30 mt-7 inline-block rounded-btn px-8 py-4 text-center font-display text-base font-semibold text-white"
-          >
-            Get started
-          </Link>
+        <Reveal className="relative mx-auto max-w-[1240px] overflow-hidden rounded-card p-10 text-center sm:p-16">
+          {/* rich layered gradient — diagonal base + two soft glows, no flat fill */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(135deg, #38316F 0%, #2F2A6B 45%, #1D1948 78%, #15161B 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute -left-[10%] -top-[35%] h-[420px] w-[420px] rounded-full"
+            style={{ background: "radial-gradient(closest-side, rgba(168,85,247,.35), transparent)" }}
+          />
+          <div
+            className="pointer-events-none absolute -bottom-[40%] -right-[8%] h-[460px] w-[460px] rounded-full"
+            style={{ background: "radial-gradient(closest-side, rgba(0,190,255,.22), transparent)" }}
+          />
+
+          <div className="relative">
+            <h2 className="font-display text-[30px] font-extrabold tracking-[-.03em] text-white sm:text-[42px]">
+              Start getting paid in minutes
+            </h2>
+            <p className="mt-3.5 text-[17px] text-white/70">
+              Create a product, share the link, watch it land.
+            </p>
+            <MetalLink href="/login" preset="gold" className="mt-7 px-9 py-4 text-base">
+              Get started
+            </MetalLink>
+          </div>
         </Reveal>
       </section>
 
