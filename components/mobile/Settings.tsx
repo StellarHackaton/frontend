@@ -45,6 +45,8 @@ export function Settings() {
   const [sendTxHash, setSendTxHash] = useState("");
   const [settingUpWallet, setSettingUpWallet] = useState(false);
   const [setupMsg, setSetupMsg] = useState("");
+  const [setupOk, setSetupOk] = useState(false);
+  const [alreadySetup, setAlreadySetup] = useState(false);
 
   const { user: privyUser } = usePrivy();
   const privyEmail = privyUser?.email?.address
@@ -103,14 +105,26 @@ export function Settings() {
         body: JSON.stringify({ address }),
       });
       const prep = await prepRes.json();
-      if (prep.alreadySetup) { setSetupMsg(`✅ ${t("settings.walletAlreadySetup")}`); return; }
-      if (!prep.xdr) { setSetupMsg(`❌ ${t("settings.walletSetupFetchFailed")}`); return; }
+      if (prep.alreadySetup) {
+        setAlreadySetup(true);
+        setSetupOk(true);
+        setSetupMsg(t("settings.walletAlreadySetup"));
+        return;
+      }
+      if (!prep.xdr) {
+        setSetupOk(false);
+        setSetupMsg(t("settings.walletSetupFetchFailed"));
+        return;
+      }
 
       const signedXdr = await signXdr(prep.xdr);
       await submitToHorizon(signedXdr);
-      setSetupMsg(`✅ ${t("settings.walletSetupSuccess")}`);
+      setAlreadySetup(true);
+      setSetupOk(true);
+      setSetupMsg(t("settings.walletSetupSuccess"));
     } catch (e: any) {
-      setSetupMsg(`❌ ${e.message ?? t("settings.walletSetupFailed")}`);
+      setSetupOk(false);
+      setSetupMsg(e.message ?? t("settings.walletSetupFailed"));
     } finally {
       setSettingUpWallet(false);
     }
@@ -187,20 +201,32 @@ export function Settings() {
             <Row label={t("settings.receives")} value="USDC (Stellar)" top />
             <Row label={t("settings.network")} value="Testnet" top />
 
-            {/* setup wallet trustlines */}
+            {/* setup wallet for USDC */}
             <div className="border-t border-ink/[.06] px-5 py-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted">USDC Trustline</span>
+                <span className="text-sm text-muted">USDC Setup</span>
                 <button
                   onClick={setupWallet}
-                  disabled={settingUpWallet}
+                  disabled={settingUpWallet || alreadySetup}
                   className="rounded-[10px] bg-primary px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50 transition-opacity active:opacity-70"
                 >
-                  {settingUpWallet ? "Setting up…" : "Setup Wallet"}
+                  {settingUpWallet ? "Setting up…" : alreadySetup ? "Set up" : "Setup Wallet"}
                 </button>
               </div>
               {setupMsg && (
-                <p className="mt-1.5 text-[12px] text-muted">{setupMsg}</p>
+                <p className="mt-1.5 flex items-center gap-1.5 text-[12px] text-muted">
+                  {setupOk ? (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1F9D78" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="flex-none">
+                      <path d="M5 12.5l4.5 4.5L19 7" />
+                    </svg>
+                  ) : (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-none text-danger">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 8v5M12 16h.01" />
+                    </svg>
+                  )}
+                  {setupMsg}
+                </p>
               )}
             </div>
 
