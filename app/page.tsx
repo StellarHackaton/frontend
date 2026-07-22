@@ -108,22 +108,6 @@ export default function Landing() {
               See how it works
             </a>
           </div>
-
-          <a
-            href="https://faucet.circle.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-primary"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22c4-4 8-7.58 8-12a8 8 0 1 0-16 0c0 4.42 4 8 8 12Z" />
-              <circle cx="12" cy="10" r="2.5" />
-            </svg>
-            Need testnet USDC on Base? Get some from the Circle faucet
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 7h10v10M7 17 17 7" />
-            </svg>
-          </a>
         </Reveal>
       </section>
 
@@ -150,8 +134,8 @@ export default function Landing() {
       </section>
 
       {/* how it works */}
-      <section id="how-it-works" className="px-5 py-16 sm:px-14 sm:py-20">
-        <Reveal className="mb-12 text-center">
+      <section id="how-it-works" className="px-5 py-10 sm:px-14 sm:py-20">
+        <Reveal className="mb-8 text-center sm:mb-12">
           <h2 className="font-display text-[30px] font-bold tracking-[-.025em] sm:text-[38px]">
             How it works
           </h2>
@@ -203,7 +187,7 @@ export default function Landing() {
       </section>
 
       {/* value blocks */}
-      <section className="flex flex-col gap-8 px-5 pb-16 sm:px-14">
+      <section className="flex flex-col gap-6 px-5 pb-10 sm:gap-8 sm:px-14 sm:pb-16">
         <Reveal>
         <ValueBlock
           title="Your buyers pay with what they already have"
@@ -242,10 +226,10 @@ export default function Landing() {
       {/* pricing */}
       <span id="pricing" />
       <section
-        className="border-t border-ink/[.06] px-5 py-16 sm:px-14 sm:py-20"
+        className="border-t border-ink/[.06] px-5 py-10 sm:px-14 sm:py-20"
         style={{ background: "linear-gradient(180deg, #F8F7F4 0%, #EFEDE8 100%)" }}
       >
-        <div className="mb-10 text-center">
+        <div className="mb-8 text-center sm:mb-10">
           <h2 className="font-display text-[30px] font-bold tracking-[-.025em] sm:text-[38px]">
             Honest pricing
           </h2>
@@ -327,8 +311,10 @@ export default function Landing() {
         </Reveal>
       </section>
 
-      {/* closing CTA */}
-      <section className="px-5 py-14 sm:px-14">
+      {/* closing CTA — hidden on mobile: the pricing card right above it
+          already ends in its own full-width "Get started" button, so this
+          read as a second, near-identical CTA block right after it */}
+      <section className="hidden px-5 py-14 sm:block sm:px-14">
         <Reveal className="relative mx-auto max-w-[1240px] overflow-hidden rounded-card p-10 text-center sm:p-16">
           {/* rich layered gradient — diagonal base + two soft glows, no flat fill */}
           <div
@@ -375,6 +361,21 @@ export default function Landing() {
           <span>Company</span>
           <span>Legal</span>
         </div>
+        <a
+          href="https://faucet.circle.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 inline-flex items-center gap-1.5 text-[12.5px] text-faint transition-colors hover:text-primary"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22c4-4 8-7.58 8-12a8 8 0 1 0-16 0c0 4.42 4 8 8 12Z" />
+            <circle cx="12" cy="10" r="2.5" />
+          </svg>
+          Need testnet USDC on Base? Get some from the Circle faucet
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 7h10v10M7 17 17 7" />
+          </svg>
+        </a>
       </footer>
     </div>
   );
@@ -405,12 +406,12 @@ function ValueBlock({
     </div>
   );
   const visual = (
-    <div className="flex min-h-[240px] items-center justify-center rounded-[20px] border border-ink/[.06] bg-paper p-6">
+    <div className="flex min-h-0 items-center justify-center rounded-[20px] border border-ink/[.06] bg-paper p-6 sm:min-h-[240px]">
       {children}
     </div>
   );
   return (
-    <div className="grid items-center gap-12 rounded-[28px] border border-ink/[.08] bg-white p-8 sm:p-12 lg:grid-cols-2">
+    <div className="grid items-center gap-6 rounded-[28px] border border-ink/[.08] bg-white p-6 sm:gap-12 sm:p-12 lg:grid-cols-2">
       {reverse ? (
         <>
           {visual}
