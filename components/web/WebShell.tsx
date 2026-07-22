@@ -150,9 +150,6 @@ export function WebShell({
                 className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full bg-primary-soft font-display font-bold text-primary"
               >
                 {userInitial}
-                {address && (
-                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
-                )}
               </button>
               {menuOpen && (
                 <div className="absolute right-0 top-11 z-50 min-w-[160px] overflow-hidden rounded-[14px] border border-ink/[.08] bg-white shadow-[0_8px_30px_rgba(21,22,27,.12)]">

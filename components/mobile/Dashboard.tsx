@@ -20,7 +20,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 export function Dashboard() {
   const router = useRouter();
   const { address, userInitial, authStatus, isConnected, storeName, disconnect } = useWalletContext();
-  const { balanceUsdc, balanceCircleUsdc, orders, loading } = useDashboard(address);
+  const { balanceUsdc, balanceCircleUsdc, orders, products, loading } = useDashboard(address);
   const { t, lang } = useLang();
   const [notifOpen, setNotifOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -29,8 +29,36 @@ export function Dashboard() {
   const [monthlyTarget, setMonthlyTarget] = useState(200);
   const [editingTarget, setEditingTarget] = useState(false);
   const [targetInput, setTargetInput] = useState("");
+  const [sharing, setSharing] = useState(false);
   useEscClose(notifOpen, () => setNotifOpen(false));
   useEscClose(accountOpen, () => setAccountOpen(false));
+
+  // Quick-share: jump straight to the QR/share screen for the merchant's
+  // most recent product instead of dumping them on the Products list.
+  async function handleQuickShare() {
+    if (!address || sharing) return;
+    if (products.length === 0) { router.push("/create"); return; }
+    const target = [...products].sort((a, b) => (b.paidCount ?? 0) - (a.paidCount ?? 0))[0];
+    if (target.type === "permanent") {
+      router.push(`/p/${target.id}`);
+      return;
+    }
+    setSharing(true);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ merchantAddress: address, productId: target.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+      router.push(`/p/${data.orderId}`);
+    } catch {
+      router.push("/products");
+    } finally {
+      setSharing(false);
+    }
+  }
 
   const handleLogout = async () => {
     setAccountOpen(false);
@@ -140,9 +168,6 @@ export function Dashboard() {
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 font-display text-base font-bold text-white ring-1 ring-white/15 backdrop-blur-md active:scale-90"
           >
             {userInitial}
-            {address && (
-              <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-[#0c0d12] bg-emerald-500" />
-            )}
           </button>
           <button
             data-tour="mobile-nav-notif"
@@ -316,9 +341,20 @@ export function Dashboard() {
             New
           </button>
           <button
-            onClick={() => router.push("/products")}
-            className="rounded-full bg-white/10 px-5 py-2.5 font-display text-[15px] font-semibold text-white ring-1 ring-white/15 backdrop-blur-md active:scale-95"
+            onClick={handleQuickShare}
+            disabled={sharing}
+            className="flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 font-display text-[15px] font-semibold text-white ring-1 ring-white/15 backdrop-blur-md active:scale-95 disabled:opacity-50"
           >
+            {sharing ? (
+              <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+            )}
             Share
           </button>
         </div>

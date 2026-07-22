@@ -2,17 +2,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { MobileShell } from "./MobileShell";
 import { MobileHeader } from "@/components/ui/MobileHeader";
 import { TabBar } from "./TabBar";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { EmptyState, ReceiptIcon } from "@/components/ui/EmptyState";
 import { EASE } from "@/lib/motion";
 import { useWalletContext } from "@/lib/wallet-context";
 import { useDashboard } from "@/lib/useDashboard";
+import { useLang } from "@/lib/i18n";
+import { timeAgo } from "@/lib/time";
 
 export function Insights() {
+  const router = useRouter();
   const { address } = useWalletContext();
   const { orders, loading } = useDashboard(address);
+  const { t, lang } = useLang();
   const [monthlyTarget, setMonthlyTarget] = useState(200);
 
   useEffect(() => {
@@ -52,6 +59,11 @@ export function Insights() {
   }, [orders]);
   const monthlyMax = Math.max(1, ...monthly.map((m) => m.value));
   const selectedMonthIdx = monthly.length - 1;
+
+  const recentOrders = useMemo(
+    () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
+    [orders]
+  );
 
   // last 5 days, order activity per day
   const activityDays = useMemo(() => {
@@ -180,6 +192,49 @@ export function Insights() {
             </span>
           </div>
         </div>
+
+        {/* recent activity */}
+        {recentOrders.length === 0 ? (
+          <div className="liquid-glass mt-4 rounded-[20px] p-2">
+            <EmptyState
+              icon={ReceiptIcon}
+              title={t("orders.emptyTitle")}
+              body={t("orders.emptyBody")}
+            />
+          </div>
+        ) : (
+          <div className="liquid-glass mt-4 overflow-hidden rounded-[20px]">
+            <div className="flex items-center justify-between px-5 pt-4">
+              <div className="font-display text-[15px] font-bold">Recent activity</div>
+              <button onClick={() => router.push("/orders")} className="text-[12.5px] font-semibold text-primary">
+                See all
+              </button>
+            </div>
+            <div className="mt-1">
+              {recentOrders.map((o, i) => (
+                <button
+                  key={o.id}
+                  onClick={() => (o.status === "pending" ? router.push(`/p/${o.id}`) : router.push("/orders"))}
+                  className={`flex w-full items-center gap-3 px-5 py-3 text-left active:bg-ink/[.03] ${i > 0 ? "border-t border-ink/[.06]" : ""}`}
+                >
+                  <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-ink font-display text-[13px] font-bold text-white">
+                    {o.title[0]?.toUpperCase()}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-display text-[14px] font-semibold">{o.title}</span>
+                    <span className="block text-[11.5px] text-faint">{timeAgo(o.createdAt, lang)}</span>
+                  </span>
+                  <span className="flex flex-none flex-col items-end gap-1">
+                    <span className={`tnum font-display text-[14px] font-bold ${o.status === "paid" ? "text-success" : "text-ink"}`}>
+                      {o.status === "paid" ? "+" : ""}${o.amountUsdc.toFixed(2)}
+                    </span>
+                    <StatusPill status={o.status} />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         </>
         )}
       </div>

@@ -227,24 +227,24 @@ export default function Landing() {
           <p className="mt-3 text-[17px] text-muted">One plan. No surprises.</p>
         </div>
 
-        <Reveal className="liquid-glass relative mx-auto max-w-[480px] overflow-hidden rounded-[32px] p-9 text-center sm:p-12">
+        <Reveal className="liquid-glass relative mx-auto max-w-[400px] overflow-hidden rounded-[28px] p-7 text-center sm:p-9">
           {/* decorative icon: receipt + checkmark badge, with sparkle accents */}
-          <div className="relative mx-auto mb-8 h-[104px] w-[136px]">
-            <Sparkle className="absolute -left-1 top-0 h-3.5 w-3.5 text-[#F472B6]" />
-            <Sparkle className="absolute right-3 top-8 h-2.5 w-2.5 text-[#FBBF24]" />
-            <Sparkle className="absolute left-4 bottom-0 h-3 w-3 text-[#38BDF8]" />
+          <div className="relative mx-auto mb-6 h-[80px] w-[104px]">
+            <Sparkle className="absolute -left-1 top-0 h-3 w-3 text-[#F472B6]" />
+            <Sparkle className="absolute right-2 top-6 h-2 w-2 text-[#FBBF24]" />
+            <Sparkle className="absolute left-3 bottom-0 h-2.5 w-2.5 text-[#38BDF8]" />
 
             {/* receipt, back layer */}
-            <div className="absolute right-2 top-5 h-[88px] w-[64px] rotate-[9deg] rounded-[14px] bg-white p-3 shadow-[0_10px_24px_rgba(21,22,27,.14)]">
-              <div className="h-[3px] w-full rounded bg-ink/[.09]" />
-              <div className="mt-2 h-[3px] w-[85%] rounded bg-ink/[.09]" />
-              <div className="mt-2 h-[3px] w-full rounded bg-ink/[.09]" />
-              <div className="mt-2 h-[3px] w-[60%] rounded bg-ink/[.09]" />
+            <div className="absolute right-1 top-4 h-[68px] w-[50px] rotate-[9deg] rounded-[11px] bg-white p-2.5 shadow-[0_8px_18px_rgba(21,22,27,.14)]">
+              <div className="h-[2px] w-full rounded bg-ink/[.09]" />
+              <div className="mt-1.5 h-[2px] w-[85%] rounded bg-ink/[.09]" />
+              <div className="mt-1.5 h-[2px] w-full rounded bg-ink/[.09]" />
+              <div className="mt-1.5 h-[2px] w-[60%] rounded bg-ink/[.09]" />
             </div>
 
             {/* checkmark badge, front layer */}
-            <div className="liquid-glass absolute left-1 top-0 flex h-[88px] w-[88px] -rotate-6 items-center justify-center rounded-[24px] shadow-[0_14px_30px_rgba(21,22,27,.14)]">
-              <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
+            <div className="liquid-glass absolute left-0.5 top-0 flex h-[68px] w-[68px] -rotate-6 items-center justify-center rounded-[19px] shadow-[0_11px_22px_rgba(21,22,27,.14)]">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M5 12.5l4.5 4.5L19 7"
                   stroke="#1F9D78"
@@ -256,13 +256,13 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="font-display text-[84px] font-extrabold leading-[.9] tracking-[-.05em] text-primary sm:text-[104px]">
+          <div className="font-display text-[60px] font-extrabold leading-[.9] tracking-[-.05em] text-primary sm:text-[76px]">
             0%
           </div>
-          <div className="mt-4 font-display text-lg font-semibold">Platform fee.</div>
+          <div className="mt-3 font-display text-base font-semibold">Platform fee.</div>
           <div className="mt-1 text-sm text-muted">Always. Forever.</div>
 
-          <div className="relative my-8 h-px bg-ink/[.08]">
+          <div className="relative my-6 h-px bg-ink/[.08]">
             <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/25" />
           </div>
 
@@ -270,10 +270,10 @@ export default function Landing() {
             {PERKS.map((p, i) => (
               <div
                 key={p}
-                className={`flex items-center gap-3 py-3.5 ${i > 0 ? "border-t border-ink/[.06]" : ""}`}
+                className={`flex items-center gap-3 py-3 ${i > 0 ? "border-t border-ink/[.06]" : ""}`}
               >
-                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[10px] bg-white shadow-[0_2px_6px_rgba(21,22,27,.08)]">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <span className="flex h-7 w-7 flex-none items-center justify-center rounded-[9px] bg-white shadow-[0_2px_6px_rgba(21,22,27,.08)]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M5 12.5l4.5 4.5L19 7"
                       stroke="#1F9D78"
@@ -283,18 +283,18 @@ export default function Landing() {
                     />
                   </svg>
                 </span>
-                <span className="text-[15px]">{p}</span>
+                <span className="text-[14px]">{p}</span>
               </div>
             ))}
           </div>
 
           <Link
             href="/login"
-            className="mt-8 flex w-full items-center justify-center gap-2 rounded-btn py-4 font-display text-base font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98]"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-btn py-3.5 font-display text-[15px] font-semibold text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.98]"
             style={{ background: "linear-gradient(90deg, #1B1B3A 0%, #263A57 50%, #1F9D78 100%)" }}
           >
             Get started
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </Link>
