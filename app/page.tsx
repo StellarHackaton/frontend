@@ -71,19 +71,30 @@ export default function Landing() {
       </header>
 
       {/* hero */}
-      <section id="product" className="mx-auto grid max-w-[1240px] items-center gap-12 px-5 py-14 sm:px-14 lg:grid-cols-[1.05fr_.95fr] lg:py-[88px]">
-        <Reveal>
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/[.07] px-3.5 py-[7px] text-[13px] font-semibold text-primary">
-            Checkout that feels like cash
-          </div>
-          <h1 className="font-display text-[40px] font-extrabold leading-[1.04] tracking-[-.035em] sm:text-[62px]">
+      <section
+        id="product"
+        className="mx-auto grid max-w-[1240px] gap-8 px-5 py-10 sm:px-14 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-12 lg:py-[88px]"
+      >
+        <Reveal className="order-1 lg:order-none lg:col-start-1 lg:row-start-1">
+          <h1 className="font-display text-[36px] font-extrabold leading-[1.04] tracking-[-.035em] sm:text-[62px]">
             Get paid in any balance. Receive exact dollars.
           </h1>
-          <p className="mt-6 max-w-[520px] text-[17px] leading-[1.55] text-muted sm:text-[19px]">
+          <p className="mt-5 max-w-[520px] text-[16px] leading-[1.55] text-muted sm:mt-6 sm:text-[19px]">
             Lunas turns any balance your customer holds into the exact amount you
             asked for. One tap. No jargon.
           </p>
-          <div className="mt-9 flex flex-col gap-3.5 sm:flex-row">
+        </Reveal>
+
+        {/* hero phone — raised above the CTAs on mobile, scaled down so it
+            never overflows the fold; full size again at the lg breakpoint */}
+        <Reveal delay={0.1} className="order-2 flex justify-center lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2">
+          <div className="-my-16 scale-[0.72] sm:-my-10 sm:scale-[0.85] lg:my-0 lg:scale-100">
+            <PhoneHero />
+          </div>
+        </Reveal>
+
+        <Reveal className="order-3 lg:order-none lg:col-start-1 lg:row-start-2">
+          <div className="flex flex-col gap-3.5 sm:flex-row">
             <Link
               href="/login"
               className="liquid-surface rounded-btn px-7 py-[14px] text-center font-display text-base font-semibold text-white"
@@ -113,11 +124,6 @@ export default function Landing() {
               <path d="M7 7h10v10M7 17 17 7" />
             </svg>
           </a>
-        </Reveal>
-
-        {/* hero phone */}
-        <Reveal delay={0.1} className="flex justify-center">
-          <PhoneHero />
         </Reveal>
       </section>
 
@@ -153,7 +159,25 @@ export default function Landing() {
             Three steps. No setup, no jargon.
           </p>
         </Reveal>
-        <div className="mx-auto grid max-w-[1100px] gap-6 md:grid-cols-3">
+        {/* compact mobile version — icon + title only, no cards */}
+        <div className="mx-auto flex max-w-[420px] flex-col gap-2.5 md:hidden">
+          {STEPS.map((s, i) => (
+            <Reveal
+              key={s.title}
+              delay={i * 0.06}
+              className="flex items-center gap-3 rounded-[18px] border border-ink/[.07] bg-white px-4 py-3"
+            >
+              <Image src={s.img} alt="" width={80} height={80} className="h-9 w-9 flex-none object-contain" />
+              <div className="min-w-0">
+                <div className="font-display text-[15px] font-bold">{s.title}</div>
+                <div className="truncate text-[12.5px] text-muted">{s.body}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* full card grid — desktop/tablet */}
+        <div className="mx-auto hidden max-w-[1100px] gap-6 md:grid md:grid-cols-3">
           {STEPS.map((s, i) => (
             <Reveal
               key={s.title}
