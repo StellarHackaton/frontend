@@ -1,9 +1,27 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, useLayoutEffect, useState } from "react";
+
+type Viewport = "mobile" | "web";
+
+const QUERY = "(min-width: 1024px)"; // Tailwind `lg`
 
 /**
- * Renders the mobile tree below the `lg` breakpoint and the web tree at/above it.
- * Both mount; CSS toggles visibility — SSR-safe, no hydration flash, adapts live
- * on resize. Web = desktop browser experience, mobile = Liquid-Glass full screen.
+ * Mounts only the tree matching the current viewport.
+ *
+ * The mobile and web components each run their own data fetching, motion/
+ * animation loops, and (on some screens) WebGL contexts — mounting both
+ * permanently and just CSS-hiding the inactive one (the old approach) meant
+ * every screen was doing double the network calls, double the animation
+ * work, and double the GPU load at all times, which is exactly what makes
+ * a page feel heavy on a phone even though only one tree was ever visible.
+ *
+ * Defaults to "mobile" so SSR/first paint always matches on mobile (our
+ * primary surface — the PWA opens straight into it) with zero flash and
+ * zero wasted mount. Desktop corrects synchronously via useLayoutEffect
+ * before the browser paints, so there's no visible flash there either —
+ * worst case is one throwaway mobile-tree mount+unmount on desktop's first
+ * load, versus the previous permanent 2x cost on every device.
  */
 export function Responsive({
   mobile,
@@ -12,10 +30,15 @@ export function Responsive({
   mobile: ReactNode;
   web: ReactNode;
 }) {
-  return (
-    <>
-      <div className="lg:hidden">{mobile}</div>
-      <div className="hidden lg:block">{web}</div>
-    </>
-  );
+  const [viewport, setViewport] = useState<Viewport>("mobile");
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia(QUERY);
+    const update = () => setViewport(mq.matches ? "web" : "mobile");
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return viewport === "mobile" ? mobile : web;
 }
