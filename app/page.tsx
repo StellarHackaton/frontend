@@ -222,6 +222,7 @@ export default function Landing() {
           title="You always receive the exact amount"
           body="Ask for $5, get $5. Lunas matches it for you behind the scenes, so the number you set is the number you keep."
           reverse
+          hideBodyOnMobile
         >
           <div className="text-center">
             <div className="mb-2 text-[13px] uppercase tracking-[.1em] text-muted">
@@ -252,8 +253,9 @@ export default function Landing() {
         </div>
 
         <Reveal className="liquid-glass relative mx-auto max-w-[400px] overflow-hidden rounded-[28px] p-7 text-center sm:p-9">
-          {/* decorative icon: receipt + checkmark badge, with sparkle accents */}
-          <div className="relative mx-auto mb-6 h-[80px] w-[104px]">
+          {/* decorative icon: receipt + checkmark badge, with sparkle accents —
+              desktop only, pure flourish that just adds scroll height on mobile */}
+          <div className="relative mx-auto mb-6 hidden h-[80px] w-[104px] sm:block">
             <Sparkle className="absolute -left-1 top-0 h-3 w-3 text-[#F472B6]" />
             <Sparkle className="absolute right-2 top-6 h-2 w-2 text-[#FBBF24]" />
             <Sparkle className="absolute left-3 bottom-0 h-2.5 w-2.5 text-[#38BDF8]" />
@@ -383,11 +385,13 @@ function ValueBlock({
   title,
   body,
   reverse,
+  hideBodyOnMobile,
   children,
 }: {
   title: string;
   body: string;
   reverse?: boolean;
+  hideBodyOnMobile?: boolean;
   children: React.ReactNode;
 }) {
   const copy = (
@@ -395,7 +399,7 @@ function ValueBlock({
       <div className="font-display text-[26px] font-bold leading-[1.15] tracking-[-.02em] sm:text-[32px]">
         {title}
       </div>
-      <div className="mt-3.5 max-w-[440px] text-base leading-[1.6] text-muted">
+      <div className={`mt-3.5 max-w-[440px] text-base leading-[1.6] text-muted ${hideBodyOnMobile ? "hidden sm:block" : ""}`}>
         {body}
       </div>
     </div>
