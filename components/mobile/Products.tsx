@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MobileShell } from "./MobileShell";
-import { TabBar } from "./TabBar";
 import { Fab } from "@/components/ui/Fab";
 import { MobileHeader } from "@/components/ui/MobileHeader";
 import { EmptyState, BoxIcon } from "@/components/ui/EmptyState";
@@ -374,7 +373,6 @@ export function Products() {
       </AnimatePresence>
 
       {!selected && <Fab onClick={() => router.push("/create")} label={t("nav.newProduct")} />}
-      <TabBar />
     </MobileShell>
   );
 }

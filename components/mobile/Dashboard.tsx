@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { TabBar } from "./TabBar";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { RowSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState, ReceiptIcon } from "@/components/ui/EmptyState";
@@ -463,7 +462,6 @@ export function Dashboard() {
         </div>
       </motion.div>
 
-      <TabBar />
       <Tour steps={MOBILE_TOUR_STEPS} storageKey={MOBILE_TOUR_KEY} />
 
       <ConfirmDialog

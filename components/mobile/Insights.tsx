@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { MobileShell } from "./MobileShell";
 import { MobileHeader } from "@/components/ui/MobileHeader";
-import { TabBar } from "./TabBar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { EmptyState, ReceiptIcon } from "@/components/ui/EmptyState";
@@ -238,8 +237,6 @@ export function Insights() {
         </>
         )}
       </div>
-
-      <TabBar />
     </MobileShell>
   );
 }

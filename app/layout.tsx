@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Inter } from "next/font/google";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AppTabBar } from "@/components/mobile/AppTabBar";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -44,7 +45,10 @@ export default function RootLayout({
     <html lang="en" className={`${hanken.variable} ${inter.variable}`}>
       <body className="font-sans antialiased">
         <Providers>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            {children}
+            <AppTabBar />
+          </ToastProvider>
         </Providers>
       </body>
     </html>

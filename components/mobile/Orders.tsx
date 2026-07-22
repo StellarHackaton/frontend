@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MobileShell } from "./MobileShell";
-import { TabBar } from "./TabBar";
 import { MobileHeader } from "@/components/ui/MobileHeader";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { RowSkeleton } from "@/components/ui/Skeleton";
@@ -178,8 +177,6 @@ export function Orders() {
           </>
         )}
       </AnimatePresence>
-
-      <TabBar />
     </MobileShell>
   );
 }

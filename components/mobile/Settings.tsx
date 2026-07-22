@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { MobileShell } from "./MobileShell";
-import { TabBar } from "./TabBar";
 import { Button } from "@/components/ui/Button";
 import { MobileHeader } from "@/components/ui/MobileHeader";
 import { useWalletContext } from "@/lib/wallet-context";
@@ -453,7 +452,6 @@ export function Settings() {
         <div className="flex-none px-[22px] pb-[96px] pt-3.5">
           <Button variant="glass" onClick={() => setConfirmSignOut(true)}>{t("settings.signOut")}</Button>
         </div>
-        <TabBar />
       </MobileShell>
 
       <ConfirmDialog
