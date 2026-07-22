@@ -114,7 +114,7 @@ export function Orders() {
               </button>
 
               {/* Header */}
-              <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="mb-4 flex items-start justify-between gap-3 pr-9">
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-display text-[18px] font-bold">{detail.title}</div>
                   <div className="mt-0.5 text-[13px] text-muted">{formatDT(detail.createdAt, lang)}</div>

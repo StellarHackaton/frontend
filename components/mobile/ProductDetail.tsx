@@ -76,23 +76,14 @@ export function ProductDetail({ slug }: { slug: string }) {
     setTimeout(() => setCopied(false), 1600);
   }
 
-  function whatsapp() {
-    const text = encodeURIComponent(`Pay for ${name}: ${payUrl}`);
-    window.open(`https://wa.me/?text=${text}`, "_blank");
-  }
-
-  function telegram() {
-    window.open(
-      `https://t.me/share/url?url=${encodeURIComponent(payUrl)}&text=${encodeURIComponent(`Pay for ${name}`)}`,
-      "_blank"
-    );
-  }
-
-  function email() {
-    window.open(
-      `mailto:?subject=${encodeURIComponent(`Pay for ${name}`)}&body=${encodeURIComponent(`Here's your payment link: ${payUrl}`)}`,
-      "_blank"
-    );
+  async function share() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Pay for ${name}`, url: payUrl });
+      } catch {}
+    } else {
+      copy();
+    }
   }
 
   return (
@@ -140,19 +131,17 @@ export function ProductDetail({ slug }: { slug: string }) {
       </div>
 
       <div className="flex flex-none flex-col gap-2.5 px-[22px] pb-8 pt-2">
-        {/* Share platform grid */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <ShareBtn onClick={whatsapp} bg="bg-[#25D366]" label={t("checkout.shareWhatsapp")}>
-            <path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12c0 1.9.53 3.67 1.44 5.18L2 22l4.96-1.42A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2Zm5.07 14.13c-.22.62-1.27 1.18-1.75 1.22-.44.04-.86.2-2.9-.6-2.44-.95-4-3.43-4.12-3.59-.12-.16-.97-1.28-.97-2.44 0-1.16.6-1.73.82-1.96.22-.24.47-.3.63-.3l.45.01c.14 0 .34-.05.52.4l.67 1.65c.06.14.1.3.02.47l-.25.38-.37.4c-.13.13-.27.27-.12.53.16.26.7 1.14 1.5 1.85.97.86 1.78 1.12 2.04 1.25.26.12.41.1.57-.06l.41-.48c.17-.2.34-.15.57-.08l1.62.76c.22.1.37.16.42.25.06.1.06.55-.17 1.17Z" />
-          </ShareBtn>
-          <ShareBtn onClick={telegram} bg="bg-[#229ED9]" label={t("checkout.shareTelegram")}>
-            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm4.64 6.8-1.7 8.02c-.12.55-.46.68-.93.42l-2.57-1.9-1.24 1.19c-.14.14-.25.25-.52.25l.19-2.64 4.84-4.37c.21-.19-.05-.29-.32-.1L7.37 14.6l-2.51-.78c-.55-.17-.56-.55.11-.82l9.8-3.78c.46-.16.86.11.87.58Z" />
-          </ShareBtn>
-          <ShareBtn onClick={email} bg="bg-[#EA4335]" label={t("checkout.shareEmail")}>
-            <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" fill="none" />
-            <path d="m2 7 10 7 10-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-          </ShareBtn>
-        </div>
+        {/* Share */}
+        <button
+          onClick={share}
+          className="liquid-glass flex h-[54px] w-full items-center justify-center gap-2.5 rounded-[20px] font-display text-[16px] font-semibold text-ink transition-transform active:scale-[.97]"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+          {t("checkout.shareNative")}
+        </button>
 
         {/* Download QR */}
         <button
@@ -166,29 +155,5 @@ export function ProductDetail({ slug }: { slug: string }) {
         </button>
       </div>
     </MobileShell>
-  );
-}
-
-function ShareBtn({
-  onClick,
-  bg,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  bg: string;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`${bg} flex flex-col items-center justify-center gap-1.5 rounded-[18px] py-3.5 text-white transition-transform active:scale-[.95]`}
-    >
-      <svg width="22" height="22" viewBox="0 0 24 24">
-        {children}
-      </svg>
-      <span className="text-[11px] font-semibold">{label}</span>
-    </button>
   );
 }
