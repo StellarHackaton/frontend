@@ -70,12 +70,14 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* hero */}
-      <section
-        id="product"
-        className="mx-auto grid max-w-[1240px] gap-8 px-5 py-10 sm:px-14 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-12 lg:py-[88px]"
-      >
-        <Reveal className="order-1 lg:order-none lg:col-start-1 lg:row-start-1">
+      {/* hero — mobile: text, then phone, then CTAs (natural flex flow).
+          desktop: original two-column grid, rendered separately below.
+          Tried doing both with one grid + order/row-span; the phone's
+          row-span-2 stretched row 1 on desktop far taller than the text
+          needed, leaving a dead gap before the buttons. Two independent
+          trees avoids fighting grid row-sizing across breakpoints. */}
+      <section className="mx-auto flex max-w-[1240px] flex-col gap-8 px-5 py-10 sm:px-14 lg:hidden">
+        <Reveal>
           <h1 className="font-display text-[36px] font-extrabold leading-[1.04] tracking-[-.035em] sm:text-[62px]">
             Get paid in any balance. Receive exact dollars.
           </h1>
@@ -85,15 +87,13 @@ export default function Landing() {
           </p>
         </Reveal>
 
-        {/* hero phone — raised above the CTAs on mobile, scaled down so it
-            never overflows the fold; full size again at the lg breakpoint */}
-        <Reveal delay={0.1} className="order-2 flex justify-center lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2">
-          <div className="-my-16 scale-[0.72] sm:-my-10 sm:scale-[0.85] lg:my-0 lg:scale-100">
+        <Reveal delay={0.1} className="flex justify-center">
+          <div className="-my-16 scale-[0.72] sm:-my-10 sm:scale-[0.85]">
             <PhoneHero />
           </div>
         </Reveal>
 
-        <Reveal className="order-3 lg:order-none lg:col-start-1 lg:row-start-2">
+        <Reveal>
           <div className="flex flex-col gap-3.5 sm:flex-row">
             <Link
               href="/login"
@@ -108,6 +108,39 @@ export default function Landing() {
               See how it works
             </a>
           </div>
+        </Reveal>
+      </section>
+
+      <section
+        id="product"
+        className="mx-auto hidden max-w-[1240px] items-center gap-12 px-14 py-[88px] lg:grid lg:grid-cols-[1.05fr_.95fr]"
+      >
+        <Reveal>
+          <h1 className="font-display text-[62px] font-extrabold leading-[1.04] tracking-[-.035em]">
+            Get paid in any balance. Receive exact dollars.
+          </h1>
+          <p className="mt-6 max-w-[520px] text-[19px] leading-[1.55] text-muted">
+            Lunas turns any balance your customer holds into the exact amount you
+            asked for. One tap. No jargon.
+          </p>
+          <div className="mt-9 flex gap-3.5">
+            <Link
+              href="/login"
+              className="liquid-surface rounded-btn px-7 py-[14px] text-center font-display text-base font-semibold text-white"
+            >
+              Get started
+            </Link>
+            <a
+              href="#how-it-works"
+              className="liquid-glass !border-primary/40 rounded-btn px-7 py-[14px] text-center font-display text-base font-semibold text-primary"
+            >
+              See how it works
+            </a>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.1} className="flex justify-center">
+          <PhoneHero />
         </Reveal>
       </section>
 
